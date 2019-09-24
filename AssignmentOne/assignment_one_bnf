@@ -1,6 +1,6 @@
 <program> ::= <identifier> ":" <block> "ENDP" <identifier> "."
 
-<block> ::= "DECLARATIONS" <declaration_block> | <block> "CODE" <statement_list>
+<block> ::= "DECLARATIONS" <declaration_block> "CODE" <statement_list> | "CODE" <statement_list>
 
 <declaration_block> ::= <identifier> "OF" "TYPE" <type> ";" | <identifier> "," <declaration_block>
 
@@ -12,33 +12,33 @@
 
 <assignment_statement> ::= <expression> "->" <identifier>
 
-<if_statement> ::= "IF" <conditional> THEN <statement_list> | <if_statement> ELSE <statement_list> | <if_statement> "ENDIF"
+<if_statement> ::= "IF" <conditional> THEN <statement_list> "ENDIF" | "IF" <conditional> THEN <statement_list> "ELSE" <statement_list> "ENDIF"
 
 <do_statement> ::= "DO" <statement_list> WHILE <conditional> ENDDO
 
 <while_statement> ::= "WHILE" <conditional> DO <statement_list> ENDWHILE
 
-<for_statement> ::= "FOR" <identifier> IS <expression> "BY" <expression> TO <expression> DO <statement_list> ENDFOR
+<for_statement> ::= "FOR" <identifier> "IS" <expression> "BY" <expression> "TO" <expression> "DO" <statement_list> ENDFOR
 
 <wirte_statement> ::= "NEWLINE" | "WRITE" "(" <output_list> ")"
 
 <read_statement> ::= "READ" "(" <identifier> ")"
 
-<output_list> ::= <value> | <value> "," <value>
+<output_list> ::= <value> | <output_list> "," <value>
 
 <conditional> ::= <expression> <comparator> <expression> | NOT <conditional> | <conditional> "AND" <conditional> | <conditional> "OR" <conditional>
 
 <comparator> ::= "=" | "<>" | "<" | ">" | "<=" | ">="
 
-<expression> ::= <term> | <term> "+" <term> | <term> "-" <term>
+<expression> ::= <term> | <expression> "+" <term> | <expression> "-" <term>
 
-<term> ::= <value> | <value> "*" <value> | <value> "/" <value>
+<term> ::= <value> | <term> "*" <value> | <term> "/" <value>
 
 <value> ::= <identifier> | <constant> | "(" <expression> ")"
 
 <constant> ::= <number_constant> | <character_constant>
 
-<number_constant> ::= <digit> | <digit> <number_constant> | <number_constant> "." <number_constant> | "-" <number_constant>
+<number_constant> ::= <digit> | <number_constant> <digit> | <number_constant> "." <number_constant> | "-" <number_constant>
 
 <identifier> ::= <character> | <identifier> <digit>  | <identifier> <character>
 
