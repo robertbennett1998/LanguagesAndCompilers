@@ -1,0 +1,43 @@
+<program> ::= <identifier> ":" <block> "ENDP" <identifier> "."
+
+<block> ::= "DECLARATIONS" <declaration_block> | <block> "CODE" <statement_list>
+
+<declaration_block> ::= <identifier> "OF" "TYPE" <type> ";" | <identifier> "," <declaration_block>
+
+<type> ::= "CHARACTER" | "INTEGER" | "REAL"
+
+<statement_list> ::= <statement> | <statement> ";" <statement_list>
+
+<statement> ::= <assignment_statement> | <if_statement> | <do_statement> | <while_statement> | <for_statement> | <write_statement> | <read_statement>
+
+<assignment_statement> ::= <expression> "->" <identifier>
+
+<if_statement> ::= "IF" <conditional> THEN <statement_list> | <if_statement> ELSE <statement_list> | <if_statement> ENDIF
+
+<do_statement> ::= "DO" <statement_list> WHILE <conditional> ENDDO
+
+<while_statement> ::= "WHILE" <conditional> DO <statement_list> ENDWHILE
+
+<for_statement> ::= "WHILE" <identifier> IS <expression> "BY" <expression> TO <expression> DO <statement_list> ENDFOR
+
+<write_statement> ::= "WRITE" "(" <output_list> ")" | <write_statement> "NEWLINE" <write_statement>
+
+<read_statement> ::= "READ" "(" <identifier> ")"
+
+<output_list> ::= <value> | <value> "," <value>
+
+<conditional> ::= NOT <conditional> | <expression> <comparator> <expression> | <conditional> "AND" <conditional> | <conditional> "OR" <conditional>
+
+<comparator> ::= "=" | "<>" | "<" | ">" | "<=" | ">="
+
+<expression> ::= <term> | <term> "+" <term> | <term> "-" <term>
+
+<term> ::= <value> | <value> "*" <value> | <value> "/" <value>
+
+<value> ::= <identifier> | <constant> | "(" <expression> ")"
+
+<constant> ::= <number_constant> | <character_constant>
+
+<number_constant> ::= <digit> | <digit> <number_constant> | <number_constant> "." <number_constant> | "-" <number_constant>
+
+<identifier> ::= <character> | <character> <digit> | <identifier> <digit> | <character> <identifier>
