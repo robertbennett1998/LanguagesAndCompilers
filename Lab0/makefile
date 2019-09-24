@@ -10,14 +10,14 @@ BIN_DIR_WINDOWS = $(BIN_DIR_ROOT)/windows
 _BIN_DIR_WINDOWS = $(_BIN_DIR_ROOT)/..
 
 SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
+ADDITIONAL_SOURCE_FILES =  $(wildcard $(INTIMIDIATE_DIR)/*.tab.c)
 FLEX_FILES = $(wildcard $(SOURCE_DIR)/*.l)
 YACC_FILES = $(wildcard $(SOURCE_DIR)/*.y)
-ADDITIONAL_SOURCE_FILES :=  $(wildcard $(INTIMIDIATE_DIR)/*.tab.c)
 
-all : linux clean-intimidiate windows
+all : linux windows
 
 linux : compile-linux
-	$(eval obj_files = $(wildcard $(INTIMIDIATE_DIR)/*.o))
+	$(eval obj_files = $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.o"))
 	$(eval obj_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(obj_files)))
 	cd $(INTIMIDIATE_DIR);\
 	gcc -o $(_INTIMIDIATE_DIR)/$(BIN_DIR_LINUX)/arith $(obj_files) -m64 -lfl
@@ -29,7 +29,7 @@ compile-linux : bison
 	gcc -c $(src) -m64
 
 windows : compile-windows
-	$(eval obj_files = $(wildcard $(INTIMIDIATE_DIR)/*.o))
+	$(eval obj_files = $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.o"))
 	$(eval obj_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(obj_files)))
 	cd $(INTIMIDIATE_DIR);\
 	x86_64-w64-mingw32-gcc -o $(_INTIMIDIATE_DIR)/$(BIN_DIR_WINDOWS)/arith.exe $(obj_files) -m64 -static
