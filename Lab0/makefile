@@ -59,11 +59,11 @@ create-directories :
 rebuild : clean all
 rebuild-linux : clean-linux linux
 rebuild-windows : clean-windows windows
+
 clean : clean-intimidiate
 	rm -rf $(BIN_DIR_ROOT)
 clean-linux : clean-intimidiate
 	rm -rf $(BIN_DIR_LINUX)
-
 clean-windows : clean-intimidiate
 	rm -rf $(BIN_DIR_LINUX)
 clean-intimidiate :
