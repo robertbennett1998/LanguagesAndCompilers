@@ -1,3 +1,5 @@
+%option noyywrap
+
 delim           [ \t\r]
 ws              {delim}+
 digit           [0-9]
