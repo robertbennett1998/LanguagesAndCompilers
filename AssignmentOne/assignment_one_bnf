@@ -38,7 +38,7 @@
 
 <constant> ::= <number_constant> | <character_constant>
 
-<number_constant> ::= <digit> | <number_constant> <digit> | <number_constant> "." <number_constant> | "-" <number_constant>
+<number_constant> ::= <digit> | "-" <number_constant> | <number_constant> <digit> | <number_constant> "." <number_constant>
 
 <identifier> ::= <character> | <identifier> <digit>  | <identifier> <character>
 
