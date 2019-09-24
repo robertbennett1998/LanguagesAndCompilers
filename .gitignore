@@ -1,5 +1,6 @@
 #directores
-bin64/
+bin/
+intimidiate/
 
 # Prerequisites
 *.d

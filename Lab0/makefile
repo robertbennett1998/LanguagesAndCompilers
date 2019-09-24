@@ -1,40 +1,70 @@
-arithm-64 : arithm-64.o
-	gcc -o arith bin64/linux/intimediate/arith.o bin64/linux/intimediate/arith.tab.o -m64 -lfl
-	rm -rf bin64/linux/intimediate	
-	mkdir -p bin64/linux
-	mv arith bin64/linux
+SOURCE_DIR = src
+_SOURCE_DIR = ..
+INTIMIDIATE_DIR = intimidiate
+_INTIMIDIATE_DIR = ..
+BIN_DIR_ROOT = bin
+_BIN_DIR_ROOT = ..
+BIN_DIR_LINUX = $(BIN_DIR_ROOT)/linux
+_BIN_DIR_LINUX = $(_BIN_DIR_ROOT)/..
+BIN_DIR_WINDOWS = $(BIN_DIR_ROOT)/windows
+_BIN_DIR_WINDOWS = $(_BIN_DIR_ROOT)/..
 
-arithm-64.o : bison
-	gcc -c -m64 arith.c arith.tab.c
-	rm -rf bin64/linux/intimediate
-	mkdir -p bin64/linux/intimediate
-	mv *.o bin64/linux/intimediate
+SOURCE_FILES = $(wildcard $(SOURCE_DIR)/*.c)
+FLEX_FILES = $(wildcard $(SOURCE_DIR)/*.l)
+YACC_FILES = $(wildcard $(SOURCE_DIR)/*.y)
+ADDITIONAL_SOURCE_FILES :=  $(wildcard $(INTIMIDIATE_DIR)/*.tab.c)
 
-arithm-win64 : arithm-win64.o
-	x86_64-w64-mingw32-gcc -o arith.exe bin64/windows/intimediate/arith.o bin64/windows/intimediate/arith.tab.o -m64 -static
-	rm -rf bin64/windows/intimediate
-	mkdir -p bin64/windows
-	mv arith.exe bin64/windows
+all : linux clean-intimidiate windows
 
-arithm-win64.o : bison
-	x86_64-w64-mingw32-gcc -c arith.c arith.tab.c -m64
-	rm -rf bin64/windows/intimediate
-	mkdir -p bin64/windows/intimediate
-	mv *.o bin64/windows/intimediate
+linux : compile-linux
+	$(eval obj_files = $(wildcard $(INTIMIDIATE_DIR)/*.o))
+	$(eval obj_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(obj_files)))
+	cd $(INTIMIDIATE_DIR);\
+	gcc -o $(_INTIMIDIATE_DIR)/$(BIN_DIR_LINUX)/arith $(obj_files) -m64 -lfl
 
-flex :
-	flex arith.l
+compile-linux : bison
+	$(eval src = $(addprefix $(_INTIMIDIATE_DIR)/, $(SOURCE_FILES)))
+	$(eval src += $(addprefix $(_INTIMIDIATE_DIR)/, $(ADDITIONAL_SOURCE_FILES)))
+	cd $(INTIMIDIATE_DIR);\
+	gcc -c $(src) -m64
+
+windows : compile-windows
+	$(eval obj_files = $(wildcard $(INTIMIDIATE_DIR)/*.o))
+	$(eval obj_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(obj_files)))
+	cd $(INTIMIDIATE_DIR);\
+	x86_64-w64-mingw32-gcc -o $(_INTIMIDIATE_DIR)/$(BIN_DIR_WINDOWS)/arith.exe $(obj_files) -m64 -static
+
+compile-windows : bison
+	$(eval src = $(addprefix $(_INTIMIDIATE_DIR)/, $(SOURCE_FILES)))
+	$(eval src += $(addprefix $(_INTIMIDIATE_DIR)/, $(ADDITIONAL_SOURCE_FILES)))
+	cd $(INTIMIDIATE_DIR);\
+	x86_64-w64-mingw32-gcc -c $(src) -m64
 
 bison : flex
-	bison arith.y
+	cd $(INTIMIDIATE_DIR);\
+	$(eval yacc_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(YACC_FILES)))\
+	bison $(yacc_files)
 
-all : arithm-64 arithm-win64 
+flex : create-directories
+	cd $(INTIMIDIATE_DIR);\
+	$(eval flex_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(FLEX_FILES)))\
+	flex $(flex_files)
 
-clean :
-	rm -rf intimediate
-	rm -rf bin64
+create-directories : 
+	mkdir -p $(INTIMIDIATE_DIR)
+	mkdir -p $(BIN_DIR_LINUX)
+	mkdir -p $(BIN_DIR_WINDOWS)
 
-rebuild : clean arithm-64
 
-rebuild-all : clean all
+rebuild : clean all
+rebuild-linux : clean-linux linux
+rebuild-windows : clean-windows windows
+clean : clean-intimidiate
+	rm -rf $(BIN_DIR_ROOT)
+clean-linux : clean-intimidiate
+	rm -rf $(BIN_DIR_LINUX)
 
+clean-windows : clean-intimidiate
+	rm -rf $(BIN_DIR_LINUX)
+clean-intimidiate :
+	rm -rf $(INTIMIDIATE_DIR)
