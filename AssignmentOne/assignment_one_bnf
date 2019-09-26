@@ -2,7 +2,7 @@
 
 <block> ::= DECLARATIONS <declaration_block> CODE <statement_list> | CODE <statement_list>
 
-<declaration_block> ::= <identifier> OF TYPE <type> ";" | <identifier> "," <declaration_block> | <declaration_block> <declaration_block>
+<declaration_block> ::= <identifier> OF TYPE <type> ";" | <identifier> "," <declaration_block> | <identifier> OF TYPE <type> ";" <declaration_block>
 
 <type> ::= CHARACTER | INTEGER | REAL
 
@@ -40,7 +40,14 @@
 
 <character_constant> ::= "'" <character> "'"
 
+/////////////////////////////////////
+// I am unsure if this would work as it would allow 12.-12 or -12.-213
 <number_constant> ::= <digit> | <number_constant> <digit> | "-" <number_constant> | <number_constant> "." <number_constant>
+
+// I think this would get around the above issue but requires me to introduce <unsigned_integer> is this okay?
+<number_constant> ::= <unsigned_integer> | "-" <unsigned_integer> | <number_constant> "." <unsigned_integer>
+<unsigned_integer> ::= <digit> | <unsigned_integer> <digit>
+/////////////////////////////////////
 
 <identifier> ::= <character> | <identifier> <digit>  | <identifier> <character>
 

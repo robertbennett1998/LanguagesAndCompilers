@@ -1,0 +1,20 @@
+PROGRAM test:
+	DECLARATIONS
+		testVar1, testVar2, testVar3 OF TYPE CHARACTER;
+		testVar4 OF TYPE INTEGER;
+		testVar5 OF TYPE REAL;
+	CODE
+		'a' -> testVar1;
+		'b' -> testVar2;
+		'C' -> testVar3;
+		1 -> testVar4;
+		2.2 -> testVar5;
+		IF NOT testVar1 = 'a' THEN
+			'a' -> testVar1;
+		ENDIF
+		IF testVar4 = 2 THEN
+			1 -> testVar4;
+		ELSE
+			2 -> testVar4;
+		ENDIF
+ENDP test.
