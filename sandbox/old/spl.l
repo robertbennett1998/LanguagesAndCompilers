@@ -4,7 +4,7 @@
 	#include <string>
 	#include <sstream>
 	extern int yylex();
-	std::stringstream ssOut;
+	unsigned int uiLineCount = 0;
 %}
 
 %option noyywrap
@@ -66,32 +66,10 @@ identifier			(?:(?:{character}){digit}*)+
 "/"						{ ssOut << yytext; } //{ std::cout << "Found '/' symbol (" << yytext << ")\n"; }
 "*"						{ ssOut << yytext; } //{ std::cout << "Found '*' symbol (" << yytext << ")\n"; }
 
-"\n"					{ ssOut << yytext; } //
+"\n"					{ uiLineCount++; ssOut << yytext; } //
 {ws}            		{ ssOut << yytext; } //; /* Do Nothing */
 {character_constant}	{ ssOut << yytext; } //{ std::cout << "Found a character constant (" << yytext << ")\n"; }
 {number_constant}		{ ssOut << yytext; } //{ std::cout << "Found a numeric constant (" << yytext << ")\n"; }
 {identifier}			{ ssOut << yytext; } //{ std::cout << "Found an identifier (" << yytext << ")\n"; }
 
 %%
-
-int main(void)
-{
-	// open a file handle to a particular file:
-	FILE *myfile = fopen("test.spl", "r");
-	// make sure it's valid:
-	if (!myfile) {
-		std::cout << "I can't open test.spl!" << std::endl;
-		return -1;
-	}
-	// set lex to read from it instead of defaulting to STDIN:
-	yyin = myfile;
-
-	int token = 0;
-	while (token = yylex())
-	{
-	}
-
-	std::cout << ssOut.str();
-
-    return 0;
-}
