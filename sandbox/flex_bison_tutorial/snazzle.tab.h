@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_SPL_TAB_H_INCLUDED
-# define YY_YY_SPL_TAB_H_INCLUDED
+#ifndef YY_YY_SNAZZLE_TAB_H_INCLUDED
+# define YY_YY_SNAZZLE_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -47,13 +47,7 @@ extern int yydebug;
   {
     INT = 258,
     FLOAT = 259,
-    STRING = 260,
-    PROGRAM = 261,
-    IDENTIFIER = 262,
-    COLON = 263,
-    ENDP = 264,
-    PERIOD = 265,
-    BLOCK = 266
+    STRING = 260
   };
 #endif
 
@@ -62,13 +56,13 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 22 "spl.y" /* yacc.c:1909  */
+#line 23 "snazzle.y" /* yacc.c:1909  */
 
-  int ival;
-  float fval;
-  char *sval;
+	int ival;
+	float fval;
+	char* sval;
 
-#line 72 "spl.tab.h" /* yacc.c:1909  */
+#line 66 "snazzle.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -81,4 +75,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_SPL_TAB_H_INCLUDED  */
+#endif /* !YY_YY_SNAZZLE_TAB_H_INCLUDED  */

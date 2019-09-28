@@ -19,10 +19,11 @@
 // hold all of the types of tokens that Flex could return, and this this means
 // we can return ints or floats or strings cleanly.  Bison implements this
 // mechanism with the %union directive:
-%union {
-  int ival;
-  float fval;
-  char *sval;
+%union
+{
+	int ival;
+	float fval;
+	char* sval;
 }
 
 // Define the "terminal symbol" token types I'm going to use (in CAPS
@@ -30,55 +31,53 @@
 %token <ival> INT
 %token <fval> FLOAT
 %token <sval> STRING
-%token PROGRAM IDENTIFIER COLON ENDP PERIOD BLOCK
 
 %%
+
 // This is the actual grammar that bison will parse, but for right now it's just
 // something silly to echo to the screen what bison gets from flex.  We'll
 // make a real one shortly:
 snazzle:
-	INT snazzle      {
-		cout << "bison found an int: " << $1 << endl;
-	}
-	| FLOAT snazzle  {
-		cout << "bison found a float: " << $1 << endl;
-	}
-	| STRING snazzle {
-		cout << "bison found a string: " << $1 << endl; free($1);
-	}
-	| INT            {
-		cout << "bison found an int: " << $1 << endl;
-	}
-	| FLOAT          {
-		cout << "bison found a float: " << $1 << endl;
-	}
-	| STRING         {
-		cout << "bison found a string: " << $1 << endl; free($1);
-	}
-	| PROGRAM snazzle {
-		cout << "PROGRAM" << endl;
-	}
-;
+    snazzle INT {
+      cout << "bison found an int: " << $2 << endl;
+    }
+  | snazzle FLOAT  {
+      cout << "bison found a float: " << $2 << endl;
+    }
+  | snazzle STRING {
+      cout << "bison found a string: " << $2 << endl; free($2);
+    }
+  | INT            {
+      cout << "bison found an int: " << $1 << endl;
+    }
+  | FLOAT          {
+      cout << "bison found a float: " << $1 << endl;
+    }
+  | STRING         {
+      cout << "bison found a string: " << $1 << endl; free($1);
+    }
+  ;
 
 %%
 
-int main(int, char**) {
+int main(int, char**) 
+{
   // Open a file handle to a particular file:
-  FILE *myfile = fopen("test.spl", "r");
+  FILE *myfile = fopen("a.snazzle", "r");
   // Make sure it is valid:
   if (!myfile) {
-    cout << "I can't open a.snazzle.file!" << endl;
+    cout << "I can't open a.snazzle!" << endl;
     return -1;
   }
   // Set Flex to read from it instead of defaulting to STDIN:
   yyin = myfile;
-  
+
   // Parse through the input:
   yyparse();
-  
 }
 
-void yyerror(const char *s) {
+void yyerror(const char *s) 
+{
   cout << "EEK, parse error!  Message: " << s << endl;
   // might as well halt now:
   exit(-1);
