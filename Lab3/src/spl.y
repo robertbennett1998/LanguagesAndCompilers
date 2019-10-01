@@ -11,21 +11,29 @@
 	int ival;
 	float fval;
 	char* sval;
+	char cval;
 }
 
-%token<sval> IDENTIFIER 
+%token<sval> IDENTIFIER
+
+%token<cval> CHARACTER_CONSTANT
 
 //Key words/symbols
-%token<ival> ENDP DECLARATIONS CODE TYPE_CHARACTER TYPE_INTEGER TYPE_REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR INTEGER REAL
+%token<ival> ENDP DECLARATIONS CODE TYPE_CHARACTER TYPE_INTEGER TYPE_REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR INTEGER
 
 //tmp
-%token<ival> CHARACTER_CONSTANT
+%token<fval> REAL
 
 %%
 
 program :
-	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
-		YYDEBUG_PRINT("Found Program - First identifier: %s Second identifier: %s\n", $1, $5);
+	identifier COLON block ENDP identifier PERIOD {
+		YYDEBUG_PRINT("Found Program\n");
+	};
+
+identifier :
+	IDENTIFIER {
+		YYDEBUG_PRINT("Found identifier (%s)\n", $1);
 	};
 
 block :
@@ -50,10 +58,10 @@ declaration :
 	};
 
 identifier_list :
-	IDENTIFIER {
+	identifier {
 		YYDEBUG_PRINT("Found identifier\n");
 	} |
-	identifier_list COMMA IDENTIFIER {
+	identifier_list COMMA identifier {
 		YYDEBUG_PRINT("Found identifier list\n");
 	};
 
@@ -101,7 +109,7 @@ statement :
 	};
 
 assignment_statement :
-	expression ASSIGNMENT_OPERATOR IDENTIFIER {
+	expression ASSIGNMENT_OPERATOR identifier {
 		YYDEBUG_PRINT("Found assignement statement\n");
 	};
 
@@ -131,7 +139,7 @@ value :
 	constant {
 		YYDEBUG_PRINT("Found constant\n");
 	} |
-	IDENTIFIER {
+	identifier {
 		YYDEBUG_PRINT("Found identifer (as value)\n");
 	} |
 	OPEN_BRACKET expression CLOSE_BRACKET {
@@ -201,8 +209,8 @@ comparator :
 	};
 
 read_statement :
-	READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {
-		YYDEBUG_PRINT("Read statement for identifier %s \n", $3);
+	READ OPEN_BRACKET identifier CLOSE_BRACKET {
+		YYDEBUG_PRINT("Read statement for identifier \n");
 	};
 
 if_statement :
@@ -225,7 +233,7 @@ conditional :
 	};
 
 for_statement :
-	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
+	FOR identifier IS expression BY expression TO expression DO statement_list ENDFOR {
 		YYDEBUG_PRINT("Found for statement \n");
 	};
 

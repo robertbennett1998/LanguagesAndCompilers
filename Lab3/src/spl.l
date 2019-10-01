@@ -117,7 +117,10 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 							yylval.fval = atof(yytext);
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
 						}
-{character_constant}	{ PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext) }
+{character_constant}	{ 
+							yylval.cval = yytext[0];
+							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
+						}
 {identifier}			{ 	
 							yylval.sval = strdup(yytext);
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
