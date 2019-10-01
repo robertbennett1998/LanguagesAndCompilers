@@ -42,7 +42,7 @@ compile-linux : bison
 windows : compile-windows
 	$(eval obj_files = $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.o"))
 	$(eval obj_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(obj_files)))
-	cp -r $(TESTS_DIR) bin/linux/
+	cp -r $(TESTS_DIR) bin/windows/
 	cd $(INTIMIDIATE_DIR);\
 	x86_64-w64-mingw32-gcc -o $(_INTIMIDIATE_DIR)/$(BIN_DIR_WINDOWS)/spl.exe $(obj_files) -m64 -static
 
