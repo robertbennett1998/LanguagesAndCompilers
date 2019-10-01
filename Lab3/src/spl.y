@@ -86,6 +86,18 @@ statement :
 	} |
 	read_statement {
 		YYDEBUG_PRINT("statement is read statement\n");
+	} |
+	if_statement {
+		YYDEBUG_PRINT("statement is if statement\n");
+	} |
+	for_statement {
+		YYDEBUG_PRINT("statement is for statement\n");
+	} |
+	while_statement {
+		YYDEBUG_PRINT("statement is while statement\n");
+	} |
+	do_statement {
+		YYDEBUG_PRINT("statement is do statement\n");
 	};
 
 assignment_statement :
@@ -191,5 +203,39 @@ comparator :
 read_statement :
 	READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {
 		YYDEBUG_PRINT("Read statement for identifier %s \n", $3);
+	};
+
+if_statement :
+	IF conditional THEN statement_list ENDIF {
+		YYDEBUG_PRINT("Found if statement \n");
+	} |
+	IF conditional THEN statement_list ELSE statement_list ENDIF {
+		YYDEBUG_PRINT("Found if else statement \n");
+	};
+
+conditional :
+	expression comparator expression {
+		YYDEBUG_PRINT("expr comp expr \n");
+	} | NOT conditional {
+		YYDEBUG_PRINT("not conditional \n");
+	} | conditional AND conditional {
+		YYDEBUG_PRINT("conditional and conditional \n");
+	} | conditional OR conditional {
+		YYDEBUG_PRINT("conditional or conditional \n");
+	};
+
+for_statement :
+	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
+		YYDEBUG_PRINT("Found for statement \n");
+	};
+
+while_statement :
+	WHILE conditional DO statement_list ENDWHILE {
+		YYDEBUG_PRINT("Found while statement \n");
+	};
+
+do_statement :
+	DO statement_list WHILE conditional ENDDO {
+		YYDEBUG_PRINT("Found do statement \n");
 	};
 %%

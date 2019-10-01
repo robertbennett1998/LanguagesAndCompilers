@@ -10,5 +10,19 @@ test:
 		WRITE (a, b, c, d, e);
 		NEWLINE;
 		READ (a);
-		NEWLINE
+		NEWLINE;
+		IF a*a = 'a' THEN
+			WRITE (a)
+		ELSE
+			'b' -> a
+		ENDIF;
+		FOR i IS 0 BY 1 TO 5 DO
+			'c' -> a
+		ENDFOR;
+		WHILE a = 'c' DO
+			'd' -> a
+		ENDWHILE;
+		DO
+			'e'-> a
+		WHILE a = 'd' ENDDO
 ENDP test.
