@@ -28,7 +28,7 @@
 												}
 
 		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
-																	PrintToken(symbolToPrint);\
+																	PrintTokenAndValue(#token, symbolToPrint);\
 																	IncrementLinePosition(strlen(symbolToPrint));\
 																	return token;\
 																}
@@ -50,8 +50,9 @@
 delim           	[ \t\r]
 whitespace         	{delim}+
 digit           	[0-9]
-integer          	{digit}+
-number_constant		-?{integer}(?:\.{integer})?
+unsigned_integer    {digit}+
+signed_intger		-?{unsigned_integer}
+real_number			-?[0-9]+\.[0-9]+
 lowercase_letters	[a-z]
 uppercase_letters	[A-Z]
 character			(?:{lowercase_letters}|{uppercase_letters})
@@ -63,9 +64,9 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 "ENDP"  				PROCESS_GENERIC_TOKEN(ENDP);
 "DECLARATIONS"  		PROCESS_GENERIC_TOKEN(DECLARATIONS);
 "CODE"  				PROCESS_GENERIC_TOKEN(CODE);
-"CHARACTER"  			PROCESS_GENERIC_TOKEN(CHARACTER);
-"INTEGER"  				PROCESS_GENERIC_TOKEN(INTEGER);
-"REAL"  				PROCESS_GENERIC_TOKEN(REAL);
+"CHARACTER"  			PROCESS_GENERIC_TOKEN(TYPE_CHARACTER);
+"INTEGER"  				PROCESS_GENERIC_TOKEN(TYPE_INTEGER);
+"REAL"  				PROCESS_GENERIC_TOKEN(TYPE_REAL);
 "IF"  					PROCESS_GENERIC_TOKEN(IF);
 "ELSE"					PROCESS_GENERIC_TOKEN(ELSE);
 "NOT"					PROCESS_GENERIC_TOKEN(NOT);
@@ -108,8 +109,15 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
-{number_constant}		{ PROCESS_GENERIC_TOKEN(NUMBER_CONSTANT) }
-{character_constant}	{ PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT) }
+{signed_intger}			{ 
+							yylval.ival = atoi(yytext);
+							PROCESS_GENERIC_TOKEN(INTEGER, yytext) 
+						}
+{real_number}			{ 
+							yylval.fval = atof(yytext);
+							PROCESS_GENERIC_TOKEN(REAL, yytext) 
+						}
+{character_constant}	{ PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext) }
 {identifier}			{ 	
 							yylval.sval = strdup(yytext);
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
@@ -120,6 +128,11 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 void PrintToken(const char* pToken)
 {
 	printf("TOKEN: %s \n", pToken);
+}
+
+void PrintTokenAndValue(const char* pToken, const char* pSymbolToPrint)
+{
+	printf("TOKEN: %s (%s) \n", pToken, pSymbolToPrint);
 }
 
 void PrintLinePositionUpdate()

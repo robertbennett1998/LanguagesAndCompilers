@@ -1,16 +1,9 @@
 %{
 	#ifdef YYDEBUG
-		#define YYDEBUG_PRINT_1(s) 			printf(s);
-		#define YYDEBUG_PRINT_2(s, ...) 	printf(s, __VA_ARGS__);
-											
+		#define YYDEBUG_PRINT(s, ...) 	printf(s, ##__VA_ARGS__);								
 	#else
-		#define YYDEBUG_PRINT_1(s)
-		#define YYDEBUG_PRINT_2(s, ...)
+		#define YYDEBUG_PRINT(s, ...)
 	#endif
-
-	#define EXPAND(x) x
-	#define GET_YYDEBUG_PRINT_MACRO(_1,_2,NAME,...) NAME
-	#define YYDEBUG_PRINT(...) EXPAND(GET_YYDEBUG_PRINT_MACRO(__VA_ARGS__, YYDEBUG_PRINT_2, YYDEBUG_PRINT_1)(__VA_ARGS__))	
 %}
 
 %union
@@ -23,16 +16,16 @@
 %token<sval> IDENTIFIER 
 
 //Key words/symbols
-%token<ival> ENDP DECLARATIONS CODE CHARACTER INTEGER REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR
+%token<ival> ENDP DECLARATIONS CODE TYPE_CHARACTER TYPE_INTEGER TYPE_REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR INTEGER REAL
 
 //tmp
-%token<ival> NUMBER_CONSTANT CHARACTER_CONSTANT
+%token<ival> CHARACTER_CONSTANT
 
 %%
 
 program :
 	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
-		YYDEBUG_PRINT_2("Found Program - First identifier: %s Second identifier: %s\n", "a", "b");
+		YYDEBUG_PRINT("Found Program - First identifier: %s Second identifier: %s\n", $1, $5);
 	};
 
 block :
@@ -65,13 +58,13 @@ identifier_list :
 	};
 
 type :
-	CHARACTER {
+	TYPE_CHARACTER {
 		YYDEBUG_PRINT("Found character type\n");
 	} |
-	INTEGER {
+	TYPE_INTEGER {
 		YYDEBUG_PRINT("Found int type\n");
 	} |
-	REAL {
+	TYPE_REAL {
 		YYDEBUG_PRINT("Found real type\n");
 	}
 
@@ -90,6 +83,9 @@ statement :
 	} |
 	write_statement {
 		YYDEBUG_PRINT("statement is write statement\n");
+	} |
+	read_statement {
+		YYDEBUG_PRINT("statement is read statement\n");
 	};
 
 assignment_statement :
@@ -100,24 +96,34 @@ assignment_statement :
 expression :
 	term {
 		YYDEBUG_PRINT("expression is term\n");
+	} |
+	expression ADD_OPERATOR term {
+		YYDEBUG_PRINT("expression is expr + term\n");
+	} |
+	expression SUBTRACT_OPERATOR term {
+		YYDEBUG_PRINT("expression is expr - term\n");
 	};
 
 term :
 	value {
 		YYDEBUG_PRINT("term is value\n");
+	} |
+	term MULTIPULCATION_OPERATOR value {
+		YYDEBUG_PRINT("term is term * value\n");
+	} |
+	term DIVISION_OPERATOR value {
+		YYDEBUG_PRINT("term is term / value\n");
 	};
 
 value :
 	constant {
 		YYDEBUG_PRINT("Found constant\n");
-	};
-
-constant :
-	NUMBER_CONSTANT {
-		YYDEBUG_PRINT("constant is number constant\n");
 	} |
-	CHARACTER_CONSTANT {
-		YYDEBUG_PRINT("constant is character constant\n");
+	IDENTIFIER {
+		YYDEBUG_PRINT("Found identifer (as value)\n");
+	} |
+	OPEN_BRACKET expression CLOSE_BRACKET {
+		YYDEBUG_PRINT("Found expression (as value)\n");
 	};
 
 write_statement :
@@ -134,5 +140,56 @@ output_list :
 	} |
 	output_list COMMA value {
 		YYDEBUG_PRINT("Output list\n");
+	};
+
+constant :
+	number_constant {
+		YYDEBUG_PRINT("constant is number constant\n");
+	} |
+	CHARACTER_CONSTANT {
+		YYDEBUG_PRINT("constant is character constant\n");
+	};
+
+number_constant :
+	signed_integer {
+		YYDEBUG_PRINT("Number constant is integer\n");
+	} |
+	real {
+		YYDEBUG_PRINT("Number constant is real\n");
+	}
+
+signed_integer :
+	INTEGER {
+		YYDEBUG_PRINT("integer\n");
+	};
+
+real :
+	REAL {
+		YYDEBUG_PRINT("real\n");
+	};
+
+comparator :
+	EQUALITY_OPERATOR {
+		YYDEBUG_PRINT("Comparator is eq op\n");
+	} |
+	NOT_EQUAL_TO_OPERATOR {
+		YYDEBUG_PRINT("Comparator is not eq op\n");
+	} |
+	LESS_THAN_OPERATOR {
+		YYDEBUG_PRINT("Comparator is < op\n");
+	} |
+	MORE_THAN_OPERATOR {
+		YYDEBUG_PRINT("Comparator is > op\n");
+	} |
+	LESS_EQUAL_TO_OPERATOR {
+		YYDEBUG_PRINT("Comparator is <= op\n");
+	} |
+	MORE_EQUAL_TO_OPERATOR {
+		YYDEBUG_PRINT("Comparator is >= op\n");
+	};
+
+read_statement :
+	READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {
+		YYDEBUG_PRINT("Read statement for identifier %s \n", $3);
 	};
 %%

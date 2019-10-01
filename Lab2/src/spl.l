@@ -8,6 +8,7 @@
 
 	//Methods
 	void PrintToken(const char* pToken);
+	void PrintTokenAndValue(const char* pSymbolToPrint, const char* pToken);
 	void PrintLinePositionUpdate();
 	void IncrementLinePosition(const int iTokenLength);
 	void ProcessEndOfLine();
@@ -28,7 +29,7 @@
 												}
 
 		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
-																	PrintToken(symbolToPrint);\
+																	PrintTokenAndValue(#token, symbolToPrint);\
 																	IncrementLinePosition(strlen(symbolToPrint));\
 																}
 	#else
@@ -105,8 +106,8 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
-{number_constant}		{ PROCESS_GENERIC_TOKEN(NUMBER_CONSTANT) }
-{character_constant}	{ PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT) }
+{number_constant}		{ PROCESS_GENERIC_TOKEN(NUMBER_CONSTANT, yytext) }
+{character_constant}	{ PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext) }
 {identifier}			{ 	
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
 						}
@@ -137,6 +138,11 @@ void main(void)
 void PrintToken(const char* pToken)
 {
 	printf("TOKEN: %s \n", pToken);
+}
+
+void PrintTokenAndValue(const char* pToken, const char* pSymbolToPrint)
+{
+	printf("TOKEN: %s (%s) \n", pToken, pSymbolToPrint);
 }
 
 void PrintLinePositionUpdate()
