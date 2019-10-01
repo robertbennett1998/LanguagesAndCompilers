@@ -113,6 +113,17 @@ assignment_statement :
 		YYDEBUG_PRINT("Found assignement statement\n");
 	};
 
+value :
+	constant {
+		YYDEBUG_PRINT("Found constant\n");
+	} |
+	identifier {
+		YYDEBUG_PRINT("Found identifer (as value)\n");
+	} |
+	OPEN_BRACKET expression CLOSE_BRACKET {
+		YYDEBUG_PRINT("Found expression (as value)\n");
+	};
+
 expression :
 	term {
 		YYDEBUG_PRINT("expression is term\n");
@@ -133,17 +144,6 @@ term :
 	} |
 	term DIVISION_OPERATOR value {
 		YYDEBUG_PRINT("term is term / value\n");
-	};
-
-value :
-	constant {
-		YYDEBUG_PRINT("Found constant\n");
-	} |
-	identifier {
-		YYDEBUG_PRINT("Found identifer (as value)\n");
-	} |
-	OPEN_BRACKET expression CLOSE_BRACKET {
-		YYDEBUG_PRINT("Found expression (as value)\n");
 	};
 
 write_statement :

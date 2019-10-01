@@ -21,6 +21,37 @@ extern unsigned long g_ulCurrentLinePosition;
 
 int main(void)
 {
+	#ifdef RUN_ALL_TESTS
+		const int iNumberOfTests = 7;
+		FILE** pAllFiles = 0;
+		pAllFiles = malloc(sizeof(FILE) * iNumberOfTests);
+		pAllFiles[0] = fopen("tests/test.spl", "r");
+		pAllFiles[1] = fopen("tests/a.spl", "r");
+		pAllFiles[2] = fopen("tests/b.spl", "r");
+		pAllFiles[3] = fopen("tests/c.spl", "r");
+		pAllFiles[4] = fopen("tests/d.spl", "r");
+		pAllFiles[5] = fopen("tests/e.spl", "r"); 
+		pAllFiles[6] = fopen("tests/HelloWorld.spl", "r");
+
+		for (int i = 0; i < iNumberOfTests; i++)
+		{
+			g_uiCurrentLineNumber = 0;
+			g_ulCurrentLinePosition = 0;
+			if (!pAllFiles[i]) 
+			{
+				printf("I can't open %d!\n", i);
+				return -1;
+			}
+
+			printf("-----------------%d-------------------\n", i);
+			yyin = pAllFiles[i];
+			yyparse();
+		}
+
+		free(pAllFiles);
+		return 0;
+	#endif
+
 	char aucFilePath[MAX_PATH_LENGTH];
 	printf("Please enter a file path: ");
 	scanf("%s", aucFilePath);
