@@ -1,4 +1,6 @@
-PREPROCESSOR_DEFINES = YYDEBUG #PRINT #LVERBOSE
+PREPROCESSOR_DEFINES =  PRINT
+#PREPROCESSOR_DEFINES += YYDEBUG
+#PREPROCESSOR_DEFINES += LVERBOSE
 INCLUDE_PATHS = intimidiate/
 
 SOURCE_DIR = src
@@ -45,11 +47,12 @@ windows : compile-windows
 
 compile-windows : bison
 	$(eval preprocessor_defs = $(addprefix -D, $(PREPROCESSOR_DEFINES)))
+	$(eval include_paths = $(addprefix -I$(_INTIMIDIATE_DIR)/, $(INCLUDE_PATHS)))
 	$(eval src = $(shell find $(SOURCE_DIR)/ -maxdepth 1 -type f -regex ".*\.c"))
 	$(eval src += $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.tab.c"))
 	$(eval src = $(addprefix $(_INTIMIDIATE_DIR)/, $(src)))
 	cd $(INTIMIDIATE_DIR);\
-	x86_64-w64-mingw32-gcc -c $(src) $(preprocessor_defs) -m64
+	x86_64-w64-mingw32-gcc -c $(src) $(preprocessor_defs) $(include_paths) -m64
 
 bison : flex
 	$(eval yacc_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(YACC_FILES)))\

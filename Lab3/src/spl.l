@@ -20,17 +20,29 @@
 	#define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
 	#define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))	
 
-	#define PROCESS_GENERIC_TOKEN_1(token) 	{\
-												PrintToken(#token);\
-												IncrementLinePosition(strlen(#token));\
-												return token;\
-											}
+	#ifdef PRINT 
+		#define PROCESS_GENERIC_TOKEN_1(token) 	{\
+													PrintToken(#token);\
+													IncrementLinePosition(strlen(#token));\
+													return token;\
+												}
 
-	#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
-																PrintToken(symbolToPrint);\
-																IncrementLinePosition(strlen(symbolToPrint));\
-																return token;\
-															}
+		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
+																	PrintToken(symbolToPrint);\
+																	IncrementLinePosition(strlen(symbolToPrint));\
+																	return token;\
+																}
+	#else
+		#define PROCESS_GENERIC_TOKEN_1(token)	{\
+													IncrementLinePosition(strlen(#token));\
+													return token;\
+												}
+
+		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint)	{\
+													IncrementLinePosition(strlen(symbolToPrint));\
+													return token;\
+												}
+	#endif
 %}
 
 %option noyywrap
@@ -97,7 +109,7 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
 {number_constant}		{ PROCESS_GENERIC_TOKEN(NUMBER_CONSTANT) }
-{character_constant}	{ PrintToken("CHARACTER_CONSTANT"); IncrementLinePosition(strlen(yytext)); }
+{character_constant}	{ PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT) }
 {identifier}			{ 	
 							yylval.sval = strdup(yytext);
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
@@ -107,9 +119,7 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 
 void PrintToken(const char* pToken)
 {
-	#ifdef PRINT
-		printf("TOKEN: %s \n", pToken);
-	#endif
+	printf("TOKEN: %s \n", pToken);
 }
 
 void PrintLinePositionUpdate()

@@ -23,10 +23,10 @@ int main(void)
 {
 	char aucFilePath[MAX_PATH_LENGTH];
 	printf("Please enter a file path: ");
-	//scanf("%s", aucFilePath);
+	scanf("%s", aucFilePath);
 
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("tests/test.spl", "r");//fopen(aucFilePath, "r");
+	FILE *myfile = fopen(aucFilePath, "r");
 	// make sure it's valid:
 	if (!myfile) {
 		printf("I can't open %s!\n", aucFilePath);
