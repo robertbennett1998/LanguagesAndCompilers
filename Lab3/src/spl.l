@@ -16,25 +16,21 @@
 	unsigned int g_uiCurrentLineNumber = 1;
 	unsigned long g_ulCurrentLinePosition = 1;
 
-	//Macros
 	#define EXPAND(x) x
 	#define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
 	#define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))	
 
-	#ifdef PRINT 
-		#define PROCESS_GENERIC_TOKEN_1(token) 	{\
-													PrintToken(#token);\
-													IncrementLinePosition(strlen(#token));\
-											 	}
+	#define PROCESS_GENERIC_TOKEN_1(token) 	{\
+												PrintToken(#token);\
+												IncrementLinePosition(strlen(#token));\
+												return token;\
+											}
 
-		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
-																	PrintToken(symbolToPrint);\
-																	IncrementLinePosition(strlen(symbolToPrint));\
-																}
-	#else
-		#define PROCESS_GENERIC_TOKEN_1(token) { }
-		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) {  }
-	#endif
+	#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
+																PrintToken(symbolToPrint);\
+																IncrementLinePosition(strlen(symbolToPrint));\
+																return token;\
+															}
 %}
 
 %option noyywrap
@@ -48,7 +44,7 @@ lowercase_letters	[a-z]
 uppercase_letters	[A-Z]
 character			(?:{lowercase_letters}|{uppercase_letters})
 character_constant	[']{character}[']
-identifier			(?:(?:{character}){digit}*)+
+identifier			(?:(?:[a-zA-Z])[0-9]*)+
 
 %%
 
@@ -100,15 +96,20 @@ identifier			(?:(?:{character}){digit}*)+
 
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
-{number_constant}		{ PrintToken("NUMBER_CONSTANT"); IncrementLinePosition(strlen(yytext)); }
+{number_constant}		{ PROCESS_GENERIC_TOKEN(NUMBER_CONSTANT) }
 {character_constant}	{ PrintToken("CHARACTER_CONSTANT"); IncrementLinePosition(strlen(yytext)); }
-{identifier}			{ PrintToken("IDENTIFIER"); IncrementLinePosition(strlen(yytext)); }
+{identifier}			{ 	
+							yylval.sval = strdup(yytext);
+							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
+						}
 
 %%
 
 void PrintToken(const char* pToken)
 {
-	printf("TOKEN: %s \n", pToken);
+	#ifdef PRINT
+		printf("TOKEN: %s \n", pToken);
+	#endif
 }
 
 void PrintLinePositionUpdate()
@@ -120,7 +121,7 @@ void IncrementLinePosition(const int iTokenLength)
 {
 	g_ulCurrentLinePosition += iTokenLength;
 
-	#ifdef VERBOSE
+	#ifdef LVERBOSE
 		PrintLinePositionUpdate();
 	#endif
 }
@@ -130,7 +131,7 @@ void ProcessEndOfLine()
 	g_uiCurrentLineNumber++;
 	g_ulCurrentLinePosition = 1;
 
-	#ifdef VERBOSE
+	#ifdef LVERBOSE
 		PrintLinePositionUpdate();
 	#endif
 }

@@ -1,23 +1,4 @@
 %{
-	//Includes
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include "lex.yy.c"
-
-	#define MAX_PATH_LENGTH 4096
-
-	//Externs
-	extern int yylex();
-	extern int yyparse();
-	extern FILE *yyin;
-	extern void PrintLinePositionUpdate();
-	
-	//methods
-	void yyerror(const char *s);
-
-	//Global vars
-	extern unsigned int g_uiCurrentLineNumber;
-	extern unsigned long g_ulCurrentLinePosition;
 %}
 
 %union
@@ -29,43 +10,95 @@
 
 %token<sval> IDENTIFIER 
 
-//Key words
-%token<ival> COLON ENDP PERIOD DECLARATIONS CODE
+//Key words/symbols
+%token<ival> ENDP DECLARATIONS CODE CHARACTER INTEGER REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR
 
+//tmp
+%token<ival> NUMBER_CONSTANT
 
 %%
 
 program :
-	IDENTIFIER COLON ENDP IDENTIFIER PERIOD {
-		printf("Fould program\n");
+	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
+		printf("Found Program - First identifier: %s Second identifier: %s\n", strdup($1), strdup($5));
 	};
 
-%%
+block :
+	DECLARATIONS declaration_block CODE statement_list {
+		printf("Found block - with both declarations and code\n");
+	} |
+	CODE statement_list {
+		printf("Found block - with code only\n");
+	};
 
-int main(void)
-{
-	char aucFilePath[MAX_PATH_LENGTH];
-	printf("Please enter a file path: ");
-	scanf("%s", aucFilePath);
+declaration_block : 
+	declaration {
+		printf("Found single declaration\n");
+	} |
+	declaration_block declaration {
+		printf("Found multiple declaration\n");
+	};
 
-	// open a file handle to a particular file:
-	FILE *myfile = fopen(aucFilePath, "r");
-	// make sure it's valid:
-	if (!myfile) {
-		printf("I can't open %s!\n", aucFilePath);
-		return -1;
+declaration :
+	identifier_list OF TYPE type SEMI_COLON {
+		printf("Found declaration\n");
+	};
+
+identifier_list :
+	IDENTIFIER {
+		printf("Found identifier\n");
+	} |
+	identifier_list COMMA IDENTIFIER {
+		printf("Found identifier list\n");
+	};
+
+type :
+	CHARACTER {
+		printf("Found character type\n");
+	} |
+	INTEGER {
+		printf("Found int type\n");
+	} |
+	REAL {
+		printf("Found real type\n");
 	}
-	// set lex to read from it instead of defaulting to STDIN:
-	yyin = myfile;
 
-	yyparse();
+statement_list :
+	statement {
+		printf("Found statement\n");
+	} |
+	statement_list SEMI_COLON statement
+	{
+		printf("Found multiple statements\n");
+	};
 
-    return 0;
-}
+statement :
+	assignment_statement {
+		printf("statement is assignment statement\n");
+	};
 
-void yyerror(const char *s) 
-{
-	printf("EEK, parse error!  Message: %s\n", s);
-	PrintLinePositionUpdate();
-	exit(-1);
-}
+assignment_statement :
+	expression ASSIGNMENT_OPERATOR IDENTIFIER {
+		printf("Found assignement statement\n");
+	};
+
+expression :
+	term {
+		printf("expression is term\n");
+	};
+
+term :
+	value {
+		printf("term is value\n");
+	};
+
+value :
+	constant {
+		printf("Found constant\n");
+	};
+
+constant :
+	NUMBER_CONSTANT {
+		printf("constant is number constant\n");
+	};
+%%

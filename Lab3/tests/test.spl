@@ -1,32 +1,8 @@
 test:
 	DECLARATIONS
-		testVar1, testVar2, testVar3 OF TYPE CHARACTER;
-		testVar4 OF TYPE INTEGER;
-		testVar5 OF TYPE REAL;
+		a, b OF TYPE CHARACTER;
+		c, d OF TYPE INTEGER;
+		e OF TYPE REAL;
 	CODE
-		'a' -> testVar1;
-		'b' -> testVar2;
-		'C' -> testVar3;
-		1 -> testVar4;
-		2.2 -> testVar5;
-		IF NOT testVar1 = 'a' THEN
-			'a' -> testVar1;
-		ENDIF
-		IF testVar4 = 2 THEN
-			1 -> testVar4
-		ELSE
-			2 -> testVar4
-		ENDIF
-		DO
-			3 -> testVar4
-		WHILE testVar4 <> 3 ENDWHILE
-		WHILE testVar4 = 3
-			4 -> testVar4
-		ENDWHILE
-		FOR i IS i = 0 BY i = i + 1 TO i = 4 DO
-			testVar4 + 1 -> testVar4
-		ENDFOR
-		READ testVar3
-		WRITE testVar1, testVar2, testVar3
-		WRITE NEWLINE
+		12 -> e
 ENDP test.

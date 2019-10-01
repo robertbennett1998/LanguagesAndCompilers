@@ -1,4 +1,5 @@
-PREPROCESSOR_DEFINES = PRINT VERBOSE
+PREPROCESSOR_DEFINES = YYDEBUG #PRINT #LVERBOSE
+INCLUDE_PATHS = intimidiate/
 
 SOURCE_DIR = src
 _SOURCE_DIR = ..
@@ -28,11 +29,12 @@ linux : compile-linux
 
 compile-linux : bison
 	$(eval preprocessor_defs = $(addprefix -D, $(PREPROCESSOR_DEFINES)))
+	$(eval include_paths = $(addprefix -I$(_INTIMIDIATE_DIR)/, $(INCLUDE_PATHS)))
 	$(eval src = $(shell find $(SOURCE_DIR)/ -maxdepth 1 -type f -regex ".*\.c"))
 	$(eval src += $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.tab.c"))
 	$(eval src = $(addprefix $(_INTIMIDIATE_DIR)/, $(src)))
 	cd $(INTIMIDIATE_DIR);\
-	gcc -c $(src) $(preprocessor_defs) -m64
+	gcc -c $(src) $(preprocessor_defs) $(include_paths) -m64
 
 windows : compile-windows
 	$(eval obj_files = $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.o"))
@@ -52,7 +54,7 @@ compile-windows : bison
 bison : flex
 	$(eval yacc_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(YACC_FILES)))\
 	cd $(INTIMIDIATE_DIR);\
-	bison $(yacc_files)
+	bison -d $(yacc_files)
 
 flex : create-directories
 	$(eval flex_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(FLEX_FILES)))\
