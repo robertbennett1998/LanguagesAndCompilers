@@ -12,6 +12,11 @@ extern int yyparse();
 extern FILE *yyin;
 extern void PrintLinePositionUpdate();
 
+#ifdef YYDEBUG
+	extern int yydebug;
+	yydebug = 1;
+#endif
+
 //methods
 void yyerror(const char *s);
 
@@ -75,5 +80,5 @@ void yyerror(const char *s)
 {
 	printf("EEK, parse error!  Message: %s\n", s);
 	PrintLinePositionUpdate();
-	exit(-1);
+	//exit(-1);
 }

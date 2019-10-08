@@ -1,6 +1,6 @@
-PREPROCESSOR_DEFINES +=  PRINT
+#PREPROCESSOR_DEFINES +=  PRINT
 PREPROCESSOR_DEFINES += YYDEBUG
-PREPROCESSOR_DEFINES += LVERBOSE
+#PREPROCESSOR_DEFINES += LVERBOSE
 PREPROCESSOR_DEFINES += RUN_ALL_TESTS
 INCLUDE_PATHS = intimidiate/
 
@@ -58,7 +58,7 @@ compile-windows : bison
 bison : flex
 	$(eval yacc_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(YACC_FILES)))\
 	cd $(INTIMIDIATE_DIR);\
-	bison -d $(yacc_files)
+	bison -d -t $(yacc_files)
 
 flex : create-directories
 	$(eval flex_files = $(addprefix $(_INTIMIDIATE_DIR)/, $(FLEX_FILES)))\

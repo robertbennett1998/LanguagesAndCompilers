@@ -51,7 +51,7 @@ delim           	[ \t\r]
 whitespace         	{delim}+
 digit           	[0-9]
 unsigned_integer    {digit}+
-signed_intger		-?{unsigned_integer}
+
 real_number			-?[0-9]+\.[0-9]+
 lowercase_letters	[a-z]
 uppercase_letters	[A-Z]
@@ -109,10 +109,11 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
-{signed_intger}			{ 
+{unsigned_integer}		{
 							yylval.ival = atoi(yytext);
-							PROCESS_GENERIC_TOKEN(INTEGER, yytext) 
-						}
+							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 
+						
+}
 {real_number}			{ 
 							yylval.fval = atof(yytext);
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
