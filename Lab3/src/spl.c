@@ -73,6 +73,8 @@ int main(void)
 
 	yyparse();
 
+	printf("Success\n");
+
     return 0;
 }
 
