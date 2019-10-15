@@ -111,23 +111,22 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
 {unsigned_integer}		{
-							yylval.ival = atoi(yytext);
+							yylval.iVal = atoi(yytext);
 							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 				
 }
 {signed_integer}		{
-							yylval.ival = atoi(yytext);
+							yylval.iVal = atoi(yytext);
 							PROCESS_GENERIC_TOKEN(SIGNED_INTEGER, yytext) 				
 }
 {real_number}			{ 
-							yylval.fval = atof(yytext);
+							yylval.fVal = atof(yytext);
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
 						}
 {character_constant}	{ 
-							yylval.cval = yytext[0];
+							yylval.cVal = yytext[0];
 							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
 						}
-{identifier}			{ 	
-							yylval.sval = strdup(yytext);
+{identifier}			{
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
 						}
 

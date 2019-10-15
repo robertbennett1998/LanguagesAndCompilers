@@ -1,6 +1,3 @@
-#include "spl.tab.h"
-#include "lex.yy.c"
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -71,11 +68,10 @@ int main(void)
 	// set lex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
 
-	yyparse();
-
+	int iRes = yyparse();
 	printf("Success\n");
 
-    return 0;
+    return iRes;
 }
 
 void yyerror(const char *s) 
