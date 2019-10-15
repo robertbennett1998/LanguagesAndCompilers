@@ -347,7 +347,11 @@ void PrintTree(const Node* pStartNode, int iLevel)
 	if (pStartNode == NULL)
 		return;
 
-	PrintLevelSpacing(iLevel);
+	int i;
+	printf("Level %d  \t", iLevel);
+	for (i = 0; i < iLevel; i++)
+		printf("...");
+
 	printf("%s (%d)\n", NodeIdentifiersValueToString(pStartNode->byNodeIdentifier), pStartNode->byNodeIdentifier);
 
 	iLevel++;
@@ -360,14 +364,6 @@ void PrintTree(const Node* pStartNode, int iLevel)
 
 	//Select third tree
 	PrintTree(pStartNode->pThirdChild, iLevel);
-}
-
-void PrintLevelSpacing(const int iLevel)
-{
-	int i;
-	printf("Level %d  \t", iLevel);
-	for (i = 0; i < iLevel; i++)
-		printf("...");
 }
 
 void PrintNodeIdentifiersValue(const NodeIdentifiers value) 
