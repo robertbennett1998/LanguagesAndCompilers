@@ -8,7 +8,6 @@ d, e OF TYPE REAL;
 
 
 CODE
-
   READ(a);
   READ( b );
   IF a > b THEN

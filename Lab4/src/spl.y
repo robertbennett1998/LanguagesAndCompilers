@@ -1,18 +1,53 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include <stdbool.h>
+	#include <stdarg.h>
 	#include <string.h>
 	#define NO_CHILD_NODE NULL
 	#define NO_SYMBOLIC_LINK NULL
+	#define NO_SYMBOL_FOUND NULL
+	#define UNKNOWN_SYMBOL_TYPE -1
+	#define MAX_IDENTIFIER_LENGTH 50
 
+
+	extern volatile unsigned int g_uiCurrentLineNumber;
+	extern volatile unsigned long g_ulCurrentLinePosition;
+	#define HANDLE_WARNING(message, ...) { printf("WARNING (%d:%d): ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); printf(message, ##__VA_ARGS__); printf("\n"); }
+
+	typedef enum _symbolTypes
+	{
+		symbol_id_unkown = 0,
+		symbol_id_program,
+		symbol_id_variable
+	} SymbolTypes;
+
+	typedef struct _symbolTableEntry
+	{
+		struct _symbolTableEntry* pNextTableEntry;
+		struct _symbolTableEntry* pPrevTableEntry;
+		char acIdentifier[MAX_IDENTIFIER_LENGTH];
+		int iType;
+		unsigned char bySymbolType;
+		bool bAssignedTo;
+		bool bUsed;
+	} SymbolTableEntry;
+
+	extern SymbolTableEntry* g_pSymbolTableStart = NO_SYMBOL_FOUND;
+	extern SymbolTableEntry* g_pSymbolTableEnd = NO_SYMBOL_FOUND;
+
+	SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier);
+	SymbolTableEntry* GetSymbolTableEntry(const char* pIdentifier);
+	void MarkSymbolAsAssigned(SymbolTableEntry* pEntry);
+	void MarkSymbolAsUsed(SymbolTableEntry* pEntry);
+	
 	typedef struct _node
 	{
-		void* pSymbolTreePointer;
+		SymbolTableEntry* pSymbolTableEntry;
 		unsigned char byNodeIdentifier;
 		struct _node* pFirstChild;
 		struct _node* pSecondChild;
 		struct _node* pThirdChild;
-		struct _node* pParent;
 	} Node;
 
 	typedef enum _nodeIdentifiers
@@ -49,12 +84,13 @@
 		id_do_statement
 	} NodeIdentifiers;
 
-	volatile Node* g_pRootNode = NULL;
-	Node* CreateNode(char* pSymbolTreePointer, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild);
+	volatile Node* g_pParseTree = NULL;
+	Node* CreateNode(SymbolTableEntry* pSymbolTreePointer, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild);
 	void PrintTree(const Node* pStartNode, int iLevel);
 
 	void PrintNodeIdentifiersValue(const NodeIdentifiers value);
 	const char* NodeIdentifiersValueToString(const NodeIdentifiers value);
+	void GenerateAndPrintWarnings();
 %}
 
 %union
@@ -63,14 +99,14 @@
 	float fVal;
 	char cVal;
 	Node* pNode;
-	void* pSymbolTreePointer;
+	SymbolTableEntry* pSymbolTableEntry;
 }
 
 %token ENDP DECLARATIONS CODE TYPE_CHARACTER TYPE_INTEGER TYPE_REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR
 %token<cVal> CHARACTER_CONSTANT
 %token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
 %token<fVal> REAL
-%token<pSymbolTreePointer> IDENTIFIER
+%token<pSymbolTableEntry> IDENTIFIER
 %type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant number_constant integer real comparator read_statement if_statement conditional comparison for_statement while_statement do_statement
 
 %start program
@@ -79,9 +115,19 @@
 
 program :
 	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
-		g_pRootNode = CreateNode($1, id_program, $3, NO_CHILD_NODE, NO_CHILD_NODE);
-		PrintTree(g_pRootNode, 0);
-		$$ = g_pRootNode;
+		if ($1 != $5)
+			printf("WARNING: Program names do not match %s vs %s\n", $1->acIdentifier, $5->acIdentifier); //TODO: Change to method
+
+		$1->bySymbolType = symbol_id_program;
+		$5->bySymbolType = symbol_id_program;
+
+		g_pParseTree = CreateNode($1, id_program, $3, NO_CHILD_NODE, NO_CHILD_NODE);
+		
+		#ifdef DEBUG
+			PrintTree(g_pParseTree, 0);
+		#endif
+
+		$$ = g_pParseTree;
 	};
 
 block :
@@ -103,7 +149,18 @@ declaration_block :
 declaration :
 	identifier_list OF TYPE type SEMI_COLON {
 		//TODO: NOTE: How do we get the type into the symbol table. Does the type need to become a node?
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+
+		Node* pIdentifierListNode = $1;
+		while (pIdentifierListNode != NO_SYMBOL_FOUND)
+		{
+			pIdentifierListNode->pSymbolTableEntry->iType = 8008;
+			pIdentifierListNode->pSymbolTableEntry->bySymbolType = symbol_id_variable;
+			pIdentifierListNode = pIdentifierListNode->pFirstChild;
+		};
+
+		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, pIdentifierListNode, $4, NO_CHILD_NODE);
+
+		$$ = pNode;
 	};
 
 identifier_list :
@@ -162,6 +219,8 @@ statement :
 
 assignment_statement :
 	expression ASSIGNMENT_OPERATOR IDENTIFIER {
+		MarkSymbolAsAssigned($3);
+
 		$$ = CreateNode($3, id_assignment_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
@@ -173,6 +232,8 @@ value :
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_value, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	IDENTIFIER {
+		MarkSymbolAsUsed($1);
+
 		$$ = CreateNode($1, id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
@@ -276,6 +337,8 @@ comparator :
 
 read_statement :
 	READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {
+		MarkSymbolAsAssigned($3);
+
 		$$ = CreateNode($3, id_read_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
@@ -306,7 +369,9 @@ comparison :
 for_statement :
 	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
 		//TODO: THIS ISNT GOING TO WORK
-		$$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), NO_CHILD_NODE, NO_CHILD_NODE);
+		MarkSymbolAsAssigned($2);
+		
+		$$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
 	};
 
 while_statement :
@@ -320,24 +385,84 @@ do_statement :
 	};
 %%
 
-Node* CreateNode(char* pSymbolTreePointer, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild)
+SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier)
+{
+	SymbolTableEntry* pEntry = GetSymbolTableEntry(pIdentifier);
+	if (pEntry == NO_SYMBOL_FOUND)
+	{
+		pEntry = malloc(sizeof(SymbolTableEntry));
+		memset(pEntry, 0, sizeof(SymbolTableEntry));
+	}
+	else
+	{
+		//printf("Existing symbol table entry: %s\n", pIdentifier);
+		return pEntry;
+	}
+
+	pEntry->pNextTableEntry = NO_SYMBOLIC_LINK;
+	pEntry->iType = UNKNOWN_SYMBOL_TYPE;
+	pEntry->bAssignedTo = false;
+	pEntry->bUsed = false;
+	//TODO: Should probs add string length check and throw error? or generate a mangled symbol name? or just cut off the symbol name?
+	strncpy(pEntry->acIdentifier, pIdentifier, MAX_IDENTIFIER_LENGTH);
+
+	if (g_pSymbolTableStart == NO_SYMBOLIC_LINK)
+	{
+		g_pSymbolTableStart = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+	else
+	{
+		pEntry->pPrevTableEntry = g_pSymbolTableEnd;
+		g_pSymbolTableEnd->pNextTableEntry = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+
+	return pEntry;
+}
+
+SymbolTableEntry* GetSymbolTableEntry(const char* pIdentifier)
+{
+	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
+	while (pCurrentEntry != NO_SYMBOL_FOUND)
+	{
+		if (strcmp(pIdentifier, pCurrentEntry->acIdentifier) == 0)
+			return pCurrentEntry;
+
+		pCurrentEntry = pCurrentEntry->pNextTableEntry;
+	}
+
+	return NO_SYMBOL_FOUND;
+}
+
+void MarkSymbolAsAssigned(SymbolTableEntry* pEntry)
+{
+	if (strcmp(pEntry->acIdentifier, "a") == 0)
+		printf("MHHHHHH\n");
+	pEntry->bAssignedTo = true;
+	pEntry->bUsed = false;
+}
+
+void MarkSymbolAsUsed(SymbolTableEntry* pEntry)
+{
+	if (strcmp(pEntry->acIdentifier, "a") == 0)
+		printf("HMMMMM\n");
+
+	if (pEntry->bAssignedTo == false)
+		HANDLE_WARNING("%s is used before it has been assigned to, this will have unexpected consequences!", pEntry->acIdentifier);
+
+	pEntry->bUsed = true;
+}
+
+Node* CreateNode(SymbolTableEntry* pSymbolTableEntry, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild)
 {
 	Node* pNode = malloc(sizeof(Node));
 	memset(pNode, 0, sizeof(Node));
-	pNode->pSymbolTreePointer = pSymbolTreePointer;
+	pNode->pSymbolTableEntry = pSymbolTableEntry;
 	pNode->byNodeIdentifier = byNodeIdentifier;
 	pNode->pFirstChild = pFirstChild;
 	pNode->pSecondChild = pSecondChild;
 	pNode->pThirdChild = pThirdChild;
-
-	if (pFirstChild != NO_CHILD_NODE)
-		pFirstChild->pParent = pNode;
-
-	if (pSecondChild != NO_CHILD_NODE)
-		pSecondChild->pParent = pNode;
-
-	if (pThirdChild != NO_CHILD_NODE)
-		pThirdChild->pParent = pNode;
 
 	return pNode;
 }
@@ -352,7 +477,17 @@ void PrintTree(const Node* pStartNode, int iLevel)
 	for (i = 0; i < iLevel; i++)
 		printf("...");
 
-	printf("%s (%d)\n", NodeIdentifiersValueToString(pStartNode->byNodeIdentifier), pStartNode->byNodeIdentifier);
+	printf("%s (%d)", NodeIdentifiersValueToString(pStartNode->byNodeIdentifier), pStartNode->byNodeIdentifier);
+
+	if (pStartNode->pSymbolTableEntry == NO_SYMBOL_FOUND)
+	{
+		printf("\n");
+	}
+	else
+	{
+		//printf("\nSHOULD PRINT ID\n");
+		printf(" - Symbol Info: Identifier = %s - Type = %d - Assigned To = %d - Used = %d\n", pStartNode->pSymbolTableEntry->acIdentifier, pStartNode->pSymbolTableEntry->iType, pStartNode->pSymbolTableEntry->bAssignedTo, pStartNode->pSymbolTableEntry->bUsed);
+	}
 
 	iLevel++;
 
@@ -364,6 +499,32 @@ void PrintTree(const Node* pStartNode, int iLevel)
 
 	//Select third tree
 	PrintTree(pStartNode->pThirdChild, iLevel);
+}
+
+void GenerateAndPrintWarnings()
+{
+	//Check symbol tree for any things not assigned to or used
+	SymbolTableEntry* pEntry = g_pSymbolTableStart;
+	while (pEntry != NO_SYMBOL_FOUND)
+	{
+		if (pEntry->bySymbolType == symbol_id_variable)
+		{
+			if (pEntry->bAssignedTo == false && pEntry->bUsed == false)
+			{
+				printf("WARNING: %s is declared but is neither assigned to or used!\n", pEntry->acIdentifier);
+			}
+			else if (pEntry->bAssignedTo == true && pEntry->bUsed == false)
+			{
+				printf("WARNING: %s is declared and is assigned to but never used!\n", pEntry->acIdentifier);
+			}
+			else if (pEntry->bAssignedTo == false && pEntry->bUsed == true)
+			{
+				printf("WARNING: %s is declared and used but never assigned to, this may have unexpected consequences!\n", pEntry->acIdentifier);
+			}
+		}
+
+		pEntry = pEntry->pNextTableEntry;
+	}
 }
 
 void PrintNodeIdentifiersValue(const NodeIdentifiers value) 

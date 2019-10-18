@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #define MAX_PATH_LENGTH 4096
 
@@ -8,6 +9,7 @@ extern int yylex();
 extern int yyparse();
 extern FILE *yyin;
 extern void PrintLinePositionUpdate();
+extern void GenerateAndPrintWarnings();
 
 #ifdef YYDEBUG
 	extern int yydebug;
@@ -69,9 +71,9 @@ int main(void)
 	yyin = myfile;
 
 	int iRes = yyparse();
-	printf("Success\n");
+	GenerateAndPrintWarnings();
 
-    return iRes;
+	return iRes;
 }
 
 void yyerror(const char *s) 

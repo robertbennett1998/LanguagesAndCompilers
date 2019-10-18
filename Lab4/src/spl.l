@@ -11,10 +11,14 @@
 	void PrintLinePositionUpdate();
 	void IncrementLinePosition(const int iTokenLength);
 	void ProcessEndOfLine();
-	
+	extern SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier);
+	extern SymbolTableEntry* GetSymbolTableEntry(const char* pIdentifier);
+
 	//Global vars
-	unsigned int g_uiCurrentLineNumber = 1;
-	unsigned long g_ulCurrentLinePosition = 1;
+	volatile unsigned int g_uiCurrentLineNumber = 1;
+	volatile unsigned long g_ulCurrentLinePosition = 1;
+	extern SymbolTableEntry* g_pSymbolTableStart;
+	extern SymbolTableEntry* g_pSymbolTableEnd;
 
 	#define EXPAND(x) x
 	#define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
@@ -127,6 +131,7 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
 						}
 {identifier}			{
+							yylval.pSymbolTableEntry = CreateSymbolTableEntry(yytext);
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, yytext)
 						}
 
