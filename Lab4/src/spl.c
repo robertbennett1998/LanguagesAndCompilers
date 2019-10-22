@@ -56,19 +56,19 @@ int main(void)
 		return 0;
 	#endif
 
-	char aucFilePath[MAX_PATH_LENGTH];
-	printf("Please enter a file path: ");
-	scanf("%s", aucFilePath);
+	// char aucFilePath[MAX_PATH_LENGTH];
+	// printf("Please enter a file path: ");
+	// scanf("%s", aucFilePath);
 
-	// open a file handle to a particular file:
-	FILE *myfile = fopen(aucFilePath, "r");
-	// make sure it's valid:
-	if (!myfile) {
-		printf("I can't open %s!\n", aucFilePath);
-		return -1;
-	}
-	// set lex to read from it instead of defaulting to STDIN:
-	yyin = myfile;
+	// // open a file handle to a particular file:
+	// FILE *myfile = fopen(aucFilePath, "r");
+	// // make sure it's valid:
+	// if (!myfile) {
+	// 	printf("I can't open %s!\n", aucFilePath);
+	// 	return -1;
+	// }
+	// // set lex to read from it instead of defaulting to STDIN:
+	// yyin = myfile;
 
 	int iRes = yyparse();
 	GenerateAndPrintWarnings();

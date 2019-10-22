@@ -10,34 +10,75 @@
 	#define UNKNOWN_SYMBOL_TYPE -1
 	#define MAX_IDENTIFIER_LENGTH 50
 
-
 	extern volatile unsigned int g_uiCurrentLineNumber;
 	extern volatile unsigned long g_ulCurrentLinePosition;
 	#define HANDLE_WARNING(message, ...) { printf("WARNING (%d:%d): ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); printf(message, ##__VA_ARGS__); printf("\n"); }
 
 	typedef enum _symbolTypes
 	{
-		symbol_id_unkown = 0,
+		symbol_id_unknown = 0,
 		symbol_id_program,
-		symbol_id_variable
+		symbol_id_variable,
+		symbol_id_constant,
+		symbol_id_type
 	} SymbolTypes;
+
+	//TEMP
+	typedef struct _programDetails
+	{
+		unsigned int uiVariableCount;
+		unsigned int uiStatementCount;
+	} ProgramDetails;
+
+	typedef struct _variableDetails
+	{
+		char acIdentifier[MAX_IDENTIFIER_LENGTH];
+		int iType;
+		bool bAssignedTo;
+		bool bUsed;
+	} VariableDetails;
+
+	typedef struct _constantDetails
+	{
+		int iType;
+		union 
+		{
+			int i;
+			float f;
+			char c;
+		} value;
+	} ConstantDetails;
+
+	typedef struct _typeDetails
+	{
+		int iType;
+	} TypeDetails;
 
 	typedef struct _symbolTableEntry
 	{
 		struct _symbolTableEntry* pNextTableEntry;
 		struct _symbolTableEntry* pPrevTableEntry;
-		char acIdentifier[MAX_IDENTIFIER_LENGTH];
-		int iType;
 		unsigned char bySymbolType;
-		bool bAssignedTo;
-		bool bUsed;
+		union
+		{
+			ProgramDetails programDetails;
+			VariableDetails variableDetails;
+			ConstantDetails constantDetails;
+			TypeDetails typeDetails;
+		} symbolDetails;
+		
 	} SymbolTableEntry;
 
 	extern SymbolTableEntry* g_pSymbolTableStart = NO_SYMBOL_FOUND;
 	extern SymbolTableEntry* g_pSymbolTableEnd = NO_SYMBOL_FOUND;
 
-	SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier);
-	SymbolTableEntry* GetSymbolTableEntry(const char* pIdentifier);
+	SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
+	SymbolTableEntry* CreateSymbolTableEntry_Type(const int iType);
+	SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* pValue);
+	SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
+	SymbolTableEntry* GetSymbolTableEntry_Type(const int iType);
+	SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pValue);
+	const char* GetTypeName(const int iType);
 	void MarkSymbolAsAssigned(SymbolTableEntry* pEntry);
 	void MarkSymbolAsUsed(SymbolTableEntry* pEntry);
 	
@@ -67,8 +108,9 @@
 		id_output_list,
 		id_constant,
 		id_number_constant,
-		id_integer,
+		id_type,
 		id_real,
+		id_integer,
 		id_comparator,
 		id_read_statement,
 		id_if_statement,
@@ -116,7 +158,7 @@
 program :
 	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
 		if ($1 != $5)
-			printf("WARNING: Program names do not match %s vs %s\n", $1->acIdentifier, $5->acIdentifier); //TODO: Change to method
+			printf("WARNING: Program names do not match %s vs %s\n", $1->symbolDetails.variableDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier); //TODO: Change to method
 
 		$1->bySymbolType = symbol_id_program;
 		$5->bySymbolType = symbol_id_program;
@@ -148,17 +190,14 @@ declaration_block :
 
 declaration :
 	identifier_list OF TYPE type SEMI_COLON {
-		//TODO: NOTE: How do we get the type into the symbol table. Does the type need to become a node?
-
 		Node* pIdentifierListNode = $1;
 		while (pIdentifierListNode != NO_SYMBOL_FOUND)
 		{
-			pIdentifierListNode->pSymbolTableEntry->iType = 8008;
-			pIdentifierListNode->pSymbolTableEntry->bySymbolType = symbol_id_variable;
+			pIdentifierListNode->pSymbolTableEntry->symbolDetails.variableDetails.iType = $4->pSymbolTableEntry->symbolDetails.variableDetails.iType;
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
-		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, pIdentifierListNode, $4, NO_CHILD_NODE);
+		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, pIdentifierListNode, NO_CHILD_NODE, NO_CHILD_NODE);
 
 		$$ = pNode;
 	};
@@ -174,15 +213,18 @@ identifier_list :
 type :
 	TYPE_CHARACTER {
 		//TODO: NOTE: Not sure how to handle this yet
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_identifier_list, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		SymbolTableEntry* pSymbolTableEntry = CreateSymbolTableEntry_Type((int)TYPE_CHARACTER);
+		$$ = CreateNode(pSymbolTableEntry, id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	TYPE_INTEGER {
 		//TODO: NOTE: Not sure how to handle this yet
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_identifier_list, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		SymbolTableEntry* pSymbolTableEntry = CreateSymbolTableEntry_Type((int)TYPE_INTEGER);
+		$$ = CreateNode(pSymbolTableEntry, id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	TYPE_REAL {
 		//TODO: NOTE: Not sure how to handle this yet
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_identifier_list, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		SymbolTableEntry* pSymbolTableEntry = CreateSymbolTableEntry_Type((int)TYPE_REAL);
+		$$ = CreateNode(pSymbolTableEntry, id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
 
 statement_list :
@@ -238,12 +280,12 @@ value :
 	};
 
 expression :
-	expression ADD_OPERATOR term {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, $3, NO_CHILD_NODE);
-	} |
 	expression SUBTRACT_OPERATOR term {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, $3, NO_CHILD_NODE);
 	} | 
+	expression ADD_OPERATOR term {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, $3, NO_CHILD_NODE);
+	} |
 	term {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
@@ -282,7 +324,7 @@ constant :
 	} |
 	CHARACTER_CONSTANT {
 		//TODO: NOTE: Not sure about this one either, probs a symbolic link?
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 number_constant :
@@ -296,17 +338,17 @@ number_constant :
 integer :
 	UNSIGNED_INTEGER {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_integer, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_integer, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	SIGNED_INTEGER {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_integer, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_integer, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 real :
 	REAL {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_real, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &$1), id_real, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 comparator :
@@ -385,9 +427,9 @@ do_statement :
 	};
 %%
 
-SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier)
+SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier)
 {
-	SymbolTableEntry* pEntry = GetSymbolTableEntry(pIdentifier);
+	SymbolTableEntry* pEntry = GetSymbolTableEntry_Variable(pIdentifier);
 	if (pEntry == NO_SYMBOL_FOUND)
 	{
 		pEntry = malloc(sizeof(SymbolTableEntry));
@@ -400,11 +442,11 @@ SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier)
 	}
 
 	pEntry->pNextTableEntry = NO_SYMBOLIC_LINK;
-	pEntry->iType = UNKNOWN_SYMBOL_TYPE;
-	pEntry->bAssignedTo = false;
-	pEntry->bUsed = false;
+	pEntry->bySymbolType = symbol_id_variable;
+	pEntry->symbolDetails.variableDetails.bAssignedTo = false;
+	pEntry->symbolDetails.variableDetails.bUsed = false;
 	//TODO: Should probs add string length check and throw error? or generate a mangled symbol name? or just cut off the symbol name?
-	strncpy(pEntry->acIdentifier, pIdentifier, MAX_IDENTIFIER_LENGTH);
+	strncpy(pEntry->symbolDetails.variableDetails.acIdentifier, pIdentifier, MAX_IDENTIFIER_LENGTH);
 
 	if (g_pSymbolTableStart == NO_SYMBOLIC_LINK)
 	{
@@ -421,13 +463,149 @@ SymbolTableEntry* CreateSymbolTableEntry(const char* pIdentifier)
 	return pEntry;
 }
 
-SymbolTableEntry* GetSymbolTableEntry(const char* pIdentifier)
+SymbolTableEntry* CreateSymbolTableEntry_Type(const int iType)
+{
+	SymbolTableEntry* pEntry = GetSymbolTableEntry_Type(iType);
+	if (pEntry == NO_SYMBOL_FOUND)
+	{
+		pEntry = malloc(sizeof(SymbolTableEntry));
+		memset(pEntry, 0, sizeof(SymbolTableEntry));
+	}
+	else
+	{
+		//printf("Existing symbol table entry: %s\n", pIdentifier);
+		return pEntry;
+	}
+
+	pEntry->pNextTableEntry = NO_SYMBOLIC_LINK;
+	pEntry->bySymbolType = symbol_id_type;
+	pEntry->symbolDetails.typeDetails.iType = iType;
+
+	if (g_pSymbolTableStart == NO_SYMBOLIC_LINK)
+	{
+		g_pSymbolTableStart = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+	else
+	{
+		pEntry->pPrevTableEntry = g_pSymbolTableEnd;
+		g_pSymbolTableEnd->pNextTableEntry = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+
+	return pEntry;
+}
+
+SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* pValue)
+{
+	SymbolTableEntry* pEntry = GetSymbolTableEntry_Constant(iType, pValue);
+	if (pEntry == NO_SYMBOL_FOUND)
+	{
+		pEntry = malloc(sizeof(SymbolTableEntry));
+		memset(pEntry, 0, sizeof(SymbolTableEntry));
+	}
+	else
+	{
+		//printf("Existing symbol table entry: %s\n", pIdentifier);
+		return pEntry;
+	}
+
+	pEntry->pNextTableEntry = NO_SYMBOLIC_LINK;
+	pEntry->bySymbolType = symbol_id_constant;
+	pEntry->symbolDetails.constantDetails.iType = iType;
+	if (iType == TYPE_INTEGER)
+	{
+		pEntry->symbolDetails.constantDetails.value.i = *(int*)pValue;
+	}
+	else if (iType == TYPE_REAL)
+	{
+		pEntry->symbolDetails.constantDetails.value.f = *(float*)pValue;
+	}
+	else if (iType == TYPE_CHARACTER)
+	{
+		pEntry->symbolDetails.constantDetails.value.c = *(char*)pValue;
+	}
+
+	if (g_pSymbolTableStart == NO_SYMBOLIC_LINK)
+	{
+		g_pSymbolTableStart = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+	else
+	{
+		pEntry->pPrevTableEntry = g_pSymbolTableEnd;
+		g_pSymbolTableEnd->pNextTableEntry = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+
+	return pEntry;
+}
+
+SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier)
 {
 	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
 	while (pCurrentEntry != NO_SYMBOL_FOUND)
 	{
-		if (strcmp(pIdentifier, pCurrentEntry->acIdentifier) == 0)
+		if (strcmp(pIdentifier, pCurrentEntry->symbolDetails.variableDetails.acIdentifier) == 0)
 			return pCurrentEntry;
+
+		pCurrentEntry = pCurrentEntry->pNextTableEntry;
+	}
+
+	return NO_SYMBOL_FOUND;
+}
+
+SymbolTableEntry* GetSymbolTableEntry_Type(const int iType)
+{
+	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
+	while (pCurrentEntry != NO_SYMBOL_FOUND)
+	{
+		if (pCurrentEntry->bySymbolType == symbol_id_type)
+		{
+			if (pCurrentEntry->symbolDetails.typeDetails.iType == iType)
+			{
+				return pCurrentEntry;
+			}
+		}
+
+		pCurrentEntry = pCurrentEntry->pNextTableEntry;
+	}
+
+	return NO_SYMBOL_FOUND;
+}
+
+SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pValue)
+{
+	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
+	while (pCurrentEntry != NO_SYMBOL_FOUND)
+	{
+		if (pCurrentEntry->bySymbolType == symbol_id_constant)
+		{
+			if (pCurrentEntry->symbolDetails.constantDetails.iType == iType)
+			{
+				if (iType == TYPE_INTEGER)
+				{
+					if (pCurrentEntry->symbolDetails.constantDetails.value.i == *(int*)pValue)
+					{
+						return pCurrentEntry;
+					}
+				}
+				else if (iType == TYPE_REAL)
+				{
+					if (iType == *(float*)pValue)
+					{
+						return pCurrentEntry;
+					}
+				}
+				else if (iType == TYPE_CHARACTER)
+				{
+					if (pCurrentEntry->symbolDetails.constantDetails.value.c == *(char*)pValue)
+					{
+						return pCurrentEntry;
+					}
+				}
+			}
+		}
 
 		pCurrentEntry = pCurrentEntry->pNextTableEntry;
 	}
@@ -437,21 +615,16 @@ SymbolTableEntry* GetSymbolTableEntry(const char* pIdentifier)
 
 void MarkSymbolAsAssigned(SymbolTableEntry* pEntry)
 {
-	if (strcmp(pEntry->acIdentifier, "a") == 0)
-		printf("MHHHHHH\n");
-	pEntry->bAssignedTo = true;
-	pEntry->bUsed = false;
+	pEntry->symbolDetails.variableDetails.bAssignedTo = true;
+	pEntry->symbolDetails.variableDetails.bUsed = false;
 }
 
 void MarkSymbolAsUsed(SymbolTableEntry* pEntry)
 {
-	if (strcmp(pEntry->acIdentifier, "a") == 0)
-		printf("HMMMMM\n");
+	if (pEntry->symbolDetails.variableDetails.bAssignedTo == false)
+		HANDLE_WARNING("%s is used before it has been assigned to, this will have unexpected consequences!", pEntry->symbolDetails.variableDetails.acIdentifier);
 
-	if (pEntry->bAssignedTo == false)
-		HANDLE_WARNING("%s is used before it has been assigned to, this will have unexpected consequences!", pEntry->acIdentifier);
-
-	pEntry->bUsed = true;
+	pEntry->symbolDetails.variableDetails.bUsed = true;
 }
 
 Node* CreateNode(SymbolTableEntry* pSymbolTableEntry, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild)
@@ -473,7 +646,7 @@ void PrintTree(const Node* pStartNode, int iLevel)
 		return;
 
 	int i;
-	printf("Level %d  \t", iLevel);
+	printf("Level %d   \t", iLevel);
 	for (i = 0; i < iLevel; i++)
 		printf("...");
 
@@ -485,8 +658,33 @@ void PrintTree(const Node* pStartNode, int iLevel)
 	}
 	else
 	{
-		//printf("\nSHOULD PRINT ID\n");
-		printf(" - Symbol Info: Identifier = %s - Type = %d - Assigned To = %d - Used = %d\n", pStartNode->pSymbolTableEntry->acIdentifier, pStartNode->pSymbolTableEntry->iType, pStartNode->pSymbolTableEntry->bAssignedTo, pStartNode->pSymbolTableEntry->bUsed);
+		if (pStartNode->pSymbolTableEntry->bySymbolType == symbol_id_variable)
+		{
+			printf(" - Symbol (Variable) Info: Identifier = %s - Type = %s - Assigned To = %d - Used = %d\n", 	pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier, 
+																									GetTypeName(pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.iType), 
+																									pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.bAssignedTo, 
+																									pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.bUsed);
+		}
+		else if (pStartNode->pSymbolTableEntry->bySymbolType == symbol_id_constant)
+		{
+			printf(" - Symbol (Constant) Info: Type = %s - ", GetTypeName(pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.iType));
+			if (pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_INTEGER)
+			{
+				printf("Value = %d\n", pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.value.i);
+			}
+			else if (pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
+			{
+				printf("Value = %f\n", pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+			}
+			else if (pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
+			{
+				printf("Value = %c\n", pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
+			}
+		}
+		else
+		{
+			printf("\n");
+		}
 	}
 
 	iLevel++;
@@ -509,17 +707,17 @@ void GenerateAndPrintWarnings()
 	{
 		if (pEntry->bySymbolType == symbol_id_variable)
 		{
-			if (pEntry->bAssignedTo == false && pEntry->bUsed == false)
+			if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == false)
 			{
-				printf("WARNING: %s is declared but is neither assigned to or used!\n", pEntry->acIdentifier);
+				printf("WARNING: %s is declared but is neither assigned to or used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
-			else if (pEntry->bAssignedTo == true && pEntry->bUsed == false)
+			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == true && pEntry->symbolDetails.variableDetails.bUsed == false)
 			{
-				printf("WARNING: %s is declared and is assigned to but never used!\n", pEntry->acIdentifier);
+				printf("WARNING: %s is declared and is assigned to but never used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
-			else if (pEntry->bAssignedTo == false && pEntry->bUsed == true)
+			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == true)
 			{
-				printf("WARNING: %s is declared and used but never assigned to, this may have unexpected consequences!\n", pEntry->acIdentifier);
+				printf("WARNING: %s is declared and used but never assigned to, this may have unexpected consequences!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 		}
 
@@ -530,6 +728,24 @@ void GenerateAndPrintWarnings()
 void PrintNodeIdentifiersValue(const NodeIdentifiers value) 
 {
 	printf("%s (%d)\n", NodeIdentifiersValueToString(value), (int)value);
+}
+
+const char* GetTypeName(const int iType)
+{
+	switch (iType)
+	{
+		case TYPE_INTEGER:
+			return "INTEGER";
+
+		case TYPE_CHARACTER:
+			return "CHARACTER";
+
+		case TYPE_REAL:
+			return "REAL";
+		
+		default:
+			return "Unknown type";
+	}
 }
 
 const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
@@ -558,6 +774,8 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_value";
 		case id_expression: 
 			return "id_expression";
+		case id_type:
+			return "id_type";
 		case id_term: 
 			return "id_term";
 		case id_write_statement: 
@@ -568,10 +786,6 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_constant";
 		case id_number_constant: 
 			return "id_number_constant";
-		case id_integer: 
-			return "id_integer";
-		case id_real: 
-			return "id_real";
 		case id_comparator: 
 			return "id_comparator";
 		case id_read_statement: 
@@ -582,6 +796,10 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_if_statement_else";
 		case id_conditional: 
 			return "id_conditional";
+		case id_real:
+			return "id_real";
+		case id_integer:
+			return "id_integer";
 		case id_conditional_not: 
 			return "id_conditional_not";
 		case id_conditional_and: 
