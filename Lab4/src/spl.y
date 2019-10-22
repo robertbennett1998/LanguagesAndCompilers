@@ -20,7 +20,8 @@
 		symbol_id_program,
 		symbol_id_variable,
 		symbol_id_constant,
-		symbol_id_type
+		symbol_id_type,
+		symbol_id_operator
 	} SymbolTypes;
 
 	//TEMP
@@ -54,6 +55,25 @@
 		int iType;
 	} TypeDetails;
 
+	typedef enum _operatorTypes
+	{
+		operator_type_unknown = 0,
+		operator_type_equality,
+		operator_type_not_equal,
+		operator_type_less_than,
+		operator_type_more_than,
+		operator_type_less_equal,
+		operator_type_more_equal
+	} OperatorTypes;
+
+	void PrintOperatorTypesValue(const OperatorTypes value);
+	const char* OperatorTypesValueToString(const OperatorTypes value);
+
+	typedef struct _operatorDetails
+	{
+		OperatorTypes operatorType;
+	} OperatorDetails;
+
 	typedef struct _symbolTableEntry
 	{
 		struct _symbolTableEntry* pNextTableEntry;
@@ -65,6 +85,7 @@
 			VariableDetails variableDetails;
 			ConstantDetails constantDetails;
 			TypeDetails typeDetails;
+			OperatorDetails operatorDetails;
 		} symbolDetails;
 		
 	} SymbolTableEntry;
@@ -75,9 +96,11 @@
 	SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
 	SymbolTableEntry* CreateSymbolTableEntry_Type(const int iType);
 	SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* pValue);
+	SymbolTableEntry* CreateSymbolTableEntry_Operator(const OperatorTypes operatorType);
 	SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
 	SymbolTableEntry* GetSymbolTableEntry_Type(const int iType);
 	SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pValue);
+	SymbolTableEntry* GetSymbolTableEntry_Operator(const OperatorTypes operatorType);
 	const char* GetTypeName(const int iType);
 	void MarkSymbolAsAssigned(SymbolTableEntry* pEntry);
 	void MarkSymbolAsUsed(SymbolTableEntry* pEntry);
@@ -193,7 +216,7 @@ declaration :
 		Node* pIdentifierListNode = $1;
 		while (pIdentifierListNode != NO_SYMBOL_FOUND)
 		{
-			pIdentifierListNode->pSymbolTableEntry->symbolDetails.variableDetails.iType = $4->pSymbolTableEntry->symbolDetails.variableDetails.iType;
+			pIdentifierListNode->pSymbolTableEntry->symbolDetails.variableDetails.iType = $4->pSymbolTableEntry->symbolDetails.typeDetails.iType;
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
@@ -354,27 +377,27 @@ real :
 comparator :
 	EQUALITY_OPERATOR {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_equality), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	NOT_EQUAL_TO_OPERATOR {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	LESS_THAN_OPERATOR {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	MORE_THAN_OPERATOR {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	} |
 	LESS_EQUAL_TO_OPERATOR {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	} |
 	MORE_EQUAL_TO_OPERATOR {
 		//TODO: HMMMMM
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	};
 
 read_statement :
@@ -541,6 +564,38 @@ SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* p
 	return pEntry;
 }
 
+SymbolTableEntry* CreateSymbolTableEntry_Operator(const OperatorTypes operatorType)
+{
+	SymbolTableEntry* pEntry = GetSymbolTableEntry_Operator(operatorType);
+	if (pEntry == NO_SYMBOL_FOUND)
+	{
+		pEntry = malloc(sizeof(SymbolTableEntry));
+		memset(pEntry, 0, sizeof(SymbolTableEntry));
+	}
+	else
+	{;
+		return pEntry;
+	}
+
+	pEntry->pNextTableEntry = NO_SYMBOLIC_LINK;
+	pEntry->bySymbolType = symbol_id_operator;
+	pEntry->symbolDetails.operatorDetails.operatorType = operatorType;
+
+	if (g_pSymbolTableStart == NO_SYMBOLIC_LINK)
+	{
+		g_pSymbolTableStart = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+	else
+	{
+		pEntry->pPrevTableEntry = g_pSymbolTableEnd;
+		g_pSymbolTableEnd->pNextTableEntry = pEntry;
+		g_pSymbolTableEnd = pEntry;
+	}
+
+	return pEntry;
+}
+
 SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier)
 {
 	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
@@ -604,6 +659,25 @@ SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pVal
 						return pCurrentEntry;
 					}
 				}
+			}
+		}
+
+		pCurrentEntry = pCurrentEntry->pNextTableEntry;
+	}
+
+	return NO_SYMBOL_FOUND;
+}
+
+SymbolTableEntry* GetSymbolTableEntry_Operator(const OperatorTypes operatorType)
+{
+	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
+	while (pCurrentEntry != NO_SYMBOL_FOUND)
+	{
+		if (pCurrentEntry->bySymbolType == symbol_id_operator)
+		{
+			if (pCurrentEntry->symbolDetails.operatorDetails.operatorType == operatorType)
+			{
+				return pCurrentEntry;
 			}
 		}
 
@@ -680,6 +754,10 @@ void PrintTree(const Node* pStartNode, int iLevel)
 			{
 				printf("Value = %c\n", pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
 			}
+		}
+		else if (pStartNode->pSymbolTableEntry->bySymbolType == symbol_id_operator)
+		{
+			printf(" - Symbol (Operator) Info: Type = %s\n", OperatorTypesValueToString(pStartNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType));
 		}
 		else
 		{
@@ -816,6 +894,34 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_while_statement";
 		case id_do_statement: 
 			return "id_do_statement";
+	}
+}
+
+void PrintOperatorTypesValue(const OperatorTypes value) 
+{
+	printf("%s (%d)\n", NodeIdentifiersValueToString(value), (int)value);
+}
+
+const char* OperatorTypesValueToString(const OperatorTypes value)
+{
+	switch (value) 
+	{ 
+		default: 
+			return "Unknown value";
+		case operator_type_unknown: 
+			return "operator_type_unknown";
+		case operator_type_equality: 
+			return "operator_type_equality";
+		case operator_type_not_equal: 
+			return "operator_type_not_equal";
+		case operator_type_less_than: 
+			return "operator_type_less_than";
+		case operator_type_more_than: 
+			return "operator_type_more_than";
+		case operator_type_less_equal: 
+			return "operator_type_less_equal";
+		case operator_type_more_equal: 
+			return "operator_type_more_equal";
 	}
 }
 

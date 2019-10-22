@@ -1,0 +1,10 @@
+typedef enum _operatorTypes
+{
+	operator_type_unknown = 0,
+	operator_type_equality,
+	operator_type_not_equal,
+	operator_type_less_than,
+	operator_type_more_than,
+	operator_type_less_equal,
+	operator_type_more_equal
+} OperatorTypes;
