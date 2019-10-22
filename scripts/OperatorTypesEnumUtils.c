@@ -28,5 +28,19 @@ const char* OperatorTypesValueToString(const OperatorTypes value)
 			return "operator_type_less_equal";
 		case operator_type_more_equal: 
 			return "operator_type_more_equal";
+		case operator_type_multipulcation: 
+			return "operator_type_multipulcation";
+		case operator_type_division: 
+			return "operator_type_division";
+		case operator_type_add: 
+			return "operator_type_add";
+		case operator_type_subtract: 
+			return "operator_type_subtract";
+		case operator_type_not: 
+			return "operator_type_not";
+		case operator_type_and: 
+			return "operator_type_and";
+		case operator_type_or: 
+			return "operator_type_or";
 	}
 }

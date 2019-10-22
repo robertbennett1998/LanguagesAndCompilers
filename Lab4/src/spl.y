@@ -63,7 +63,14 @@
 		operator_type_less_than,
 		operator_type_more_than,
 		operator_type_less_equal,
-		operator_type_more_equal
+		operator_type_more_equal,
+		operator_type_multipulcation,
+		operator_type_division,
+		operator_type_add,
+		operator_type_subtract,
+		operator_type_not,
+		operator_type_and,
+		operator_type_or
 	} OperatorTypes;
 
 	void PrintOperatorTypesValue(const OperatorTypes value);
@@ -137,7 +144,7 @@
 		id_comparator,
 		id_read_statement,
 		id_if_statement,
-		id_if_statement_else,
+		id_if_else_statement,
 		id_conditional,
 		id_conditional_not,
 		id_conditional_and,
@@ -172,7 +179,7 @@
 %token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
 %token<fVal> REAL
 %token<pSymbolTableEntry> IDENTIFIER
-%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant number_constant integer real comparator read_statement if_statement conditional comparison for_statement while_statement do_statement
+%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant number_constant integer real comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
 
 %start program
 
@@ -236,18 +243,15 @@ identifier_list :
 type :
 	TYPE_CHARACTER {
 		//TODO: NOTE: Not sure how to handle this yet
-		SymbolTableEntry* pSymbolTableEntry = CreateSymbolTableEntry_Type((int)TYPE_CHARACTER);
-		$$ = CreateNode(pSymbolTableEntry, id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_CHARACTER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	TYPE_INTEGER {
 		//TODO: NOTE: Not sure how to handle this yet
-		SymbolTableEntry* pSymbolTableEntry = CreateSymbolTableEntry_Type((int)TYPE_INTEGER);
-		$$ = CreateNode(pSymbolTableEntry, id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_INTEGER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	TYPE_REAL {
 		//TODO: NOTE: Not sure how to handle this yet
-		SymbolTableEntry* pSymbolTableEntry = CreateSymbolTableEntry_Type((int)TYPE_REAL);
-		$$ = CreateNode(pSymbolTableEntry, id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_REAL), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
 
 statement_list :
@@ -270,6 +274,9 @@ statement :
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	if_statement {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	if_else_statement {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	for_statement {
@@ -303,25 +310,25 @@ value :
 	};
 
 expression :
-	expression SUBTRACT_OPERATOR term {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, $3, NO_CHILD_NODE);
-	} | 
-	expression ADD_OPERATOR term {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, $3, NO_CHILD_NODE);
-	} |
 	term {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	expression SUBTRACT_OPERATOR term {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, $1, $3, NO_CHILD_NODE);
+	} | 
+	expression ADD_OPERATOR term {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, $1, $3, NO_CHILD_NODE);
 	};
 
 term :
-	term MULTIPULCATION_OPERATOR value {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_term, $1, $3, NO_CHILD_NODE);
-	} |
-	term DIVISION_OPERATOR value {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_term, $1, $3, NO_CHILD_NODE);
-	} |
 	value {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_term, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	term MULTIPULCATION_OPERATOR value {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_multipulcation), id_term, $1, $3, NO_CHILD_NODE);
+	} |
+	term DIVISION_OPERATOR value {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, $1, $3, NO_CHILD_NODE);
 	};
 
 write_statement :
@@ -410,20 +417,22 @@ read_statement :
 if_statement :
 	IF conditional THEN statement_list ENDIF {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_if_statement, $2, $4, NO_CHILD_NODE);
-	} |
+	};
+
+if_else_statement :
 	IF conditional THEN statement_list ELSE statement_list ENDIF {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_if_statement_else, $2, $4, $6);
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_if_else_statement, $2, $4, $6);
 	};
 
 conditional :
 	comparison {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} | NOT conditional {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional_not, $2, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_conditional_not, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	} | conditional AND comparison {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional_and, $1, $3, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional_and, $1, $3, NO_CHILD_NODE);
 	} | conditional OR comparison {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional_or, $1, $3, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional_or, $1, $3, NO_CHILD_NODE);
 	};
 
 comparison :
@@ -803,11 +812,6 @@ void GenerateAndPrintWarnings()
 	}
 }
 
-void PrintNodeIdentifiersValue(const NodeIdentifiers value) 
-{
-	printf("%s (%d)\n", NodeIdentifiersValueToString(value), (int)value);
-}
-
 const char* GetTypeName(const int iType)
 {
 	switch (iType)
@@ -824,6 +828,11 @@ const char* GetTypeName(const int iType)
 		default:
 			return "Unknown type";
 	}
+}
+
+void PrintNodeIdentifiersValue(const NodeIdentifiers value) 
+{
+	printf("%s (%d)\n", NodeIdentifiersValueToString(value), (int)value);
 }
 
 const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
@@ -852,8 +861,6 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_value";
 		case id_expression: 
 			return "id_expression";
-		case id_type:
-			return "id_type";
 		case id_term: 
 			return "id_term";
 		case id_write_statement: 
@@ -864,20 +871,22 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_constant";
 		case id_number_constant: 
 			return "id_number_constant";
+		case id_type: 
+			return "id_type";
+		case id_real: 
+			return "id_real";
+		case id_integer: 
+			return "id_integer";
 		case id_comparator: 
 			return "id_comparator";
 		case id_read_statement: 
 			return "id_read_statement";
 		case id_if_statement: 
 			return "id_if_statement";
-		case id_if_statement_else: 
-			return "id_if_statement_else";
+		case id_if_else_statement: 
+			return "id_if_else_statement";
 		case id_conditional: 
 			return "id_conditional";
-		case id_real:
-			return "id_real";
-		case id_integer:
-			return "id_integer";
 		case id_conditional_not: 
 			return "id_conditional_not";
 		case id_conditional_and: 
@@ -922,6 +931,20 @@ const char* OperatorTypesValueToString(const OperatorTypes value)
 			return "operator_type_less_equal";
 		case operator_type_more_equal: 
 			return "operator_type_more_equal";
+		case operator_type_multipulcation: 
+			return "operator_type_multipulcation";
+		case operator_type_division: 
+			return "operator_type_division";
+		case operator_type_add: 
+			return "operator_type_add";
+		case operator_type_subtract: 
+			return "operator_type_subtract";
+		case operator_type_not: 
+			return "operator_type_not";
+		case operator_type_and: 
+			return "operator_type_and";
+		case operator_type_or: 
+			return "operator_type_or";
 	}
 }
 

@@ -44,18 +44,20 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_constant";
 		case id_number_constant: 
 			return "id_number_constant";
-		case id_integer: 
-			return "id_integer";
+		case id_type: 
+			return "id_type";
 		case id_real: 
 			return "id_real";
+		case id_integer: 
+			return "id_integer";
 		case id_comparator: 
 			return "id_comparator";
 		case id_read_statement: 
 			return "id_read_statement";
 		case id_if_statement: 
 			return "id_if_statement";
-		case id_if_statement_else: 
-			return "id_if_statement_else";
+		case id_if_else_statement: 
+			return "id_if_else_statement";
 		case id_conditional: 
 			return "id_conditional";
 		case id_conditional_not: 
