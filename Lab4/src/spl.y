@@ -227,7 +227,7 @@ declaration :
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
-		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, pIdentifierListNode, NO_CHILD_NODE, NO_CHILD_NODE);
+		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 
 		$$ = pNode;
 	};
@@ -290,7 +290,7 @@ statement :
 	};
 
 assignment_statement :
-	expression ASSIGNMENT_OPERATOR IDENTIFIER {
+	value ASSIGNMENT_OPERATOR IDENTIFIER {
 		MarkSymbolAsAssigned($3);
 
 		$$ = CreateNode($3, id_assignment_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
@@ -300,35 +300,56 @@ value :
 	OPEN_BRACKET expression CLOSE_BRACKET {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_value, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
-	constant {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_value, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} |
 	IDENTIFIER {
 		MarkSymbolAsUsed($1);
 
 		$$ = CreateNode($1, id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	constant {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_value, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 expression :
-	term {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+	UNSIGNED_INTEGER SIGNED_INTEGER {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE),  CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$2), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE);
 	} |
 	expression SUBTRACT_OPERATOR term {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, $1, $3, NO_CHILD_NODE);
-	} | 
+	} |
 	expression ADD_OPERATOR term {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, $1, $3, NO_CHILD_NODE);
+	} |
+	term {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_expression, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 term :
-	value {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_term, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} |
 	term MULTIPULCATION_OPERATOR value {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_multipulcation), id_term, $1, $3, NO_CHILD_NODE);
 	} |
 	term DIVISION_OPERATOR value {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, $1, $3, NO_CHILD_NODE);
+	} |
+	value {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_term, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+	};
+
+constant :
+	REAL {
+		//TODO: HMMMMM
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	UNSIGNED_INTEGER {
+		//TODO: HMMMMM
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	SIGNED_INTEGER {
+		//TODO: HMMMMM
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	CHARACTER_CONSTANT {
+		//TODO: NOTE: Not sure about this one either, probs a symbolic link?
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 write_statement :
@@ -336,7 +357,6 @@ write_statement :
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, $3, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	NEWLINE {
-		//TODO: NOTE: Hmmmmm not sure this is right, I think there should be another rule for NEWLINE and then create a node for it or just have id_newline
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
@@ -346,39 +366,6 @@ output_list :
 	} |
 	output_list COMMA value {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_output_list, $1, $3, NO_CHILD_NODE);
-	};
-
-constant :
-	number_constant {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_constant, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} |
-	CHARACTER_CONSTANT {
-		//TODO: NOTE: Not sure about this one either, probs a symbolic link?
-		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
-	};
-
-number_constant :
-	integer {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_number_constant, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} |
-	real {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_number_constant, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	}
-
-integer :
-	UNSIGNED_INTEGER {
-		//TODO: HMMMMM
-		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_integer, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
-	} |
-	SIGNED_INTEGER {
-		//TODO: HMMMMM
-		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_integer, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
-	};
-
-real :
-	REAL {
-		//TODO: HMMMMM
-		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &$1), id_real, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 comparator :
@@ -427,12 +414,12 @@ if_else_statement :
 conditional :
 	comparison {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} | NOT conditional {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_conditional_not, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	} | conditional AND comparison {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional_and, $1, $3, NO_CHILD_NODE);
 	} | conditional OR comparison {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional_or, $1, $3, NO_CHILD_NODE);
+	} | NOT comparison {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_conditional_not, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 comparison :
@@ -444,7 +431,7 @@ for_statement :
 	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
 		//TODO: THIS ISNT GOING TO WORK
 		MarkSymbolAsAssigned($2);
-		
+		printf("\n\n%p %p %p %p %p\n\n", $2, $4, $6, $8, $10);
 		$$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
 	};
 
@@ -731,7 +718,7 @@ void PrintTree(const Node* pStartNode, int iLevel)
 	int i;
 	printf("Level %d   \t", iLevel);
 	for (i = 0; i < iLevel; i++)
-		printf("...");
+		printf("...|");
 
 	printf("%s (%d)", NodeIdentifiersValueToString(pStartNode->byNodeIdentifier), pStartNode->byNodeIdentifier);
 

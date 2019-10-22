@@ -3,7 +3,7 @@ ProgV
 
 DECLARATIONS
 
-integer,i OF TYPE INTEGER;
+integer,i,b OF TYPE INTEGER;
 
 CODE
 
@@ -11,6 +11,7 @@ CODE
   IF integer <= 5  OR integer >=12 THEN
     WRITE (integer)
   ENDIF;
+  (36-1) -> b;
   WRITE ( (36-1) ); NEWLINE;
 
   FOR integer IS -1 BY -1 TO -5 DO
