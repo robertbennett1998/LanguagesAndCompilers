@@ -1,0 +1,13 @@
+ProgA:
+
+DECLARATIONS
+  a, b, c OF TYPE INTEGER;
+  d, e, f OF TYPE REAL;
+  g, h, i OF TYPE CHARACTER;
+
+CODE
+
+  WRITE('h','e','l','l','o');
+  NEWLINE
+
+ENDP ProgA.

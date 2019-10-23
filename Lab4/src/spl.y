@@ -27,6 +27,7 @@
 	//TEMP
 	typedef struct _programDetails
 	{
+		char acIdentifier[MAX_IDENTIFIER_LENGTH];
 		unsigned int uiVariableCount;
 		unsigned int uiStatementCount;
 	} ProgramDetails;
@@ -163,6 +164,7 @@
 	void PrintNodeIdentifiersValue(const NodeIdentifiers value);
 	const char* NodeIdentifiersValueToString(const NodeIdentifiers value);
 	void GenerateAndPrintWarnings();
+	void GenCode(Node* pNode);
 %}
 
 %union
@@ -191,13 +193,25 @@ program :
 			printf("WARNING: Program names do not match %s vs %s\n", $1->symbolDetails.variableDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier); //TODO: Change to method
 
 		$1->bySymbolType = symbol_id_program;
-		$5->bySymbolType = symbol_id_program;
+		SymbolTableEntry* pNewSymbol = malloc(sizeof(SymbolTableEntry));
+		pNewSymbol->bySymbolType = symbol_id_program;
+		strcpy(pNewSymbol->symbolDetails.programDetails.acIdentifier, $1->symbolDetails.variableDetails.acIdentifier);
+		pNewSymbol->pNextTableEntry = $1->pNextTableEntry;
+		pNewSymbol->pPrevTableEntry = $1->pPrevTableEntry;
+		memcpy($1, pNewSymbol, sizeof(SymbolTableEntry));
+		strcpy(pNewSymbol->symbolDetails.programDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier);
+		pNewSymbol->pNextTableEntry = $5->pNextTableEntry;
+		pNewSymbol->pPrevTableEntry = $5->pPrevTableEntry;
+		memcpy($5, pNewSymbol, sizeof(SymbolTableEntry));
+		free(pNewSymbol);
 
 		g_pParseTree = CreateNode($1, id_program, $3, NO_CHILD_NODE, NO_CHILD_NODE);
 		
 		#ifdef DEBUG
 			PrintTree(g_pParseTree, 0);
 		#endif
+
+		GenCode(g_pParseTree);
 
 		$$ = g_pParseTree;
 	};
@@ -227,7 +241,7 @@ declaration :
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
-		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, $4, NO_CHILD_NODE);
 
 		$$ = pNode;
 	};
@@ -933,6 +947,196 @@ const char* OperatorTypesValueToString(const OperatorTypes value)
 		case operator_type_or: 
 			return "operator_type_or";
 	}
+}
+
+int g_iIndentLevel = 0;
+void Indent()
+{
+	int i;
+	for (i = 0; i < g_iIndentLevel; i++)
+		printf("\t");
+}
+
+void Evaluate(Node* pNode)
+{
+	switch (pNode->byNodeIdentifier)
+	{
+		case id_program:
+		{
+			g_iIndentLevel = 0;
+			printf("void %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			Evaluate(pNode->pFirstChild);
+			printf("}\n\n");
+			printf("int main()\n{\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			break;
+		}
+
+		case id_block:
+		{
+			g_iIndentLevel++;
+			Evaluate(pNode->pFirstChild);
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+				Evaluate(pNode->pSecondChild);
+
+			break;
+		}
+
+		case id_declaration_block:
+		{
+			Evaluate(pNode->pFirstChild);
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+				Evaluate(pNode->pSecondChild);
+
+			break;
+		}
+
+		case id_declaration:
+		{
+			Evaluate(pNode->pSecondChild);
+			Evaluate(pNode->pFirstChild);
+			printf(";\n");
+			break;
+		}
+
+		case id_type:
+		{
+			if (pNode->pSymbolTableEntry == NO_SYMBOLIC_LINK)
+			{
+				printf("NO SYMBOLIC LINK\n");
+				break;
+			}
+
+			if (pNode->pSymbolTableEntry->bySymbolType != symbol_id_type)
+			{
+				printf("Expected type symbol\n");
+				break;
+			}
+
+			Indent();
+			if (pNode->pSymbolTableEntry->symbolDetails.typeDetails.iType == TYPE_INTEGER)
+			{
+				printf("int");
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.typeDetails.iType == TYPE_REAL)
+			{
+				printf("float");
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.typeDetails.iType == TYPE_CHARACTER)
+			{
+				printf("char");
+			}
+			else
+			{
+				printf("UNDEFINED\n");
+			}
+
+			break;
+		}
+
+		case id_identifier_list:
+		{
+			if (pNode->pSymbolTableEntry->bySymbolType != symbol_id_variable)
+			{
+				printf("UNDEF\n");
+				break;
+			}
+
+			if (pNode->pFirstChild != NO_CHILD_NODE)
+			{
+				Evaluate(pNode->pFirstChild);
+				printf(",");
+			}
+
+			printf(" %s", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+
+			break;
+		}
+
+		case id_statement_list:
+		{
+			Evaluate(pNode->pFirstChild);
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+				Evaluate(pNode->pSecondChild);
+			
+			break;
+		}
+
+		case id_statement:
+		{
+			Evaluate(pNode->pFirstChild);
+			break;
+		}
+
+		case id_write_statement:
+		{
+			if (pNode->pFirstChild == NO_CHILD_NODE)
+			{
+				Indent();
+				printf("printf(\"\\n\");\n");
+				break;
+			}
+			
+			Indent();
+			printf("printf(\"");
+			Evaluate(pNode->pFirstChild);
+			printf("\");\n");
+			break;
+		}
+
+		case id_output_list:
+		{
+			Evaluate(pNode->pFirstChild);
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+				Evaluate(pNode->pSecondChild);
+
+			break;
+		}
+
+		case id_value:
+		{
+			if (pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK)
+			{
+				printf("NOT IMPLEMENTED - %s\n", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+				break;
+			}
+
+			Evaluate(pNode->pFirstChild);
+
+			break;
+		}
+
+		case id_constant:
+		{
+			if (pNode->pSymbolTableEntry->bySymbolType != symbol_id_constant)
+			{
+				printf("Expected constant symbol\n");
+				break;
+			}
+
+			if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_INTEGER)
+			{
+				printf("%d", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.i);
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
+			{
+				printf("%f", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
+			{
+				printf("%c", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
+			}
+
+			break;
+		}
+
+		default:
+			break;
+	}
+}
+
+void GenCode(Node* pNode)
+{
+	Evaluate(pNode);
 }
 
 #include <lex.yy.c>
