@@ -1,8 +1,7 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <execinfo.h>
-#include <signal.h>
 
 #define MAX_PATH_LENGTH 4096
 
@@ -25,23 +24,8 @@ void yyerror(const char *s);
 extern unsigned int g_uiCurrentLineNumber;
 extern unsigned long g_ulCurrentLinePosition;
 
-void handler(int sig) {
-  void *array[10];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(array, 10);
-
-  // print out all the frames to stderr
-  fprintf(stderr, "Error: signal %d:\n", sig);
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
-  exit(1);
-}
-
 int main(void)
 {
-	signal(SIGSEGV, handler);
-
 	#ifdef RUN_ALL_TESTS
 		const int iNumberOfTests = 7;
 		FILE** pAllFiles = 0;

@@ -964,6 +964,9 @@ void Indent()
 
 void Evaluate(Node* pNode)
 {
+	if (pNode == NO_CHILD_NODE)
+		return;
+
 	printf("Evaluating: %s\n", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 	switch (pNode->byNodeIdentifier)
 	{

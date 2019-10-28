@@ -38,7 +38,7 @@ compile-linux : bison
 	$(eval src += $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.tab.c"))
 	$(eval src = $(addprefix $(_INTIMIDIATE_DIR)/, $(src)))
 	cd $(INTIMIDIATE_DIR);\
-	gcc -c $(src) $(preprocessor_defs) $(include_paths) -m64
+	gcc -c -g -rdynamic $(src) $(preprocessor_defs) $(include_paths) -m64
 
 windows : compile-windows
 	$(eval obj_files = $(shell find $(INTIMIDIATE_DIR)/ -maxdepth 1 -type f -regex ".*\.o"))
