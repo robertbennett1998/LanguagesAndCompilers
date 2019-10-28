@@ -245,7 +245,7 @@ declaration :
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
-		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, $4, NO_CHILD_NODE);
 
 		$$ = pNode;
 	};
@@ -330,9 +330,9 @@ value :
 	};
 
 expression :
-	UNSIGNED_INTEGER SIGNED_INTEGER {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE),  CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$2), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE);
-	} |
+	// UNSIGNED_INTEGER SIGNED_INTEGER {
+	// 	$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE),  CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$2), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE);
+	// } |
 	expression SUBTRACT_OPERATOR term {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, $1, $3, NO_CHILD_NODE);
 	} |
@@ -967,7 +967,7 @@ void Evaluate(Node* pNode)
 	if (pNode == NO_CHILD_NODE)
 		return;
 
-	printf("Evaluating: %s\n", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+	//printf("Evaluating: %s\n", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_program:
@@ -1076,28 +1076,50 @@ void Evaluate(Node* pNode)
 			break;
 		}
 
-		case id_write_statement:
+		case id_assignment_statement:
 		{
-			if (pNode->pFirstChild == NO_CHILD_NODE)
-			{
-				Indent();
-				printf("printf(\"\\n\");\n");
-				break;
-			}
+			if (pNode->pSymbolTableEntry->bySymbolType != symbol_id_variable)
+				printf("Expected a symbol variable symbol.\n");
+
+			if (pNode->pFirstChild->byNodeIdentifier != id_expression)
+				printf("Expected an expression.\n");
+
+			void* pValue = NULL;
 
 			Indent();
-			printf("printf(\"");
+			printf("%s = ", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+
 			Evaluate(pNode->pFirstChild);
-			printf("\");\n");
+
+			printf(";\n");
+
 			break;
 		}
 
-		case id_output_list:
+		case id_expression:
 		{
-			Evaluate(pNode->pFirstChild);
-			if (pNode->pSecondChild != NO_CHILD_NODE)
-				Evaluate(pNode->pSecondChild);
+			if (pNode->pFirstChild->byNodeIdentifier == id_term)
+			{
+				Evaluate(pNode->pFirstChild);
+			}
 
+			break;
+		}
+
+		case id_term:
+		{
+			if (pNode->pFirstChild->byNodeIdentifier == id_value)
+			{
+				Evaluate(pNode->pFirstChild);
+			}
+			
+			break;
+		}
+
+		case id_write_statement:
+		{
+			Indent();
+			printf("Write Statement - Not Implemented\n");
 			break;
 		}
 
@@ -1105,7 +1127,12 @@ void Evaluate(Node* pNode)
 		{
 			if (pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK)
 			{
-				printf("NOT IMPLEMENTED - %s\n", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+				if (pNode->pSymbolTableEntry->bySymbolType != symbol_id_variable)
+				{
+					printf("Expected a variable symbol\n");
+				}
+
+				printf("%s", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
 				break;
 			}
 
@@ -1132,7 +1159,7 @@ void Evaluate(Node* pNode)
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
 			{
-				printf("%c", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
+				printf("'%c'", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
 			}
 
 			break;
