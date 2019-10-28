@@ -1,0 +1,23 @@
+ProgComplete:
+
+DECLARATIONS
+
+	a, b, c OF TYPE INTEGER;
+	d, e, f OF TYPE CHARACTER;
+	g, h, i OF TYPE REAL;
+
+CODE
+
+	1 -> a;
+	2 -> b;
+	b + a -> c;
+	'a' -> d;
+	'b' -> e;
+	e + 1 -> f;
+	a / c -> g;
+	g * 2 -> h;
+	2.3 -> i;
+	WRITE('h','e','l','l','o', a);
+	NEWLINE
+
+ENDP ProgComplete.

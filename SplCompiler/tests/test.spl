@@ -1,0 +1,28 @@
+test:
+	DECLARATIONS
+		a, b OF TYPE CHARACTER;
+		c, d OF TYPE INTEGER;
+		e OF TYPE REAL;
+	CODE
+		12 -> c;
+		'a' -> a;
+		12.345 -> e;
+		WRITE (a, b, c, d, e);
+		NEWLINE;
+		READ (a);
+		NEWLINE;
+		IF a*a = 'a' THEN
+			WRITE (a)
+		ELSE
+			'b' -> a
+		ENDIF;
+		FOR i IS 0 BY 1 TO 5 DO
+			'c' -> a
+		ENDFOR;
+		WHILE a = 'c' DO
+			'd' -> a
+		ENDWHILE;
+		DO
+			'e'-> a
+		WHILE a = 'd' ENDDO
+ENDP test.

@@ -1,0 +1,11 @@
+ProgB:
+
+DECLARATIONS
+
+a OF TYPE INTEGER;
+
+CODE
+
+  WRITE(a);
+
+ENDP ProgB.
