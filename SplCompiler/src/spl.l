@@ -1,23 +1,22 @@
 %{
-	//Includes
-	#include "spl.y.h"
-
-	//Externs
+	
 	extern int yylex();
 
-	//Methods
+	
 	void PrintToken(const char* pToken);
 	void PrintLinePositionUpdate();
 	void IncrementLinePosition(const int iTokenLength);
 	void ProcessEndOfLine();
-	extern SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
-	extern SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
-
-	//Global vars
+	#ifndef PRINT
+		extern SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
+		extern SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
+		extern SymbolTableEntry* g_pSymbolTableStart;
+		extern SymbolTableEntry* g_pSymbolTableEnd;
+	#endif
+	
+	
 	extern unsigned int g_uiCurrentLineNumber = 1;
 	extern unsigned long g_ulCurrentLinePosition = 1;
-	extern SymbolTableEntry* g_pSymbolTableStart;
-	extern SymbolTableEntry* g_pSymbolTableEnd;
 
 	#define EXPAND(x) x
 	#define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
@@ -27,14 +26,13 @@
 		#define PROCESS_GENERIC_TOKEN_1(token) 	{\
 													PrintToken(#token);\
 													IncrementLinePosition(strlen(#token));\
-													return token;\
 												}
 
 		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
 																	PrintTokenAndValue(#token, symbolToPrint);\
 																	IncrementLinePosition(strlen(symbolToPrint));\
-																	return token;\
 																}
+		#define ASSIGN_YYLVAL(x, y)
 	#else
 		#define PROCESS_GENERIC_TOKEN_1(token)	{\
 													IncrementLinePosition(strlen(#token));\
@@ -45,6 +43,7 @@
 													IncrementLinePosition(strlen(symbolToPrint));\
 													return token;\
 												}
+		#define ASSIGN_YYLVAL(x, y) yylval.x = y;
 	#endif
 %}
 
@@ -113,22 +112,22 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
 {unsigned_integer}		{
-							yylval.iVal = atoi(yytext);
+							ASSIGN_YYLVAL(iVal, atoi(yytext));
 							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 				
 }
 {real_number}			{ 
-							yylval.fVal = atof(yytext);
+							ASSIGN_YYLVAL(fVal, atof(yytext));
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
 						}
 {character_constant}	{
-							yylval.cVal = yytext[1];
+							ASSIGN_YYLVAL(cVal, yytext[1]);
 							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
 						}
 {identifier}			{
 							char* pIdentifier = malloc(strlen(yytext) + 5);
 							strcpy(pIdentifier, "spl_");
 							strcat(pIdentifier, yytext);
-							yylval.pSymbolTableEntry = CreateSymbolTableEntry_Variable(pIdentifier);
+							ASSIGN_YYLVAL(pSymbolTableEntry, CreateSymbolTableEntry_Variable(pIdentifier))
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, pIdentifier)
 						}
 

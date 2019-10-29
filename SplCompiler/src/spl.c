@@ -5,7 +5,6 @@
 
 #define MAX_PATH_LENGTH 4096
 
-//Externs
 extern int yylex();
 extern int yyparse();
 extern FILE *yyin;
@@ -17,10 +16,8 @@ extern void GenerateAndPrintWarnings();
 	yydebug = 1;
 #endif
 
-//methods
 void yyerror(const char *s);
 
-//Global vars
 extern unsigned int g_uiCurrentLineNumber;
 extern unsigned long g_ulCurrentLinePosition;
 
