@@ -17,6 +17,43 @@ CODE
 	a / c -> g;
 	g * 2 -> h;
 	2.3 -> i;
+
+	IF a = 1 THEN
+		WRITE (a);
+		NEWLINE
+  	ENDIF;
+
+	IF c = (a + b) THEN
+		WRITE (c, 'E', 'Q', 'U', 'A', 'L', 'S', a, 'P', 'L', 'U', 'S', b);
+		NEWLINE
+	ELSE
+		WRITE (c, 'N', 'O', 'T', 'E', 'Q', 'U', 'A', 'L', a, 'P', 'L', 'U', 'S', b);
+		NEWLINE
+  	ENDIF;
+
+	NEWLINE;
+	FOR a IS 1 BY 1 TO 13 DO
+		WRITE(a);
+		NEWLINE
+	ENDFOR;
+	NEWLINE;
+
+	1 -> a;
+	WHILE NOT a <= 13 AND a > 14 DO
+		WRITE(a);
+		NEWLINE;
+		(a + 1) -> a
+	ENDWHILE;
+	NEWLINE;
+
+	1 -> a;
+	DO
+		WRITE(a);
+		NEWLINE;
+		(a + 1) -> a
+	WHILE NOT a > 13 ENDDO;
+	NEWLINE;
+
 	WRITE('h','e','l','l','o', a);
 	NEWLINE
 

@@ -101,7 +101,7 @@ void Evaluate_StatementList(const Node* const pNode)
 			Indent();
 			printf("%s = ", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
 
-			Evaluate(pNode->pFirstChild);
+			Evaluate_StatementList(pNode->pFirstChild);
 			printf(";\n");
 			break;
 		}
@@ -123,41 +123,208 @@ void Evaluate_StatementList(const Node* const pNode)
 		case id_if_statement:
 		{
 			Indent();
-			printf("[If Statement]\n");
+			printf("if (");
+			Evaluate_StatementList(pNode->pFirstChild);
+			printf(")\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Evaluate_StatementList(pNode->pSecondChild);
+			g_iIndentLevel--;
+			Indent();
+			printf("}\n");
 			break;
 		}
 
 		case id_if_else_statement:
 		{
 			Indent();
-			printf("[If Else Statement]\n");
+			printf("if (");
+			Evaluate_StatementList(pNode->pFirstChild);
+			printf(")\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Evaluate_StatementList(pNode->pSecondChild);
+			g_iIndentLevel--;
+			Indent();
+			printf("}\n");
+			Indent();
+			printf("else\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Evaluate_StatementList(pNode->pThirdChild);
+			g_iIndentLevel--;
+			Indent();
+			printf("}\n");
 			break;
 		}
 
 		case id_for_statement:
 		{
 			Indent();
-			printf("[For Statement]\n");
+			char* pIdentifier = pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier;
+			printf("for (%s = ", pIdentifier);
+			Evaluate_StatementList(pNode->pFirstChild->pFirstChild);
+			printf("; %s <= ", pIdentifier);
+			Evaluate_StatementList(pNode->pFirstChild->pThirdChild);
+			printf("; %s += ", pIdentifier);
+			Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+			printf(")\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Evaluate_StatementList(pNode->pSecondChild);
+			g_iIndentLevel--;
+			Indent();
+			printf("}\n");
+
+
 			break;
 		}
 
 		case id_while_statement:
 		{
 			Indent();
-			printf("[While Statement]\n");
+			printf("while (");
+			Evaluate_StatementList(pNode->pFirstChild);
+			printf(")\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Evaluate_StatementList(pNode->pSecondChild);
+			g_iIndentLevel--;
+			Indent();
+			printf("};\n");
 			break;
 		}
 
 		case id_do_statement:
 		{
 			Indent();
-			printf("[Do While Statement]\n");
+			printf("do\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Evaluate_StatementList(pNode->pFirstChild);
+			g_iIndentLevel--;
+			Indent();
+			printf("} while (");
+			Evaluate_StatementList(pNode->pSecondChild);
+			printf(");\n");
+			break;
+		}
+
+		case id_expression:
+		{
+			printf("[Expression]");
+			break;
+		}
+
+		case id_term:
+		{
+			printf("[Term]");
+			break;
+		}
+
+		case id_value:
+		{
+			printf("[Value]");
+			break;
+		}
+
+		case id_conditional:
+		{
+			if (pNode->pSecondChild == NO_CHILD_NODE)
+			{
+				if (pNode->pSymbolTableEntry == NO_SYMBOLIC_LINK)
+				{
+					Evaluate_StatementList(pNode->pFirstChild);
+				}
+				else
+				{
+					printf("!(");
+					Evaluate_StatementList(pNode->pFirstChild);
+					printf(")");
+				}				
+			}
+			else
+			{
+				if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_and)
+				{
+					printf("((");
+					Evaluate_StatementList(pNode->pFirstChild);
+					printf(")");
+					printf(" && ");
+					printf("(");
+					Evaluate_StatementList(pNode->pFirstChild);
+					printf("))");
+				}
+				else
+				{
+					printf("((");
+					Evaluate_StatementList(pNode->pFirstChild);
+					printf(")");
+					printf(" || ");
+					printf("(");
+					Evaluate_StatementList(pNode->pFirstChild);
+					printf("))");
+				}
+			}
+
+			break;
+		}
+
+		case id_comparison:
+		{
+			Evaluate_StatementList(pNode->pFirstChild);
+			printf(" ");
+			Evaluate_StatementList(pNode->pSecondChild);
+			printf(" ");
+			Evaluate_StatementList(pNode->pThirdChild);
+			break;
+		}
+
+		case id_comparator:
+		{
+			switch (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType)
+			{
+				case operator_type_equality:
+					printf("==");
+					break;
+
+				case operator_type_not_equal:
+					printf("!=");
+					break;
+
+				case operator_type_less_than:
+					printf("<");
+					break;
+
+				case operator_type_more_than:
+					printf(">");
+					break;
+
+				case operator_type_less_equal:
+					printf("<=");
+					break;
+				
+				case operator_type_more_equal:
+					printf(">=");
+					break;
+
+				default:
+					printf("[Unknown Operator For Comparison]");
+					break;
+			}
+
 			break;
 		}
 
 		default:
 		{
-			printf("[NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			printf("[NOT IMPLEMENTED - %s - %d]", NodeIdentifiersValueToString(pNode->byNodeIdentifier), pNode->byNodeIdentifier);
 			break;
 		}
 	}

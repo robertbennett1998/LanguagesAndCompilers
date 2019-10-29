@@ -17,7 +17,7 @@
 %token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
 %token<fVal> REAL
 %token<pSymbolTableEntry> IDENTIFIER
-%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant number_constant integer real comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
+%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
 
 %start program
 
@@ -119,8 +119,6 @@ statement :
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	write_statement {
-		printf("Write statement\n");
-
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	read_statement {
@@ -211,37 +209,29 @@ write_statement :
 
 output_list :
 	value {
-		printf("Output list (value)\n");
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_output_list, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	output_list COMMA value {
-		printf("Output list (,)\n");
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_output_list, $1, $3, NO_CHILD_NODE);
 	};
 
 comparator :
 	EQUALITY_OPERATOR {
-		//TODO: HMMMMM
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_equality), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	NOT_EQUAL_TO_OPERATOR {
-		//TODO: HMMMMM
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	LESS_THAN_OPERATOR {
-		//TODO: HMMMMM
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	MORE_THAN_OPERATOR {
-		//TODO: HMMMMM
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	} |
 	LESS_EQUAL_TO_OPERATOR {
-		//TODO: HMMMMM
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	} |
 	MORE_EQUAL_TO_OPERATOR {
-		//TODO: HMMMMM
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	};
 
@@ -266,11 +256,11 @@ conditional :
 	comparison {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	} | conditional AND comparison {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional_and, $1, $3, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional, $1, $3, NO_CHILD_NODE);
 	} | conditional OR comparison {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional_or, $1, $3, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional, $1, $3, NO_CHILD_NODE);
 	} | NOT comparison {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_conditional_not, $2, NO_CHILD_NODE, NO_CHILD_NODE);
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_conditional, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 comparison :
@@ -282,7 +272,6 @@ for_statement :
 	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
 		//TODO: THIS ISNT GOING TO WORK
 		MarkSymbolAsAssigned($2);
-		printf("\n\n%p %p %p %p %p\n\n", $2, $4, $6, $8, $10);
 		$$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
 	};
 
