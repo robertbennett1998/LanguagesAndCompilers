@@ -48,7 +48,7 @@ typedef struct _constantDetails
 	union 
 	{
 		int i;
-		float f;
+		double f;
 		char c;
 	} value;
 } ConstantDetails;

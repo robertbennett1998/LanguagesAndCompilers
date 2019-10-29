@@ -5,7 +5,7 @@
 %union
 {
 	int iVal;
-	float fVal;
+	double fVal;
 	char cVal;
 	Node* pNode;
 	SymbolTableEntry* pSymbolTableEntry;
@@ -383,7 +383,7 @@ SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* p
 	}
 	else if (iType == TYPE_REAL)
 	{
-		pEntry->symbolDetails.constantDetails.value.f = *(float*)pValue;
+		pEntry->symbolDetails.constantDetails.value.f = *(double*)pValue;
 	}
 	else if (iType == TYPE_CHARACTER)
 	{
@@ -488,7 +488,7 @@ SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pVal
 				}
 				else if (iType == TYPE_REAL)
 				{
-					if (iType == *(float*)pValue)
+					if (iType == *(double*)pValue)
 					{
 						return pCurrentEntry;
 					}
@@ -1079,7 +1079,7 @@ void Evaluate_StatementList(const Node* const pNode)
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
 			{
-				printf("%ff", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+				printf("%f", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
 			{
@@ -1416,7 +1416,7 @@ void Evaluate_OutputList_Parameters(const Node* const pNode)
 			}
 			else if (iType == TYPE_REAL)
 			{
-				printf(", (float)");
+				printf(", (double)");
 			}
 
 			Evaluate_StatementList(pNode);
@@ -1505,7 +1505,7 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 			}
 			else if (iType == TYPE_REAL)
 			{
-				printf("float ");
+				printf("double ");
 			}
 			else if (iType == TYPE_CHARACTER)
 			{

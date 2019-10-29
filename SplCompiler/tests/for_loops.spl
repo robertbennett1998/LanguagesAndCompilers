@@ -1,0 +1,16 @@
+ForLoops:
+    DECLARATIONS
+        a OF TYPE CHARACTER;
+        b OF TYPE INTEGER;
+        c OF TYPE REAL;
+    CODE
+        FOR a IS 'a' BY 'c' - 'a' TO 'Z' DO
+            WRITE(a);
+            NEWLINE
+        ENDFOR;
+        NEWLINE;
+        FOR b IS 0 BY 2 TO 10 DO
+            WRITE(b);
+            NEWLINE
+        ENDFOR
+ENDP ForLoops.
