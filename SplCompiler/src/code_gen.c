@@ -181,7 +181,7 @@ void Evaluate_StatementList(const Node* const pNode)
 			char* pIdentifier = pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier;
 			printf("for (%s = ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pFirstChild);
-			printf("; %s <= ", pIdentifier);
+			printf("; %s != ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pThirdChild);
 			printf("; %s += ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
@@ -452,63 +452,59 @@ int OrderTypes(int currType, int newType)
 		return newType;
 	}
 	
-
 	return -1;
 }
 
-int Evaluate_OutputList_Format_Expression(const Node* const pNode)
+int GetFinalTypeOfExpression(const Node* const pNode, const int _currType)
 {
-	int currType = -1;
+	int currType = _currType;
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_expression:
 		{
-			printf("EXPRESSION\n");
-			currType = OrderTypes(currType, Evaluate_OutputList_Format_Expression(pNode->pFirstChild));
-			if (pNode->pSecondChild == NO_CHILD_NODE)
+			currType = OrderTypes(currType, GetFinalTypeOfExpression(pNode->pFirstChild, _currType));
+			if (pNode->pSecondChild != NO_CHILD_NODE)
 			{
-				currType = OrderTypes(currType, Evaluate_OutputList_Format_Expression(pNode->pSecondChild));
+				currType = OrderTypes(currType, GetFinalTypeOfExpression(pNode->pSecondChild, _currType));
 			}
-
+			//printf("\n%d\n", currType);
 			return currType;
 		}
 
 		case id_term:
 		{
-			printf("TERM\n");
-			currType = OrderTypes(currType, Evaluate_OutputList_Format_Expression(pNode->pFirstChild));
-			if (pNode->pSecondChild == NO_CHILD_NODE)
+			currType = OrderTypes(currType, GetFinalTypeOfExpression(pNode->pFirstChild, _currType));
+			if (pNode->pSecondChild != NO_CHILD_NODE)
 			{
-				currType = OrderTypes(currType, Evaluate_OutputList_Format_Expression(pNode->pSecondChild));
+				currType = OrderTypes(currType, GetFinalTypeOfExpression(pNode->pSecondChild, _currType));
 			}
-
+			//printf("\n%d\n", currType);
 			return currType;
 		}
 
 		case id_value:
 		{
-			printf("VALUE\n");	
 			if (pNode->pFirstChild == NO_CHILD_NODE)
 			{
 				currType = pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType;
 			}
 			else
 			{
-				currType = OrderTypes(currType, Evaluate_OutputList_Format_Expression(pNode->pFirstChild));
+				currType = OrderTypes(currType, GetFinalTypeOfExpression(pNode->pFirstChild, _currType));
 			}
-
+			//printf("\n%d\n", currType);
 			return currType;
 		}
 
 		case id_constant:
 		{
-			printf("CONST\n");
+			//printf("\n%d\n", pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType);
 			return pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType;
 		}
 
 		default:
 		{
-			printf("[Evaluate_OutputList_Format_Expression: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			printf("[GetFinalTypeOfExpression: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 			break;
 		}
 	}
@@ -516,16 +512,10 @@ int Evaluate_OutputList_Format_Expression(const Node* const pNode)
 
 void Evaluate_OutputList_Format(const Node* const pNode)
 {
-	printf("HELLO\n");
-	if (pNode == NULL)
-	{
-		printf("NULL\n");
-	}
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_output_list:
 		{
-			printf("OUTPUTLIST\n");
 			Evaluate_OutputList_Format(pNode->pFirstChild);
 
 			if (pNode->pSecondChild != NO_CHILD_NODE)
@@ -538,7 +528,6 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 
 		case id_value:
 		{
-			printf("_VALUE\n");
 			if (pNode->pFirstChild != NO_CHILD_NODE)
 			{
 				Evaluate_OutputList_Format(pNode->pFirstChild);
@@ -564,7 +553,6 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 
 		case id_constant:
 		{
-			printf("_CONSTANT\n");
 			if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
 			{
 				printf("%c", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
@@ -583,8 +571,20 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 
 		case id_expression:
 		{
-			printf("EXPRESSION\n");
-			Evaluate_OutputList_Format_Expression(pNode);
+			int iType =  GetFinalTypeOfExpression(pNode, -1);
+			if (iType == TYPE_CHARACTER)
+			{
+				printf("%%c");
+			}
+			else if (iType == TYPE_INTEGER)
+			{
+				printf("%%d");
+			}
+			else if (iType == TYPE_REAL)
+			{
+				printf("%%f");
+			}
+
 			break;
 		}
 
@@ -628,7 +628,22 @@ void Evaluate_OutputList_Parameters(const Node* const pNode)
 
 		case id_expression:
 		{
-			printf(", [Evaluate_OutputList_Format: Expression]");
+			int iType =  GetFinalTypeOfExpression(pNode, -1);
+			if (iType == TYPE_CHARACTER)
+			{
+				printf(", (char)");
+			}
+			else if (iType == TYPE_INTEGER)
+			{
+				printf(", (int)");
+			}
+			else if (iType == TYPE_REAL)
+			{
+				printf(", (float)");
+			}
+
+			Evaluate_StatementList(pNode);
+
 			break;
 		}
 
@@ -647,7 +662,6 @@ void Evaluate_OutputList_Parameters(const Node* const pNode)
 
 void Evaluate_WriteStatement(const Node* const pNode)
 {
-	printf("AA\n");
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_write_statement:
@@ -659,7 +673,6 @@ void Evaluate_WriteStatement(const Node* const pNode)
 			}
 			else
 			{
-				printf("HMMM\n");
 				printf("printf(\"");
 				Evaluate_OutputList_Format(pNode->pFirstChild);
 				printf("\"");

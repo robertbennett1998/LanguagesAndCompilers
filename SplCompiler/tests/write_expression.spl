@@ -1,4 +1,8 @@
 WriteExpression:
     CODE
-        WRITE((36-1))
+        WRITE((1+1));
+        WRITE((1+1.1));
+        WRITE((1+'c'));
+        WRITE((1.1+'c'));
+        WRITE((1+1.1+'c'))
 ENDP WriteExpression.
