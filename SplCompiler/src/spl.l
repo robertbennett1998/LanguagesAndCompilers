@@ -54,7 +54,6 @@ delim           	[ \t\r]
 whitespace         	{delim}+
 digit           	[0-9]
 unsigned_integer    {digit}+
-signed_integer    	-{digit}+
 
 real_number			-?[0-9]+\.[0-9]+
 lowercase_letters	[a-z]
@@ -116,10 +115,6 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 {unsigned_integer}		{
 							yylval.iVal = atoi(yytext);
 							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 				
-}
-{signed_integer}		{
-							yylval.iVal = atoi(yytext);
-							PROCESS_GENERIC_TOKEN(SIGNED_INTEGER, yytext) 				
 }
 {real_number}			{ 
 							yylval.fVal = atof(yytext);

@@ -1,0 +1,4 @@
+WriteExpression:
+    CODE
+        WRITE((36-1))
+ENDP WriteExpression.

@@ -163,9 +163,6 @@ value :
 	};
 
 expression :
-	// UNSIGNED_INTEGER SIGNED_INTEGER {
-	// 	$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE),  CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$2), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE);
-	// } |
 	expression SUBTRACT_OPERATOR term {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, $1, $3, NO_CHILD_NODE);
 	} |
@@ -194,8 +191,9 @@ constant :
 	UNSIGNED_INTEGER {
 		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
-	SIGNED_INTEGER {
-		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+	SUBTRACT_OPERATOR UNSIGNED_INTEGER {
+		$2 = -$2;
+		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$2), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	CHARACTER_CONSTANT {
 		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
