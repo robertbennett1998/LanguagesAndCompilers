@@ -8,7 +8,7 @@ DECLARATIONS
 
 CODE
 
-	1 -> a;
+	READ(a);
 	2 -> b;
 	b + a -> c;
 	'a' -> d;
@@ -39,7 +39,7 @@ CODE
 	NEWLINE;
 
 	1 -> a;
-	WHILE NOT a <= 13 AND a > 14 DO
+	WHILE a <= 13 AND NOT a > 14 DO
 		WRITE(a);
 		NEWLINE;
 		(a + 1) -> a

@@ -1,8 +1,8 @@
 #include "code_gen.h"
 
-#define TYPE_CHARACTER 0
-#define TYPE_INTEGER 1
-#define TYPE_REAL 2
+#define TYPE_CHARACTER 261
+#define TYPE_INTEGER 262
+#define TYPE_REAL 263
 
 int g_iIndentLevel;
 
@@ -14,6 +14,7 @@ void Indent()
 }
 
 void Evaluate_StatementList(const Node* const pNode);
+void Evaluate_WriteStatement(const Node* const pNode);
 void Evaluate_DeclarationBlock(const Node* const pNode);
 
 void Evaluate(const Node* const pNode)
@@ -27,7 +28,7 @@ void Evaluate(const Node* const pNode)
 		case id_program:
 		{
 			g_iIndentLevel = 0;
-			printf("void %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("#include <stdio.h>\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			Evaluate(pNode->pFirstChild);
 			printf("}\n\n");
 			printf("int main()\n{\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
@@ -62,7 +63,7 @@ void Evaluate(const Node* const pNode)
 
 		default:
 		{
-			printf("[NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			printf("[Evaluate: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 			break;
 		}
 	}
@@ -108,15 +109,28 @@ void Evaluate_StatementList(const Node* const pNode)
 
 		case id_write_statement:
 		{
-			Indent();
-			printf("[Write Statement]\n");
+			Evaluate_WriteStatement(pNode);
 			break;
 		}
 
 		case id_read_statement:
 		{
 			Indent();
-			printf("[Read Statement]\n");
+			printf("scanf(\"");
+			if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
+			{
+				printf("%%c");
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
+			{
+				printf("%%i");
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
+			{
+				printf("%%f");
+			}
+			printf("\", &%s);\n", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+
 			break;
 		}
 
@@ -218,19 +232,87 @@ void Evaluate_StatementList(const Node* const pNode)
 
 		case id_expression:
 		{
-			printf("[Expression]");
+			if (pNode->pSecondChild == NO_CHILD_NODE)
+			{
+				Evaluate_StatementList(pNode->pFirstChild);				
+			}
+			else
+			{
+				printf("(");
+				Evaluate_StatementList(pNode->pFirstChild);
+				if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_add)
+				{
+					printf(" + ");
+				}
+				else if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_subtract)
+				{
+					printf(" - ");
+				}
+				Evaluate_StatementList(pNode->pSecondChild);
+				printf(")");
+			}
+			
 			break;
 		}
 
 		case id_term:
 		{
-			printf("[Term]");
+			if (pNode->pSecondChild == NO_CHILD_NODE)
+			{
+				Evaluate_StatementList(pNode->pFirstChild);
+			}
+			else
+			{
+				printf("(");
+				Evaluate_StatementList(pNode->pFirstChild);
+				if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_multipulcation)
+				{
+					printf(" * ");
+				}
+				else if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_division)
+				{
+					printf(" / ");
+				}
+				Evaluate_StatementList(pNode->pSecondChild);
+				printf(")");
+			}
+
 			break;
 		}
 
 		case id_value:
 		{
-			printf("[Value]");
+			if (pNode->pFirstChild != NO_CHILD_NODE)
+			{
+				Evaluate_StatementList(pNode->pFirstChild);
+			}
+			else
+			{
+				printf("%s", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+			}
+			
+			break;
+		}
+
+		case id_constant:
+		{
+			if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_INTEGER)
+			{
+				printf("%d", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.i);
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
+			{
+				printf("%ff", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
+			{
+				printf("'%c'", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
+			}
+			else
+			{
+				printf("[Unknown Constant Type]");
+			}
+
 			break;
 		}
 
@@ -238,16 +320,7 @@ void Evaluate_StatementList(const Node* const pNode)
 		{
 			if (pNode->pSecondChild == NO_CHILD_NODE)
 			{
-				if (pNode->pSymbolTableEntry == NO_SYMBOLIC_LINK)
-				{
-					Evaluate_StatementList(pNode->pFirstChild);
-				}
-				else
-				{
-					printf("!(");
-					Evaluate_StatementList(pNode->pFirstChild);
-					printf(")");
-				}				
+				Evaluate_StatementList(pNode->pFirstChild);				
 			}
 			else
 			{
@@ -258,7 +331,7 @@ void Evaluate_StatementList(const Node* const pNode)
 					printf(")");
 					printf(" && ");
 					printf("(");
-					Evaluate_StatementList(pNode->pFirstChild);
+					Evaluate_StatementList(pNode->pSecondChild);
 					printf("))");
 				}
 				else
@@ -268,10 +341,25 @@ void Evaluate_StatementList(const Node* const pNode)
 					printf(")");
 					printf(" || ");
 					printf("(");
-					Evaluate_StatementList(pNode->pFirstChild);
+					Evaluate_StatementList(pNode->pSecondChild);
 					printf("))");
 				}
 			}
+
+			break;
+		}
+
+		case id_logical:
+		{
+			if (pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK)
+			{
+				printf("!(");
+				Evaluate_StatementList(pNode->pFirstChild);	
+				printf(")");
+				break;
+			}
+
+			Evaluate_StatementList(pNode->pFirstChild);	
 
 			break;
 		}
@@ -324,7 +412,178 @@ void Evaluate_StatementList(const Node* const pNode)
 
 		default:
 		{
-			printf("[NOT IMPLEMENTED - %s - %d]", NodeIdentifiersValueToString(pNode->byNodeIdentifier), pNode->byNodeIdentifier);
+			printf("[Evaluate_StatementList: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			break;
+		}
+	}
+}
+
+void Evaluate_OutputList_Format_Expression(const Node* const pNode)
+{
+	switch (pNode->byNodeIdentifier)
+	{
+		case id_expression:
+		{
+			printf("[Evaluate_OutputList_Format_Expression: Expression]");
+			break;
+		}
+
+		default:
+		{
+			printf("[Evaluate_OutputList_Format_Expression: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			break;
+		}
+	}
+}
+
+void Evaluate_OutputList_Format(const Node* const pNode)
+{
+	switch (pNode->byNodeIdentifier)
+	{
+		case id_output_list:
+		{
+			Evaluate_OutputList_Format(pNode->pFirstChild);
+
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+			{
+				Evaluate_OutputList_Format(pNode->pSecondChild);
+			}
+
+			break;
+		}
+
+		case id_value:
+		{
+			if (pNode->pFirstChild != NO_CHILD_NODE)
+			{
+				Evaluate_OutputList_Format(pNode->pFirstChild);
+			}
+			else
+			{
+				if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
+				{
+					printf("%%c");
+				}
+				else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
+				{
+					printf("%%d");
+				}
+				else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
+				{
+					printf("%%f");
+				}
+			}
+
+			break;
+		}
+
+		case id_constant:
+		{
+			if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
+			{
+				printf("%c", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.c);
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_INTEGER)
+			{
+				printf("%d", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.i);
+			}
+			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
+			{
+				printf("%f", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+			}
+
+			break;
+		}
+
+		case id_expression:
+		{
+			Evaluate_OutputList_Format_Expression(pNode);
+			break;
+		}
+
+		default:
+		{
+			printf("[Evaluate_OutputList_Format: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			break;
+		}
+	}
+}
+
+void Evaluate_OutputList_Parameters(const Node* const pNode)
+{
+	switch (pNode->byNodeIdentifier)
+	{
+		case id_output_list:
+		{
+			Evaluate_OutputList_Parameters(pNode->pFirstChild);
+
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+			{
+				Evaluate_OutputList_Parameters(pNode->pSecondChild);
+			}
+
+			break;
+		}
+
+		case id_value:
+		{
+			if (pNode->pFirstChild != NO_CHILD_NODE)
+			{
+				Evaluate_OutputList_Parameters(pNode->pFirstChild);
+			}
+			else
+			{
+				printf(", %s", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+			}
+
+			break;
+		}
+
+		case id_expression:
+		{
+			printf(", [Evaluate_OutputList_Format: Expression]");
+			break;
+		}
+
+		case id_constant:
+		{
+			break;
+		}
+
+		default:
+		{
+			printf("[Evaluate_OutputList_Parameters: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			break;
+		}
+	}
+}
+
+void Evaluate_WriteStatement(const Node* const pNode)
+{
+	switch (pNode->byNodeIdentifier)
+	{
+		case id_write_statement:
+		{
+			Indent();
+			if (pNode->pFirstChild == NO_CHILD_NODE)
+			{
+				printf("printf(\"\\n\");\n");
+			}
+			else
+			{
+				printf("printf(\"");
+				Evaluate_OutputList_Format(pNode->pFirstChild);
+				printf("\"");
+				Evaluate_OutputList_Parameters(pNode->pFirstChild);
+				printf(");\n");
+			}
+
+			break;
+		}
+
+		default:
+		{
+			printf("[Evaluate_WriteStatement: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 			break;
 		}
 	}
@@ -360,7 +619,7 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 
 		case id_type:
 		{
-			int iType = pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType;
+			int iType = pNode->pSymbolTableEntry->symbolDetails.typeDetails.iType;
 			if (iType == TYPE_INTEGER)
 			{
 				printf("int ");
@@ -375,7 +634,7 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 			}
 			else
 			{
-				printf("UNDEFINED_TYPE ");
+				printf("[UNKNOWN TYPE - %d] ", pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType);
 			}
 
 			break;
@@ -396,7 +655,7 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 
 		default:
 		{
-			printf("[NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
+			printf("[Evaluate_DeclarationBlock: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 			break;
 		}
 	}

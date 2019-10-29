@@ -15,7 +15,7 @@
 
 unsigned int g_uiCurrentLineNumber;
 unsigned long g_ulCurrentLinePosition;
-#define HANDLE_WARNING(message, ...) { printf("WARNING (%d:%d): ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); printf(message, ##__VA_ARGS__); printf("\n"); }
+#define HANDLE_WARNING(message, ...) { printf("/*WARNING (%d:%d): ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); printf(message, ##__VA_ARGS__); printf("*/\n"); }
 
 typedef enum _symbolTypes
 {
@@ -149,6 +149,7 @@ typedef enum _nodeIdentifiers
 	id_if_statement,
 	id_if_else_statement,
 	id_conditional,
+	id_logical,
 	id_conditional_not,
 	id_conditional_and,
 	id_conditional_or,

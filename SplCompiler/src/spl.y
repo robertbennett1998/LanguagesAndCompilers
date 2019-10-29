@@ -17,7 +17,7 @@
 %token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
 %token<fVal> REAL
 %token<pSymbolTableEntry> IDENTIFIER
-%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
+%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional logical comparison for_statement while_statement do_statement
 
 %start program
 
@@ -26,7 +26,9 @@
 program :
 	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
 		if ($1 != $5)
-			printf("WARNING: Program names do not match %s vs %s\n", $1->symbolDetails.variableDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier); //TODO: Change to method
+		{
+			HANDLE_WARNING("Program names do not match %s vs %s\n", $1->symbolDetails.variableDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier);
+		}
 
 		$1->bySymbolType = symbol_id_program;
 		$5->bySymbolType = symbol_id_program;
@@ -253,15 +255,21 @@ if_else_statement :
 	};
 
 conditional :
-	comparison {
+	logical {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} | conditional AND comparison {
+	} | conditional AND logical {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional, $1, $3, NO_CHILD_NODE);
-	} | conditional OR comparison {
+	} | conditional OR logical {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional, $1, $3, NO_CHILD_NODE);
-	} | NOT comparison {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_conditional, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
+
+logical :
+	comparison {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_logical, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+	} |
+	NOT comparison {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_logical, $2, NO_CHILD_NODE, NO_CHILD_NODE);
+	}
 
 comparison :
 	expression comparator expression {
@@ -624,15 +632,15 @@ void GenerateAndPrintWarnings()
 		{
 			if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == false)
 			{
-				printf("WARNING: %s is declared but is neither assigned to or used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
+				HANDLE_WARNING("%s is declared but is neither assigned to or used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == true && pEntry->symbolDetails.variableDetails.bUsed == false)
 			{
-				printf("WARNING: %s is declared and is assigned to but never used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
+				HANDLE_WARNING("%s is declared and is assigned to but never used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == true)
 			{
-				printf("WARNING: %s is declared and used but never assigned to, this may have unexpected consequences!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
+				HANDLE_WARNING("%s is declared and used but never assigned to, this may have unexpected consequences!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 		}
 
