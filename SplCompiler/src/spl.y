@@ -26,7 +26,7 @@ program :
 	IDENTIFIER COLON block ENDP IDENTIFIER PERIOD {
 		if ($1 != $5)
 		{
-			HANDLE_WARNING("Program names do not match %s vs %s\n", $1->symbolDetails.variableDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier);
+			HANDLE_WARNING("Program names do not match %s vs %s", $1->symbolDetails.variableDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier);
 		}
 
 		$1->bySymbolType = symbol_id_program;
@@ -629,15 +629,15 @@ void GenerateAndPrintWarnings()
 		{
 			if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == false)
 			{
-				HANDLE_WARNING("%s is declared but is neither assigned to or used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
+				HANDLE_WARNING("%s is declared but is neither assigned to or used!", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == true && pEntry->symbolDetails.variableDetails.bUsed == false)
 			{
-				HANDLE_WARNING("%s is declared and is assigned to but never used!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
+				HANDLE_WARNING("%s is declared and is assigned to but never used!", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == true)
 			{
-				HANDLE_WARNING("%s is declared and used but never assigned to, this may have unexpected consequences!\n", pEntry->symbolDetails.variableDetails.acIdentifier);
+				HANDLE_WARNING("%s is declared and used but never assigned to, this may have unexpected consequences!", pEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 		}
 
