@@ -1,0 +1,278 @@
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for a.spl 
+--21:55:43.06----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for b.spl 
+--21:55:44.56----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for c.spl 
+--21:55:45.93----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for d.spl 
+--21:55:46.87----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for e.spl 
+--21:55:47.24----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse debug output for a.spl 
+--21:55:49.91----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_ProgA()
+{
+	printf("hello");
+	printf("\n");
+}
+
+int main()
+{
+	spl_ProgA();
+	return 0;
+}
+--30/10/2019----------------------------------------------------- 
+Parse debug output for b.spl 
+--21:55:50.24----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_ProgB()
+{
+	int spl_a, spl_b;
+	char spl_c;
+	double spl_d, spl_e;
+
+	scanf("%d", &spl_a);
+	_spl_flush_stdin();
+	scanf("%d", &spl_b);
+	_spl_flush_stdin();
+	if (spl_a > spl_b)
+	{
+		printf("A");
+	}
+	else
+	{
+		printf("B");
+	}
+	printf("\n");
+	scanf("%lf", &spl_d);
+	_spl_flush_stdin();
+	spl_e = (spl_d * 2.300000);
+	printf("%lf", spl_e);
+	printf("\n");
+	scanf("%c", &spl_c);
+	_spl_flush_stdin();
+	printf("%c", spl_c);
+	printf("\n");
+}
+
+int main()
+{
+	spl_ProgB();
+	return 0;
+}
+--30/10/2019----------------------------------------------------- 
+Parse debug output for c.spl 
+--21:55:50.50----------------------------------------------------- 
+/*WARNING (9:17): spl_a is used before it has been assigned to, this will have unexpected consequences!*/
+/*WARNING (10:18): spl_a is used before it has been assigned to, this will have unexpected consequences!*/
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_Prog3()
+{
+	int spl_a;
+
+	int _spl_integer_by = 1;
+	for (spl_a = 1; _spl_integer_by < 0 ? spl_a >= 13 : spl_a <= 13; spl_a += _spl_integer_by)
+	{
+		if (!(spl_a == 7))
+		{
+			printf("%d", spl_a);
+			printf("\n");
+		}
+		_spl_integer_by = 1;
+	}
+	spl_a = 0;
+	do
+	{
+		spl_a = (spl_a + 1);
+		if (((!(spl_a == 6)) && (spl_a != 8)))
+		{
+			printf("%d", spl_a);
+			printf("\n");
+		}
+	} while (spl_a < 14);
+	spl_a = 0;
+	while (spl_a < 12)
+	{
+		printf("%d", spl_a);
+		spl_a = (spl_a + 1);
+	};
+	printf("\n");
+}
+
+int main()
+{
+	spl_Prog3();
+	return 0;
+}
+/*WARNING (29:1): spl_a is declared and is assigned to but never used!*/
+--30/10/2019----------------------------------------------------- 
+Parse debug output for d.spl 
+--21:55:52.10----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_Prog4D()
+{
+	double spl_r1, spl_r2, spl_r3;
+
+	spl_r1 = -2.400000;
+	spl_r2 = -34.989000;
+	spl_r3 = ((spl_r1 * spl_r2) / 7.400000);
+	printf("%lf", spl_r3);
+	printf("\n");
+	scanf("%lf", &spl_r1);
+	_spl_flush_stdin();
+	spl_r3 = (spl_r1 + spl_r3);
+	printf("%lf", spl_r3);
+	printf("\n");
+}
+
+int main()
+{
+	spl_Prog4D();
+	return 0;
+}
+--30/10/2019----------------------------------------------------- 
+Parse debug output for e.spl 
+--21:55:52.79----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_ProgV()
+{
+	int spl_integer, spl_i;
+
+	scanf("%d", &spl_integer);
+	_spl_flush_stdin();
+	if (((spl_integer <= 5) || (spl_integer >= 12)))
+	{
+		printf("%d", spl_integer);
+	}
+	printf("%d", (int)(36 - 1));
+	printf("\n");
+	int _spl_integer_by = -1;
+	for (spl_integer = -1; _spl_integer_by < 0 ? spl_integer >= -5 : spl_integer <= -5; spl_integer += _spl_integer_by)
+	{
+		printf("%d", spl_integer);
+		printf("\n");
+		_spl_integer_by = -1;
+	}
+	spl_i = -1;
+	_spl_integer_by = ((((spl_i * spl_i) * spl_i) * spl_i) * spl_i);
+	for (spl_integer = ((spl_i * spl_i) * spl_i); _spl_integer_by < 0 ? spl_integer >= ((spl_i * spl_i) * ((((spl_i + spl_i) + spl_i) + spl_i) + spl_i)) : spl_integer <= ((spl_i * spl_i) * ((((spl_i + spl_i) + spl_i) + spl_i) + spl_i)); spl_integer += _spl_integer_by)
+	{
+		printf("%d", spl_integer);
+		printf("\n");
+		_spl_integer_by = ((((spl_i * spl_i) * spl_i) * spl_i) * spl_i);
+	}
+}
+
+int main()
+{
+	spl_ProgV();
+	return 0;
+}
+/*WARNING (29:1): spl_integer is declared and is assigned to but never used!*/
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for a.spl 
+--21:55:53.61----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for b.spl 
+--21:55:53.73----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for c.spl 
+--21:55:53.86----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for d.spl 
+--21:55:53.99----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for e.spl 
+--21:55:54.10----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+C Code output for a.spl 
+--21:55:54.70----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for b.spl 
+--21:55:54.83----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for c.spl 
+--21:55:55.38----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for d.spl 
+--21:55:55.73----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for e.spl 
+--21:55:55.86----------------------------------------------------- 

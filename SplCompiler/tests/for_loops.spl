@@ -1,16 +1,22 @@
 ForLoops:
     DECLARATIONS
-        a OF TYPE CHARACTER;
-        b OF TYPE INTEGER;
-        c OF TYPE REAL;
+        a, d, f OF TYPE CHARACTER;
+        b, c, e OF TYPE INTEGER;
     CODE
-        FOR a IS 'a' BY 'c' - 'a' TO 'Z' DO
-            WRITE(a);
-            NEWLINE
-        ENDFOR;
-        NEWLINE;
-        FOR b IS 0 BY 2 TO 10 DO
-            WRITE(b);
+        READ(c);
+        FOR b IS 1 BY 1 TO c DO
+            IF d = 'a' THEN
+                'z' -> d;
+                -1 -> e;
+                'a' -> f
+            ELSE
+                'a' -> d;
+                1 -> e;
+                'z' -> f
+            ENDIF;
+            FOR a IS d BY e TO f DO
+                WRITE(a)
+            ENDFOR;
             NEWLINE
         ENDFOR
 ENDP ForLoops.

@@ -1,0 +1,394 @@
+-- flex Errors -------------------------------- 
+-- gcc -DPRINT Errors -------------------------------- 
+spl.l: In function 'yylex':
+spl.l:25:18: warning: implicit declaration of function 'PrintTokenAndValue'; did you mean 'PrintToken'? [-Wimplicit-function-declaration]
+                  PrintTokenAndValue(#token, symbolToPrint);\
+                  ^
+spl.l:14:20: note: in definition of macro 'EXPAND'
+  #define EXPAND(x) x
+                    ^
+spl.l:15:58: note: in expansion of macro 'PROCESS_GENERIC_TOKEN_2'
+  #define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
+                                                          ^~~~
+spl.l:16:44: note: in expansion of macro 'GET_PROCESS_GENERIC_TOKEN_MACRO'
+  #define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))
+                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spl.l:87:1: note: in expansion of macro 'PROCESS_GENERIC_TOKEN'
+ "->"     PROCESS_GENERIC_TOKEN(ASSIGNMENT_OPERATOR, "->");
+ ^~~~~~~~~~~~~~~~~~~~~
+spl.l: At top level:
+spl.l:134:6: warning: conflicting types for 'PrintTokenAndValue'
+ void PrintTokenAndValue(const char* pToken, const char* pSymbolToPrint)
+      ^~~~~~~~~~~~~~~~~~
+spl.l:25:18: note: previous implicit declaration of 'PrintTokenAndValue' was here
+                  PrintTokenAndValue(#token, symbolToPrint);\
+                  ^
+spl.l:14:20: note: in definition of macro 'EXPAND'
+  #define EXPAND(x) x
+                    ^
+spl.l:15:58: note: in expansion of macro 'PROCESS_GENERIC_TOKEN_2'
+  #define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
+                                                          ^~~~
+spl.l:16:44: note: in expansion of macro 'GET_PROCESS_GENERIC_TOKEN_MACRO'
+  #define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))
+                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spl.l:87:1: note: in expansion of macro 'PROCESS_GENERIC_TOKEN'
+ "->"     PROCESS_GENERIC_TOKEN(ASSIGNMENT_OPERATOR, "->");
+ ^~~~~~~~~~~~~~~~~~~~~
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x2fe): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x2fe): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x319): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x319): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x334): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x334): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x34f): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x34f): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x36a): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x36a): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x385): more undefined references to `IncrementLinePosition' follow
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x385): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x3a0): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x3bb): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x3d6): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x3f1): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x40c): additional relocation overflows omitted from the output
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x808): undefined reference to `ProcessEndOfLine'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x826): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x85d): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x894): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x8cb): undefined reference to `IncrementLinePosition'
+/cygdrive/c/Users/rober/AppData/Local/Temp/ccSncE65.o:lex.yy.c:(.text+0x93c): undefined reference to `IncrementLinePosition'
+collect2: error: ld returned 1 exit status
+-- bison -t Errors -------------------------------- 
+-- gcc -DYYDEBUG Errors -------------------------------- 
+-- gcc -DDEBUG Errors -------------------------------- 
+C:\Users\rober\AppData\Local\Temp\spl.c:5:10: fatal error: spl.y.h: No such file or directory
+ #include "spl.y.h"
+          ^~~~~~~~~
+compilation terminated.
+-- gcc Errors -------------------------------- 
+C:\Users\rober\AppData\Local\Temp\spl.c:5:10: fatal error: spl.y.h: No such file or directory
+ #include "spl.y.h"
+          ^~~~~~~~~
+compilation terminated.
+-- Output -------------------------------- 
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for a.spl 
+--21:55:43.06----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for b.spl 
+--21:55:44.56----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for c.spl 
+--21:55:45.93----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for d.spl 
+--21:55:46.87----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for e.spl 
+--21:55:47.24----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse debug output for a.spl 
+--21:55:49.91----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_ProgA()
+{
+	printf("hello");
+	printf("\n");
+}
+
+int main()
+{
+	spl_ProgA();
+	return 0;
+}
+--30/10/2019----------------------------------------------------- 
+Parse debug output for b.spl 
+--21:55:50.24----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_ProgB()
+{
+	int spl_a, spl_b;
+	char spl_c;
+	double spl_d, spl_e;
+
+	scanf("%d", &spl_a);
+	_spl_flush_stdin();
+	scanf("%d", &spl_b);
+	_spl_flush_stdin();
+	if (spl_a > spl_b)
+	{
+		printf("A");
+	}
+	else
+	{
+		printf("B");
+	}
+	printf("\n");
+	scanf("%lf", &spl_d);
+	_spl_flush_stdin();
+	spl_e = (spl_d * 2.300000);
+	printf("%lf", spl_e);
+	printf("\n");
+	scanf("%c", &spl_c);
+	_spl_flush_stdin();
+	printf("%c", spl_c);
+	printf("\n");
+}
+
+int main()
+{
+	spl_ProgB();
+	return 0;
+}
+--30/10/2019----------------------------------------------------- 
+Parse debug output for c.spl 
+--21:55:50.50----------------------------------------------------- 
+/*WARNING (9:17): spl_a is used before it has been assigned to, this will have unexpected consequences!*/
+/*WARNING (10:18): spl_a is used before it has been assigned to, this will have unexpected consequences!*/
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_Prog3()
+{
+	int spl_a;
+
+	int _spl_integer_by = 1;
+	for (spl_a = 1; _spl_integer_by < 0 ? spl_a >= 13 : spl_a <= 13; spl_a += _spl_integer_by)
+	{
+		if (!(spl_a == 7))
+		{
+			printf("%d", spl_a);
+			printf("\n");
+		}
+		_spl_integer_by = 1;
+	}
+	spl_a = 0;
+	do
+	{
+		spl_a = (spl_a + 1);
+		if (((!(spl_a == 6)) && (spl_a != 8)))
+		{
+			printf("%d", spl_a);
+			printf("\n");
+		}
+	} while (spl_a < 14);
+	spl_a = 0;
+	while (spl_a < 12)
+	{
+		printf("%d", spl_a);
+		spl_a = (spl_a + 1);
+	};
+	printf("\n");
+}
+
+int main()
+{
+	spl_Prog3();
+	return 0;
+}
+/*WARNING (29:1): spl_a is declared and is assigned to but never used!*/
+--30/10/2019----------------------------------------------------- 
+Parse debug output for d.spl 
+--21:55:52.10----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_Prog4D()
+{
+	double spl_r1, spl_r2, spl_r3;
+
+	spl_r1 = -2.400000;
+	spl_r2 = -34.989000;
+	spl_r3 = ((spl_r1 * spl_r2) / 7.400000);
+	printf("%lf", spl_r3);
+	printf("\n");
+	scanf("%lf", &spl_r1);
+	_spl_flush_stdin();
+	spl_r3 = (spl_r1 + spl_r3);
+	printf("%lf", spl_r3);
+	printf("\n");
+}
+
+int main()
+{
+	spl_Prog4D();
+	return 0;
+}
+--30/10/2019----------------------------------------------------- 
+Parse debug output for e.spl 
+--21:55:52.79----------------------------------------------------- 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+	}
+
+void spl_ProgV()
+{
+	int spl_integer, spl_i;
+
+	scanf("%d", &spl_integer);
+	_spl_flush_stdin();
+	if (((spl_integer <= 5) || (spl_integer >= 12)))
+	{
+		printf("%d", spl_integer);
+	}
+	printf("%d", (int)(36 - 1));
+	printf("\n");
+	int _spl_integer_by = -1;
+	for (spl_integer = -1; _spl_integer_by < 0 ? spl_integer >= -5 : spl_integer <= -5; spl_integer += _spl_integer_by)
+	{
+		printf("%d", spl_integer);
+		printf("\n");
+		_spl_integer_by = -1;
+	}
+	spl_i = -1;
+	_spl_integer_by = ((((spl_i * spl_i) * spl_i) * spl_i) * spl_i);
+	for (spl_integer = ((spl_i * spl_i) * spl_i); _spl_integer_by < 0 ? spl_integer >= ((spl_i * spl_i) * ((((spl_i + spl_i) + spl_i) + spl_i) + spl_i)) : spl_integer <= ((spl_i * spl_i) * ((((spl_i + spl_i) + spl_i) + spl_i) + spl_i)); spl_integer += _spl_integer_by)
+	{
+		printf("%d", spl_integer);
+		printf("\n");
+		_spl_integer_by = ((((spl_i * spl_i) * spl_i) * spl_i) * spl_i);
+	}
+}
+
+int main()
+{
+	spl_ProgV();
+	return 0;
+}
+/*WARNING (29:1): spl_integer is declared and is assigned to but never used!*/
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for a.spl 
+--21:55:53.61----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for b.spl 
+--21:55:53.73----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for c.spl 
+--21:55:53.86----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for d.spl 
+--21:55:53.99----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Parse Tree output for e.spl 
+--21:55:54.10----------------------------------------------------- 
+'.\tree.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+C Code output for a.spl 
+--21:55:54.70----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for b.spl 
+--21:55:54.83----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for c.spl 
+--21:55:55.38----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for d.spl 
+--21:55:55.73----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+C Code output for e.spl 
+--21:55:55.86----------------------------------------------------- 
+--30/10/2019----------------------------------------------------- 
+Program A output incorrect 
+--21:55:56.25----------------------------------------------------- 
+/usr/lib/gcc/x86_64-pc-cygwin/7.4.0/../../../../lib/libcygwin.a(libcmain.o): In function `main':
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37: undefined reference to `WinMain'
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37:(.text.startup+0x7f): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `WinMain'
+collect2: error: ld returned 1 exit status
+'.\a.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Program B output incorrect - 2 
+--21:55:56.74----------------------------------------------------- 
+/usr/lib/gcc/x86_64-pc-cygwin/7.4.0/../../../../lib/libcygwin.a(libcmain.o): In function `main':
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37: undefined reference to `WinMain'
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37:(.text.startup+0x7f): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `WinMain'
+collect2: error: ld returned 1 exit status
+'.\b.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Incorrect Execution output for c.spl - 2 
+--21:55:57.91----------------------------------------------------- 
+/usr/lib/gcc/x86_64-pc-cygwin/7.4.0/../../../../lib/libcygwin.a(libcmain.o): In function `main':
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37: undefined reference to `WinMain'
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37:(.text.startup+0x7f): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `WinMain'
+collect2: error: ld returned 1 exit status
+'.\c.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Program D output incorrect - 0 
+--21:55:58.43----------------------------------------------------- 
+/usr/lib/gcc/x86_64-pc-cygwin/7.4.0/../../../../lib/libcygwin.a(libcmain.o): In function `main':
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37: undefined reference to `WinMain'
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37:(.text.startup+0x7f): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `WinMain'
+collect2: error: ld returned 1 exit status
+--30/10/2019----------------------------------------------------- 
+Program E output incorrect - 0 
+--21:55:59.07----------------------------------------------------- 
+/usr/lib/gcc/x86_64-pc-cygwin/7.4.0/../../../../lib/libcygwin.a(libcmain.o): In function `main':
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37: undefined reference to `WinMain'
+/usr/src/debug/cygwin-3.0.7-1/winsup/cygwin/lib/libcmain.c:37:(.text.startup+0x7f): relocation truncated to fit: R_X86_64_PC32 against undefined symbol `WinMain'
+collect2: error: ld returned 1 exit status
+-- End of Program Output -------------------------------- 

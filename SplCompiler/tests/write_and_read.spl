@@ -1,0 +1,20 @@
+WriteAndRead:
+    DECLARATIONS
+        a, b OF TYPE CHARACTER;
+        c, d OF TYPE INTEGER;
+    CODE
+        READ(c);
+        READ(d);
+
+        WRITE(c);
+        NEWLINE;
+        WRITE(d);
+        NEWLINE;
+
+        READ(a);
+        READ(b);
+        
+        WRITE(a);
+        NEWLINE;
+        WRITE(b)
+ENDP WriteAndRead.

@@ -1,0 +1,25 @@
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for a.spl 
+--21:55:43.06----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for b.spl 
+--21:55:44.56----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for c.spl 
+--21:55:45.93----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for d.spl 
+--21:55:46.87----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.
+--30/10/2019----------------------------------------------------- 
+Lexical Tokens for e.spl 
+--21:55:47.24----------------------------------------------------- 
+'.\lexer.exe' is not recognized as an internal or external command,
+operable program or batch file.

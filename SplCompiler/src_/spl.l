@@ -1,5 +1,43 @@
 %{
 	#include "spl.y.h"
+	void PrintToken(const char* pToken);
+	void PrintLinePositionUpdate();
+	void IncrementLinePosition(const int iTokenLength);
+	void ProcessEndOfLine();
+	#ifndef PRINT
+		extern SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
+		extern SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
+		extern SymbolTableEntry* g_pSymbolTableStart;
+		extern SymbolTableEntry* g_pSymbolTableEnd;
+	#endif
+
+	#define EXPAND(x) x
+	#define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
+	#define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))	
+
+	#ifdef PRINT 
+		#define PROCESS_GENERIC_TOKEN_1(token) 	{\
+													PrintToken(#token);\
+													IncrementLinePosition(strlen(#token));\
+												}
+
+		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
+																	PrintTokenAndValue(#token, symbolToPrint);\
+																	IncrementLinePosition(strlen(symbolToPrint));\
+																}
+		#define ASSIGN_YYLVAL(x, y)
+	#else
+		#define PROCESS_GENERIC_TOKEN_1(token)	{\
+													IncrementLinePosition(strlen(#token));\
+													return token;\
+												}
+
+		#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint)	{\
+													IncrementLinePosition(strlen(symbolToPrint));\
+													return token;\
+												}
+		#define ASSIGN_YYLVAL(x, y) yylval.x = y;
+	#endif
 %}
 
 %option noyywrap
@@ -98,6 +136,8 @@ void PrintTokenAndValue(const char* pToken, const char* pSymbolToPrint)
 	printf("TOKEN: %s (%s) \n", pToken, pSymbolToPrint);
 }
 
+#ifndef PRINT
+
 void PrintLinePositionUpdate()
 {
 	printf("Line Number: %d Line Position: %d\n", g_uiCurrentLineNumber, g_ulCurrentLinePosition);
@@ -121,3 +161,5 @@ void ProcessEndOfLine()
 		PrintLinePositionUpdate();
 	#endif
 }
+
+#endif

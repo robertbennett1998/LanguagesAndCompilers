@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include "spl.y.h"
 
 #define MAX_PATH_LENGTH 4096
