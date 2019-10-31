@@ -1066,7 +1066,7 @@ void Evaluate_StatementList(const Node* const pNode)
 			printf("scanf(\"");
 			if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 			{
-				printf("%%c");
+				printf(" %%c");
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
 			{
