@@ -1177,7 +1177,7 @@ void Evaluate_StatementList(const Node* const pNode)
 				static char bDefined = 0;
 				if (!bDefined)
 				{
-					printf("int ");
+					printf("char ");
 					bDefined = 1;
 				}
 				printf("%s = ", pByName);
@@ -1191,7 +1191,7 @@ void Evaluate_StatementList(const Node* const pNode)
 				static char bDefined = 0;
 				if (!bDefined)
 				{
-					printf("int ");
+					printf("double ");
 					bDefined = 1;
 				}
 				printf("%s = ", pByName);

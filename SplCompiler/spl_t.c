@@ -674,7 +674,7 @@ static const yytype_uint16 yyrline[] =
      325,   328,   331,   336,   343,   346,   351,   356,   359,   362,
      367,   370,   373,   378,   381,   384,   388,   393,   396,   401,
      404,   409,   412,   415,   418,   421,   424,   429,   436,   441,
-     446,   448,   450,   455,   457,   462,   469,   474
+     446,   448,   450,   455,   457,   462,   468,   473
 };
 #endif
 
@@ -2008,31 +2008,30 @@ yyreduce:
   case 55:
 #line 462 "spl.y" /* yacc.c:1646  */
     {
-		
-		MarkSymbolAsAssigned((yyvsp[-9].pSymbolTableEntry));
 		(yyval.pNode) = CreateNode((yyvsp[-9].pSymbolTableEntry), id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, (yyvsp[-7].pNode), (yyvsp[-5].pNode), (yyvsp[-3].pNode)), (yyvsp[-1].pNode), NO_CHILD_NODE);
+		MarkSymbolAsAssigned((yyvsp[-9].pSymbolTableEntry));
 	}
-#line 2016 "spl_t.c" /* yacc.c:1646  */
+#line 2015 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 469 "spl.y" /* yacc.c:1646  */
+#line 468 "spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_while_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2024 "spl_t.c" /* yacc.c:1646  */
+#line 2023 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 474 "spl.y" /* yacc.c:1646  */
+#line 473 "spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2032 "spl_t.c" /* yacc.c:1646  */
+#line 2031 "spl_t.c" /* yacc.c:1646  */
     break;
 
 
-#line 2036 "spl_t.c" /* yacc.c:1646  */
+#line 2035 "spl_t.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2260,7 +2259,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 477 "spl.y" /* yacc.c:1906  */
+#line 476 "spl.y" /* yacc.c:1906  */
 
 
 SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier)
@@ -2965,7 +2964,7 @@ void Evaluate_StatementList(const Node* const pNode)
 				static char bDefined = 0;
 				if (!bDefined)
 				{
-					printf("int ");
+					printf("char ");
 					bDefined = 1;
 				}
 				printf("%s = ", pByName);
@@ -2979,7 +2978,7 @@ void Evaluate_StatementList(const Node* const pNode)
 				static char bDefined = 0;
 				if (!bDefined)
 				{
-					printf("int ");
+					printf("double ");
 					bDefined = 1;
 				}
 				printf("%s = ", pByName);
