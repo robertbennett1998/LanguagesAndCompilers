@@ -1,0 +1,15 @@
+read:
+    DECLARATIONS
+        int OF TYPE INTEGER;
+        char, char2 OF TYPE CHARACTER;
+    CODE
+        READ(int);
+        READ(char);
+        READ(char2);
+        NEWLINE;
+        WRITE(int);
+        NEWLINE;
+        WRITE(char);
+        NEWLINE;
+        WRITE(char2)
+ENDP read.

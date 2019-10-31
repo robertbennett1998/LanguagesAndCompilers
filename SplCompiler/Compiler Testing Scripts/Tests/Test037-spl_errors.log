@@ -1,7 +1,7 @@
-[ERROR] - Line 11 | Position 16 - Variable ((null)) has been used but not declared.*/
-[WARNING] - Line 17 | Position 10 - spl_a is declared but is neither assigned to or used!*/
-[WARNING] - Line 17 | Position 10 - spl_b is declared but is neither assigned to or used!*/
-[WARNING] - Line 17 | Position 10 - spl_c is declared but is neither assigned to or used!*/
-[WARNING] - Line 17 | Position 10 - spl_d is declared but is neither assigned to or used!*/
-[WARNING] - Line 17 | Position 10 - spl_e is declared but is neither assigned to or used!*/
-[WARNING] - Line 17 | Position 10 - spl_f is declared but is neither assigned to or used!*/
+[ERROR] - Line 11 | Position 16 - Variable ((null)) has been used but not declared.
+[WARNING] - Line 17 | Position 10 - spl_a is declared but is neither assigned to or used!
+[WARNING] - Line 17 | Position 10 - spl_b is declared but is neither assigned to or used!
+[WARNING] - Line 17 | Position 10 - spl_c is declared but is neither assigned to or used!
+[WARNING] - Line 17 | Position 10 - spl_d is declared but is neither assigned to or used!
+[WARNING] - Line 17 | Position 10 - spl_e is declared but is neither assigned to or used!
+[WARNING] - Line 17 | Position 10 - spl_f is declared but is neither assigned to or used!

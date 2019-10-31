@@ -9,10 +9,10 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
-void spl_Test36()
+void prg_Test36()
 {
 	int spl_a = 1, spl_b = 1, spl_c = 1;
-	double spl_Test36 = 1, spl_e = 1;
+	double prg_Test36 = 1, spl_e = 1;
 	char spl_f = 1;
 
 	spl_a = 1;
@@ -21,6 +21,6 @@ void spl_Test36()
 
 int main()
 {
-	spl_Test36();
+	prg_Test36();
 	return 0;
 }

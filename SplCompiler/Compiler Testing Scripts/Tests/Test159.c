@@ -9,11 +9,18 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
-void spl_Test()
+void prg_Test()
 {
 	double spl_a = 1;
 
-	scanf("%lf", &spl_a);
+	while (scanf("%lf", &spl_a) != 1)
+	{
+		char c = getchar();
+		if (c == '\n' || c == ' ' || c == EOF)
+		{
+			break;
+		}
+	};
 	_spl_flush_stdin();
 	printf("%lf", spl_a);
 	printf("\n");
@@ -21,6 +28,6 @@ void spl_Test()
 
 int main()
 {
-	spl_Test();
+	prg_Test();
 	return 0;
 }

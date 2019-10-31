@@ -9,13 +9,13 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
-void spl_Test2()
+void prg_Test2()
 {
 	printf("\n");
 }
 
 int main()
 {
-	spl_Test2();
+	prg_Test2();
 	return 0;
 }

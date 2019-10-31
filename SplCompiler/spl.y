@@ -8,7 +8,7 @@
     #define NO_SYMBOL_FOUND NULL
 	#define NO_ERRORS NULL
     #define UNKNOWN_SYMBOL_TYPE -1
-    #define MAX_IDENTIFIER_LENGTH 50
+    #define MAX_IDENTIFIER_LENGTH 51 /*1 extra char for \0*/
 
     /* SYMBOL TABLE */
     typedef enum _symbolTypes
@@ -151,12 +151,9 @@
         id_if_else_statement,
         id_conditional,
         id_logical,
-        id_conditional_not,
-        id_conditional_and,
-        id_conditional_or,
         id_comparison,
         id_for_statement,
-        id_for_statement_is_by_to,
+		id_for_statement_is_by_to,
         id_while_statement,
         id_do_statement
     } NodeIdentifiers;
@@ -174,8 +171,8 @@
     extern void PrintLinePositionUpdate();
     extern void IncrementLinePosition(const int iTokenLength);
     extern void ProcessEndOfLine();
-    #define HANDLE_WARNING(message, ...) { fprintf(stderr, "[WARNING] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "*/\n"); }
-	#define HANDLE_ERROR(message, ...) { fprintf(stderr, "[ERROR] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "*/\n"); }
+    #define HANDLE_WARNING(message, ...) { fprintf(stderr, "[WARNING] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "\n"); }
+	#define HANDLE_ERROR(message, ...) { fprintf(stderr, "[ERROR] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "\n"); }
 
 	typedef enum _errorTypes
 	{
@@ -203,7 +200,7 @@
 %token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
 %token<fVal> REAL
 %token<pSymbolTableEntry> IDENTIFIER
-%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
+%type<pNode> program block declaration_block code statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
 
 %start program
 
@@ -220,11 +217,16 @@ program :
 		$5->bySymbolType = symbol_id_program;
 		SymbolTableEntry* pNewSymbol = malloc(sizeof(SymbolTableEntry));
 		pNewSymbol->bySymbolType = symbol_id_program;
-		strcpy(pNewSymbol->symbolDetails.programDetails.acIdentifier, $1->symbolDetails.variableDetails.acIdentifier);
+		strcpy(&pNewSymbol->symbolDetails.programDetails.acIdentifier[4], &$1->symbolDetails.variableDetails.acIdentifier[4]); /*Remove spl_*/
+		memcpy(pNewSymbol->symbolDetails.programDetails.acIdentifier, "prg_", 4); 
 		pNewSymbol->pNextTableEntry = $1->pNextTableEntry;
 		pNewSymbol->pPrevTableEntry = $1->pPrevTableEntry;
 		memcpy($1, pNewSymbol, sizeof(SymbolTableEntry));
-		strcpy(pNewSymbol->symbolDetails.programDetails.acIdentifier, $5->symbolDetails.variableDetails.acIdentifier);
+		if ($1 != $5)
+		{
+			memcpy(pNewSymbol->symbolDetails.programDetails.acIdentifier, "prg_", 4); 
+			strcpy(&pNewSymbol->symbolDetails.programDetails.acIdentifier[4], &$5->symbolDetails.variableDetails.acIdentifier[4]); /*Remove spl_*/
+		}
 		pNewSymbol->pNextTableEntry = $5->pNextTableEntry;
 		pNewSymbol->pPrevTableEntry = $5->pPrevTableEntry;
 		memcpy($5, pNewSymbol, sizeof(SymbolTableEntry));
@@ -245,10 +247,10 @@ program :
 	};
 
 block :
-	DECLARATIONS declaration_block CODE statement_list {
+	DECLARATIONS declaration_block CODE code {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_block, $2, $4, NO_CHILD_NODE);
 	} |
-	CODE statement_list {
+	CODE code {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_block, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
@@ -270,9 +272,7 @@ declaration :
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
-		Node* pNode = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, $4, NO_CHILD_NODE);
-
-		$$ = pNode;
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, $4, NO_CHILD_NODE);
 	};
 
 identifier_list :
@@ -285,17 +285,22 @@ identifier_list :
 
 type :
 	TYPE_CHARACTER {
-		
 		$$ = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_CHARACTER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	TYPE_INTEGER {
-		
 		$$ = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_INTEGER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	TYPE_REAL {
-		
 		$$ = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_REAL), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
+
+code :
+	statement_list {
+		$$ = $1;
+	} | statement_list SEMI_COLON {
+		HANDLE_WARNING("Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.");
+		$$ = $1;
+	};
 
 statement_list :
 	statement {
@@ -917,12 +922,6 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_if_else_statement";
 		case id_conditional: 
 			return "id_conditional";
-		case id_conditional_not: 
-			return "id_conditional_not";
-		case id_conditional_and: 
-			return "id_conditional_and";
-		case id_conditional_or: 
-			return "id_conditional_or";
 		case id_comparison: 
 			return "id_comparison";
 		case id_for_statement: 
@@ -996,7 +995,6 @@ void Evaluate(const Node* const pNode)
 	if (pNode == NO_CHILD_NODE)
 		return;
 
-	
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_program:
@@ -1090,7 +1088,7 @@ void Evaluate_StatementList(const Node* const pNode)
 		case id_read_statement:
 		{
 			Indent();
-			printf("scanf(\"");
+			printf("while (scanf(\"");
 			if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 			{
 				printf(" %%c");
@@ -1103,7 +1101,25 @@ void Evaluate_StatementList(const Node* const pNode)
 			{
 				printf("%%lf");
 			}
-			printf("\", &%s);\n", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+			printf("\", &%s) != 1)\n", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Indent();
+			printf("char c = getchar();\n");
+			Indent();
+			printf("if (c == '\\n' || c == ' ' || c == EOF)\n");
+			Indent();
+			printf("{\n");
+			g_iIndentLevel++;
+			Indent();
+			printf("break;\n");
+			g_iIndentLevel--;
+			Indent();
+			printf("}\n");
+			g_iIndentLevel--;
+			Indent();
+			printf("};\n");
 
 			Indent();
 			printf("_spl_flush_stdin();\n");
