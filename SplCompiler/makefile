@@ -4,19 +4,19 @@ flex :
 	flex spl.l
 
 lexer : lexer-clean flex
-	gcc -o lexer.exe -DPRINT -UYY_MAIN lex.yy.c -I. -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
+	gcc -o lexer.exe -DPRINT -UYY_MAIN lex.yy.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
 
 bison : bison-clean flex
 	bison -t -v spl.y -o spl_t.c
 
 parser : parser-clean bison flex
-	gcc -o parser.exe -DYYDEBUG -UYY_MAIN spl.c spl_t.c -I. -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
+	gcc -o parser.exe -DYYDEBUG -UYY_MAIN spl.c spl_t.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
 
 tree : tree-clean flex bison
-	gcc -o tree.exe -DDEBUG -UYY_MAIN spl.c spl_t.c -I. -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
+	gcc -o tree.exe -DDEBUG -UYY_MAIN spl.c spl_t.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
 
 compiler : compiler-clean flex bison
-	gcc -o compiler.exe spl.c spl_t.c -I. -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
+	gcc -o compiler.exe spl.c spl_t.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
 
 test : clean
 	./RunCompiler.bat

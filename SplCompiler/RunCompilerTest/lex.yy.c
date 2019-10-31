@@ -544,10 +544,46 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "spl.l"
 #line 2 "spl.l"
-    #include "spl_lexer.h"
-    #include "spl_debugging.h"
-#line 549 "lex.yy.c"
-#line 550 "lex.yy.c"
+    #define EXPAND(x) x
+    #define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
+    #define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))	
+
+    #ifdef PRINT 
+        #define PROCESS_GENERIC_TOKEN_1(token) 	{\
+                                                    PrintToken(#token);\
+                                                    IncrementLinePosition(strlen(#token));\
+                                                }
+
+        #define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
+                                                                    PrintTokenAndValue(#token, symbolToPrint);\
+                                                                    IncrementLinePosition(strlen(symbolToPrint));\
+                                                                }
+
+        #define ASSIGN_YYLVAL(x, y)
+    #else
+        #define PROCESS_GENERIC_TOKEN_1(token)	{\
+                                                    IncrementLinePosition(strlen(#token));\
+                                                    return token;\
+                                                }
+
+        #define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint)	{\
+                                                    IncrementLinePosition(strlen(symbolToPrint));\
+                                                    return token;\
+                                                }
+
+        #define ASSIGN_YYLVAL(x, y) yylval.x = y;
+    #endif
+
+    void PrintToken(const char* pToken);
+    void PrintTokenAndValue(const char* pToken, const char* pSymbolToPrint);
+
+    unsigned int g_uiCurrentLineNumber;
+    unsigned long g_ulCurrentLinePosition;
+    void PrintLinePositionUpdate();
+    void IncrementLinePosition(const int iTokenLength);
+    void ProcessEndOfLine();
+#line 585 "lex.yy.c"
+#line 586 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -764,10 +800,10 @@ YY_DECL
 		}
 
 	{
-#line 20 "spl.l"
+#line 56 "spl.l"
 
 
-#line 770 "lex.yy.c"
+#line 806 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -826,238 +862,238 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 22 "spl.l"
+#line 58 "spl.l"
 PROCESS_GENERIC_TOKEN(ENDP);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 23 "spl.l"
+#line 59 "spl.l"
 PROCESS_GENERIC_TOKEN(DECLARATIONS);
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 24 "spl.l"
+#line 60 "spl.l"
 PROCESS_GENERIC_TOKEN(CODE);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 25 "spl.l"
+#line 61 "spl.l"
 PROCESS_GENERIC_TOKEN(TYPE_CHARACTER);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 26 "spl.l"
+#line 62 "spl.l"
 PROCESS_GENERIC_TOKEN(TYPE_INTEGER);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 27 "spl.l"
+#line 63 "spl.l"
 PROCESS_GENERIC_TOKEN(TYPE_REAL);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 28 "spl.l"
+#line 64 "spl.l"
 PROCESS_GENERIC_TOKEN(IF);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 29 "spl.l"
+#line 65 "spl.l"
 PROCESS_GENERIC_TOKEN(ELSE);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 30 "spl.l"
+#line 66 "spl.l"
 PROCESS_GENERIC_TOKEN(NOT);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 31 "spl.l"
+#line 67 "spl.l"
 PROCESS_GENERIC_TOKEN(OF);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 32 "spl.l"
+#line 68 "spl.l"
 PROCESS_GENERIC_TOKEN(TYPE);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 33 "spl.l"
+#line 69 "spl.l"
 PROCESS_GENERIC_TOKEN(THEN);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 34 "spl.l"
+#line 70 "spl.l"
 PROCESS_GENERIC_TOKEN(ENDIF);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 35 "spl.l"
+#line 71 "spl.l"
 PROCESS_GENERIC_TOKEN(AND);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 36 "spl.l"
+#line 72 "spl.l"
 PROCESS_GENERIC_TOKEN(OR);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 37 "spl.l"
+#line 73 "spl.l"
 PROCESS_GENERIC_TOKEN(DO);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 38 "spl.l"
+#line 74 "spl.l"
 PROCESS_GENERIC_TOKEN(WHILE);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 39 "spl.l"
+#line 75 "spl.l"
 PROCESS_GENERIC_TOKEN(ENDDO);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 40 "spl.l"
+#line 76 "spl.l"
 PROCESS_GENERIC_TOKEN(ENDWHILE);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 41 "spl.l"
+#line 77 "spl.l"
 PROCESS_GENERIC_TOKEN(FOR);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 42 "spl.l"
+#line 78 "spl.l"
 PROCESS_GENERIC_TOKEN(IS);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 43 "spl.l"
+#line 79 "spl.l"
 PROCESS_GENERIC_TOKEN(BY);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 44 "spl.l"
+#line 80 "spl.l"
 PROCESS_GENERIC_TOKEN(TO);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 45 "spl.l"
+#line 81 "spl.l"
 PROCESS_GENERIC_TOKEN(ENDFOR);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 46 "spl.l"
+#line 82 "spl.l"
 PROCESS_GENERIC_TOKEN(NEWLINE);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 47 "spl.l"
+#line 83 "spl.l"
 PROCESS_GENERIC_TOKEN(WRITE);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 48 "spl.l"
+#line 84 "spl.l"
 PROCESS_GENERIC_TOKEN(READ);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 50 "spl.l"
+#line 86 "spl.l"
 PROCESS_GENERIC_TOKEN(ASSIGNMENT_OPERATOR, "->");
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 51 "spl.l"
+#line 87 "spl.l"
 PROCESS_GENERIC_TOKEN(EQUALITY_OPERATOR, "=");
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 52 "spl.l"
+#line 88 "spl.l"
 PROCESS_GENERIC_TOKEN(NOT_EQUAL_TO_OPERATOR, "<>");
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 53 "spl.l"
+#line 89 "spl.l"
 PROCESS_GENERIC_TOKEN(LESS_THAN_OPERATOR, "<");
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 54 "spl.l"
+#line 90 "spl.l"
 PROCESS_GENERIC_TOKEN(MORE_THAN_OPERATOR, ">");
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 55 "spl.l"
+#line 91 "spl.l"
 PROCESS_GENERIC_TOKEN(LESS_EQUAL_TO_OPERATOR, "<=");
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 56 "spl.l"
+#line 92 "spl.l"
 PROCESS_GENERIC_TOKEN(MORE_EQUAL_TO_OPERATOR, ">=");
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 57 "spl.l"
+#line 93 "spl.l"
 PROCESS_GENERIC_TOKEN(OPEN_BRACKET, "(");
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 58 "spl.l"
+#line 94 "spl.l"
 PROCESS_GENERIC_TOKEN(CLOSE_BRACKET, ")");
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 59 "spl.l"
+#line 95 "spl.l"
 PROCESS_GENERIC_TOKEN(COMMA, ",");
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 60 "spl.l"
+#line 96 "spl.l"
 PROCESS_GENERIC_TOKEN(COLON, ":");
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 61 "spl.l"
+#line 97 "spl.l"
 PROCESS_GENERIC_TOKEN(SEMI_COLON, ";");
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 62 "spl.l"
+#line 98 "spl.l"
 PROCESS_GENERIC_TOKEN(PERIOD, ".");
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 63 "spl.l"
+#line 99 "spl.l"
 PROCESS_GENERIC_TOKEN(ADD_OPERATOR, "+");
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 64 "spl.l"
+#line 100 "spl.l"
 PROCESS_GENERIC_TOKEN(SUBTRACT_OPERATOR, "-");
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 65 "spl.l"
+#line 101 "spl.l"
 PROCESS_GENERIC_TOKEN(DIVISION_OPERATOR, "/");
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 66 "spl.l"
+#line 102 "spl.l"
 PROCESS_GENERIC_TOKEN(MULTIPULCATION_OPERATOR, "*");
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 68 "spl.l"
+#line 104 "spl.l"
 ProcessEndOfLine();
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 69 "spl.l"
+#line 105 "spl.l"
 IncrementLinePosition(strlen(yytext));
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 70 "spl.l"
+#line 106 "spl.l"
 {
 							ASSIGN_YYLVAL(iVal, atoi(yytext));
 							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 				
@@ -1065,7 +1101,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 74 "spl.l"
+#line 110 "spl.l"
 { 
 							ASSIGN_YYLVAL(fVal, atof(yytext));
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
@@ -1073,7 +1109,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 78 "spl.l"
+#line 114 "spl.l"
 {
 							ASSIGN_YYLVAL(cVal, yytext[1]);
 							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
@@ -1081,7 +1117,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 82 "spl.l"
+#line 118 "spl.l"
 {
 							char* pIdentifier = malloc(strlen(yytext) + 5);
 							strcpy(pIdentifier, "spl_");
@@ -1092,10 +1128,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 90 "spl.l"
+#line 126 "spl.l"
 ECHO;
 	YY_BREAK
-#line 1098 "lex.yy.c"
+#line 1134 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2100,7 +2136,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 90 "spl.l"
+#line 126 "spl.l"
 
 
 void PrintToken(const char* pToken)

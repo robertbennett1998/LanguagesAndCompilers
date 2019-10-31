@@ -1,7 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "spl_debugging.h"
+extern unsigned int g_uiCurrentLineNumber;
+extern unsigned long g_ulCurrentLinePosition;
+extern void PrintLinePositionUpdate();
+extern void IncrementLinePosition(const int iTokenLength);
+extern void ProcessEndOfLine();
 
 extern void yyerror(const char *s);
 extern int yylex();
