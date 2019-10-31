@@ -186,7 +186,7 @@
 %token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
 %token<fVal> REAL
 %token<pSymbolTableEntry> IDENTIFIER
-%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional logical comparison for_statement while_statement do_statement
+%type<pNode> program block declaration_block statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
 
 %start program
 
@@ -422,25 +422,19 @@ if_else_statement :
 	};
 
 conditional :
-	logical {
+	comparison {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_conditional, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} | conditional AND logical {
+	} | conditional AND comparison {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional, $1, $3, NO_CHILD_NODE);
-	} | conditional OR logical {
+	} | conditional OR comparison {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional, $1, $3, NO_CHILD_NODE);
 	};
-
-logical :
-	comparison {
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_logical, $1, NO_CHILD_NODE, NO_CHILD_NODE);
-	} |
-	NOT comparison {
-		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_logical, $2, NO_CHILD_NODE, NO_CHILD_NODE);
-	}
 
 comparison :
 	expression comparator expression {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparison, $1, $2, $3);
+	} | NOT comparison {
+		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_comparison, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
 for_statement :
@@ -1348,28 +1342,24 @@ void Evaluate_StatementList(const Node* const pNode)
 			break;
 		}
 
-		case id_logical:
-		{
-			if (pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK)
-			{
-				printf("!(");
-				Evaluate_StatementList(pNode->pFirstChild);	
-				printf(")");
-				break;
-			}
-
-			Evaluate_StatementList(pNode->pFirstChild);	
-
-			break;
-		}
-
 		case id_comparison:
 		{
-			Evaluate_StatementList(pNode->pFirstChild);
-			printf(" ");
-			Evaluate_StatementList(pNode->pSecondChild);
-			printf(" ");
-			Evaluate_StatementList(pNode->pThirdChild);
+			if (pNode->pSecondChild == NO_CHILD_NODE)
+			{
+				printf("!(");
+				Evaluate_StatementList(pNode->pFirstChild);
+				printf(")");
+			}
+			else
+			{
+				printf("(");
+				Evaluate_StatementList(pNode->pFirstChild);
+				printf(" ");
+				Evaluate_StatementList(pNode->pSecondChild);
+				printf(" ");
+				Evaluate_StatementList(pNode->pThirdChild);
+				printf(")");
+			}
 			break;
 		}
 

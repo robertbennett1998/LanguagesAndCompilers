@@ -1,44 +1,34 @@
-TOKEN: IDENTIFIER (spl_Test) 
-TOKEN: COLON (:) 
-TOKEN: DECLARATIONS 
-TOKEN: IDENTIFIER (spl_a) 
-TOKEN: OF 
-TOKEN: TYPE 
-TOKEN: TYPE_INTEGER 
-TOKEN: SEMI_COLON (;) 
-TOKEN: IDENTIFIER (spl_b) 
-TOKEN: OF 
-TOKEN: TYPE 
-TOKEN: TYPE_INTEGER 
-TOKEN: SEMI_COLON (;) 
-TOKEN: CODE 
-TOKEN: UNSIGNED_INTEGER (1) 
-TOKEN: ASSIGNMENT_OPERATOR (->) 
-TOKEN: IDENTIFIER (spl_a) 
-TOKEN: SEMI_COLON (;) 
-TOKEN: UNSIGNED_INTEGER (2) 
-TOKEN: ASSIGNMENT_OPERATOR (->) 
-TOKEN: IDENTIFIER (spl_b) 
-TOKEN: SEMI_COLON (;) 
-TOKEN: IF 
-TOKEN: NOT 
-TOKEN: NOT 
-TOKEN: IDENTIFIER (spl_a) 
-TOKEN: EQUALITY_OPERATOR (=) 
-TOKEN: IDENTIFIER (spl_b) 
-TOKEN: THEN 
-TOKEN: WRITE 
-TOKEN: OPEN_BRACKET (() 
-TOKEN: CHARACTER_CONSTANT ('y') 
-TOKEN: CLOSE_BRACKET ()) 
-TOKEN: ELSE 
-TOKEN: WRITE 
-TOKEN: OPEN_BRACKET (() 
-TOKEN: CHARACTER_CONSTANT ('n') 
-TOKEN: CLOSE_BRACKET ()) 
-TOKEN: ENDIF 
-TOKEN: SEMI_COLON (;) 
-TOKEN: NEWLINE 
-TOKEN: ENDP 
-TOKEN: IDENTIFIER (spl_Test) 
-TOKEN: PERIOD (.) 
+#include <stdio.h>
+
+void _spl_flush_stdin()
+{
+	char c = -1;
+	do
+	{
+		c = getchar();
+	} while (c != '\n' && c != ' ' && c != EOF);
+}
+
+void spl_Test()
+{
+	int spl_a;
+	int spl_b;
+
+	spl_a = 1;
+	spl_b = 2;
+	if (!(!((spl_a == spl_b))))
+	{
+		printf("y");
+	}
+	else
+	{
+		printf("n");
+	}
+	printf("\n");
+}
+
+int main()
+{
+	spl_Test();
+	return 0;
+}

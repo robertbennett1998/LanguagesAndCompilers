@@ -14,7 +14,7 @@ void spl_Test()
 	int spl_a;
 
 	spl_a = 1;
-	if (spl_a > 0)
+	if ((spl_a > 0))
 	{
 		printf("%d", spl_a);
 	}

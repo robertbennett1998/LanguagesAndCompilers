@@ -14,7 +14,7 @@ void spl_Test()
 	int spl_a;
 
 	spl_a = 1;
-	while (spl_a <= 0)
+	while ((spl_a <= 0))
 	{
 		printf("%d", spl_a);
 		spl_a = (spl_a + 1);

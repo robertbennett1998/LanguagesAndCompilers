@@ -16,7 +16,7 @@ void spl_Test()
 
 	spl_a = 1;
 	spl_b = 2;
-	if (spl_b > spl_a)
+	if ((spl_b > spl_a))
 	{
 		printf("y");
 	}

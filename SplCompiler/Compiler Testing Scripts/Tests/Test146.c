@@ -18,7 +18,7 @@ void spl_Test()
 	{
 		printf("%d", spl_a);
 		spl_a = (spl_a + 1);
-	} while (spl_a <= 5);
+	} while ((spl_a <= 5));
 	printf("\n");
 }
 
