@@ -1,11 +1,7 @@
-#ifndef SPL_Y_H
-#define SPL_Y_H
+#ifndef SPL_PARSER_H
+#define SPL_PARSER_H
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
-#include <stdarg.h>
-#include <string.h>
 
 #define NO_CHILD_NODE NULL
 #define NO_SYMBOLIC_LINK NULL
@@ -13,10 +9,7 @@
 #define UNKNOWN_SYMBOL_TYPE -1
 #define MAX_IDENTIFIER_LENGTH 50
 
-unsigned int g_uiCurrentLineNumber;
-unsigned long g_ulCurrentLinePosition;
-#define HANDLE_WARNING(message, ...) { printf("/*WARNING (%d:%d): ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); printf(message, ##__VA_ARGS__); printf("*/\n"); }
-
+/* SYMBOL TABLE */
 typedef enum _symbolTypes
 {
 	symbol_id_unknown = 0,
@@ -75,7 +68,6 @@ typedef enum _operatorTypes
 	operator_type_and,
 	operator_type_or
 } OperatorTypes;
-
 void PrintOperatorTypesValue(const OperatorTypes value);
 const char* OperatorTypesValueToString(const OperatorTypes value);
 
@@ -107,14 +99,18 @@ SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
 SymbolTableEntry* CreateSymbolTableEntry_Type(const int iType);
 SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* pValue);
 SymbolTableEntry* CreateSymbolTableEntry_Operator(const OperatorTypes operatorType);
+
 SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
 SymbolTableEntry* GetSymbolTableEntry_Type(const int iType);
 SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pValue);
 SymbolTableEntry* GetSymbolTableEntry_Operator(const OperatorTypes operatorType);
+
 const char* GetTypeName(const int iType);
+
 void MarkSymbolAsAssigned(SymbolTableEntry* pEntry);
 void MarkSymbolAsUsed(SymbolTableEntry* pEntry);
 
+/* PARSE TREE */
 typedef struct _node
 {
 	SymbolTableEntry* pSymbolTableEntry;
@@ -159,53 +155,13 @@ typedef enum _nodeIdentifiers
 	id_while_statement,
 	id_do_statement
 } NodeIdentifiers;
+void PrintNodeIdentifiersValue(const NodeIdentifiers value);
+const char* NodeIdentifiersValueToString(const NodeIdentifiers value);
 
 Node* CreateNode(SymbolTableEntry* pSymbolTreePointer, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild);
 void PrintTree(const Node* pStartNode, int iLevel);
 
-void PrintNodeIdentifiersValue(const NodeIdentifiers value);
-const char* NodeIdentifiersValueToString(const NodeIdentifiers value);
-void GenerateAndPrintWarnings();
-
+/* CODE GENERATION */
 void GenerateCode(const Node* const pStartNode);
-
-void PrintToken(const char* pToken);
-void PrintLinePositionUpdate();
-void IncrementLinePosition(const int iTokenLength);
-void ProcessEndOfLine();
-#ifndef PRINT
-	extern SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier);
-	extern SymbolTableEntry* GetSymbolTableEntry_Variable(const char* pIdentifier);
-	extern SymbolTableEntry* g_pSymbolTableStart;
-	extern SymbolTableEntry* g_pSymbolTableEnd;
-#endif
-
-#define EXPAND(x) x
-#define GET_PROCESS_GENERIC_TOKEN_MACRO(_1,_2,NAME,...) NAME
-#define PROCESS_GENERIC_TOKEN(...) EXPAND(GET_PROCESS_GENERIC_TOKEN_MACRO(__VA_ARGS__, PROCESS_GENERIC_TOKEN_2, PROCESS_GENERIC_TOKEN_1)(__VA_ARGS__))	
-
-#ifdef PRINT 
-	#define PROCESS_GENERIC_TOKEN_1(token) 	{\
-												PrintToken(#token);\
-												IncrementLinePosition(strlen(#token));\
-											}
-
-	#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint) 	{\
-																PrintTokenAndValue(#token, symbolToPrint);\
-																IncrementLinePosition(strlen(symbolToPrint));\
-															}
-	#define ASSIGN_YYLVAL(x, y)
-#else
-	#define PROCESS_GENERIC_TOKEN_1(token)	{\
-												IncrementLinePosition(strlen(#token));\
-												return token;\
-											}
-
-	#define PROCESS_GENERIC_TOKEN_2(token, symbolToPrint)	{\
-												IncrementLinePosition(strlen(symbolToPrint));\
-												return token;\
-											}
-	#define ASSIGN_YYLVAL(x, y) yylval.x = y;
-#endif
 
 #endif
