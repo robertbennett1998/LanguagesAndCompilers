@@ -11,7 +11,7 @@ void _spl_flush_stdin()
 
 void spl_Test()
 {
-	char spl_a;
+	char spl_a = 1;
 
 	spl_a = (('B' * 2) - 6);
 	printf("%c", spl_a);

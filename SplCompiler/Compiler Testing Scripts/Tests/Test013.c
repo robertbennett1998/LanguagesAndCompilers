@@ -11,9 +11,9 @@ void _spl_flush_stdin()
 
 void spl_Test13()
 {
-	int spl_a;
-	double spl_b;
-	char spl_c;
+	int spl_a = 1;
+	double spl_b = 1;
+	char spl_c = 1;
 
 	printf("\n");
 }
@@ -23,6 +23,3 @@ int main()
 	spl_Test13();
 	return 0;
 }
-/*WARNING (15:2): spl_a is declared but is neither assigned to or used!*/
-/*WARNING (15:2): spl_b is declared but is neither assigned to or used!*/
-/*WARNING (15:2): spl_c is declared but is neither assigned to or used!*/

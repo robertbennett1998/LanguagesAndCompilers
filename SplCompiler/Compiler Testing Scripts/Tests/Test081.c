@@ -11,7 +11,7 @@ void _spl_flush_stdin()
 
 void spl_Test()
 {
-	int spl_a;
+	int spl_a = 1;
 
 	spl_a = (2 * 2);
 	printf("%d", spl_a);

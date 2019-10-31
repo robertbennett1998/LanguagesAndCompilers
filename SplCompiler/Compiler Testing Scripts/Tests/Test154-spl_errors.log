@@ -1,0 +1,2 @@
+[WARNING] - Line 10 | Position 17 - spl_a is used before it has been assigned to, this will have unexpected consequences!*/
+[WARNING] - Line 16 | Position 10 - spl_a is declared and is assigned to but never used!*/

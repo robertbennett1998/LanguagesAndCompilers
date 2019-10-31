@@ -1,4 +1,3 @@
-/*WARNING (6:15): Program names do not match spl_Test2 vs spl_Test*/
 #include <stdio.h>
 
 void _spl_flush_stdin()

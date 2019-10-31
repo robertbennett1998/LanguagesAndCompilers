@@ -11,7 +11,7 @@ void _spl_flush_stdin()
 
 void spl_Test10()
 {
-	char spl_a;
+	char spl_a = 1;
 
 	printf("\n");
 }
@@ -21,4 +21,3 @@ int main()
 	spl_Test10();
 	return 0;
 }
-/*WARNING (12:12): spl_a is declared but is neither assigned to or used!*/

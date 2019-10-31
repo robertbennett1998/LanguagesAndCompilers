@@ -14,6 +14,10 @@
                                                                     IncrementLinePosition(strlen(symbolToPrint));\
                                                                 }
 
+        #define PROCESS_INVALID_TOKEN(token, symbolToPrint) 	{\
+                                                                    PrintTokenAndValue(#token, symbolToPrint);\
+                                                                }
+
         #define ASSIGN_YYLVAL(x, y)
     #else
         #define PROCESS_GENERIC_TOKEN_1(token)	{\
@@ -26,14 +30,16 @@
                                                     return token;\
                                                 }
 
+        #define PROCESS_INVALID_TOKEN(token, symbolToPrint)
+
         #define ASSIGN_YYLVAL(x, y) yylval.x = y;
     #endif
 
     void PrintToken(const char* pToken);
     void PrintTokenAndValue(const char* pToken, const char* pSymbolToPrint);
 
-    unsigned int g_uiCurrentLineNumber;
-    unsigned long g_ulCurrentLinePosition;
+    unsigned int g_uiCurrentLineNumber = 1;
+    unsigned long g_ulCurrentLinePosition = 1;
     void PrintLinePositionUpdate();
     void IncrementLinePosition(const int iTokenLength);
     void ProcessEndOfLine();
@@ -41,17 +47,18 @@
 
 %option noyywrap
 
-delim           	[ \t\r]
-whitespace         	{delim}+
-digit           	[0-9]
-unsigned_integer    {digit}+
+delim           	        [ \t\r]
+whitespace         	        {delim}+
+digit           	        [0-9]
+unsigned_integer            {digit}+
 
-real_number			-?[0-9]+\.[0-9]+
-lowercase_letters	[a-z]
-uppercase_letters	[A-Z]
-character			(?:{lowercase_letters}|{uppercase_letters})
-character_constant	[']{character}[']
-identifier			(?:(?:[a-zA-Z])[0-9]*)+
+real_number			        -?[0-9]+\.[0-9]+
+lowercase_letters	        [a-z]
+uppercase_letters	        [A-Z]
+character			        (?:{lowercase_letters}|{uppercase_letters})
+character_constant	        [']{character}[']
+invalid_character_constant	[']{character}{2,}[']
+identifier			        (?:(?:[a-zA-Z])[0-9]*)+
 
 %%
 
@@ -115,6 +122,14 @@ identifier			(?:(?:[a-zA-Z])[0-9]*)+
 							ASSIGN_YYLVAL(cVal, yytext[1]);
 							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
 						}
+{invalid_character_constant}    {
+                                    IncrementLinePosition(strlen(yytext));
+                                    #ifndef PRINT
+                                        CreateError(error_type_invalid_character_constant, yytext);
+                                    #else
+                                        PROCESS_INVALID_TOKEN(INVALID_CHARACTER_CONSTANT, yytext)
+                                    #endif
+                                }
 {identifier}			{
 							char* pIdentifier = malloc(strlen(yytext) + 5);
 							strcpy(pIdentifier, "spl_");

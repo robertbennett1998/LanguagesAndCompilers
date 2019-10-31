@@ -6,6 +6,7 @@
     #define NO_CHILD_NODE NULL
     #define NO_SYMBOLIC_LINK NULL
     #define NO_SYMBOL_FOUND NULL
+	#define NO_ERRORS NULL
     #define UNKNOWN_SYMBOL_TYPE -1
     #define MAX_IDENTIFIER_LENGTH 50
 
@@ -33,6 +34,7 @@
         int iType;
         bool bAssignedTo;
         bool bUsed;
+		bool bDeclared;
     } VariableDetails;
 
     typedef struct _constantDetails
@@ -109,6 +111,7 @@
 
     void MarkSymbolAsAssigned(SymbolTableEntry* pEntry);
     void MarkSymbolAsUsed(SymbolTableEntry* pEntry);
+	void CheckIfVariableIsDeclared(SymbolTableEntry* pEntry);
 
     /* PARSE TREE */
     typedef struct _node
@@ -119,6 +122,8 @@
         struct _node* pSecondChild;
         struct _node* pThirdChild;
     } Node;
+
+	void MarkVariableAsDeclared(Node* pNode);
 
     typedef enum _nodeIdentifiers
     {
@@ -169,7 +174,19 @@
     extern void PrintLinePositionUpdate();
     extern void IncrementLinePosition(const int iTokenLength);
     extern void ProcessEndOfLine();
-    #define HANDLE_WARNING(message, ...) { printf("/*WARNING (%d:%d): ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); printf(message, ##__VA_ARGS__); printf("*/\n"); }
+    #define HANDLE_WARNING(message, ...) { fprintf(stderr, "[WARNING] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "*/\n"); }
+	#define HANDLE_ERROR(message, ...) { fprintf(stderr, "[ERROR] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "*/\n"); }
+
+	typedef enum _errorTypes
+	{
+		error_type_unknown = 0,
+		error_type_invalid_character_constant,
+		error_type_variable_not_declared,
+		error_type_variable_redeclaration
+	} ErrorTypes;
+
+	unsigned int g_uiErrorCount = 0;
+	void CreateError(ErrorTypes errorType, void* pValue);
 %}
 
 %union
@@ -221,7 +238,10 @@ program :
 		#endif
 
 		$$ = pParseTree;
-        GenerateCode(pParseTree);
+		if (g_uiErrorCount == 0)
+		{
+        	GenerateCode(pParseTree);
+		}
 	};
 
 block :
@@ -246,6 +266,7 @@ declaration :
 		while (pIdentifierListNode != NO_SYMBOL_FOUND)
 		{
 			pIdentifierListNode->pSymbolTableEntry->symbolDetails.variableDetails.iType = $4->pSymbolTableEntry->symbolDetails.typeDetails.iType;
+			MarkVariableAsDeclared(pIdentifierListNode);
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 
@@ -314,7 +335,7 @@ statement :
 assignment_statement :
 	expression ASSIGNMENT_OPERATOR IDENTIFIER {
 		MarkSymbolAsAssigned($3);
-
+		CheckIfVariableIsDeclared($3);
 		$$ = CreateNode($3, id_assignment_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 	};
 
@@ -324,7 +345,7 @@ value :
 	} |
 	IDENTIFIER {
 		MarkSymbolAsUsed($1);
-
+		CheckIfVariableIsDeclared($1);
 		$$ = CreateNode($1, id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	constant {
@@ -439,9 +460,8 @@ comparison :
 
 for_statement :
 	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
-		
-		MarkSymbolAsAssigned($2);
 		$$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
+		MarkSymbolAsAssigned($2);
 	};
 
 while_statement :
@@ -706,6 +726,21 @@ void MarkSymbolAsUsed(SymbolTableEntry* pEntry)
 	pEntry->symbolDetails.variableDetails.bUsed = true;
 }
 
+void MarkVariableAsDeclared(Node* pNode)
+{
+	if (pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK && pNode->pSymbolTableEntry->bySymbolType == symbol_id_variable)
+	{
+		if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.bDeclared == false)
+		{
+			pNode->pSymbolTableEntry->symbolDetails.variableDetails.bDeclared = true;
+		}
+		else
+		{
+			CreateError(error_type_variable_redeclaration, NULL);
+		}
+	}
+}
+
 Node* CreateNode(SymbolTableEntry* pSymbolTableEntry, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild)
 {
 	Node* pNode = malloc(sizeof(Node));
@@ -723,8 +758,6 @@ void PrintTree(const Node* pStartNode, int iLevel)
 {
 	if (pStartNode == NULL)
 		return;
-
-	
 
 	int i;
 	printf("Level %d   \t", iLevel);
@@ -1739,7 +1772,7 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 				printf(", ", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
 			}
 
-			printf("%s", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+			printf("%s = 1", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
 
 			break;
 		}
@@ -1748,6 +1781,40 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 		{
 			printf("[Evaluate_DeclarationBlock: NOT IMPLEMENTED - %s]", NodeIdentifiersValueToString(pNode->byNodeIdentifier));
 			break;
+		}
+	}
+}
+
+void CreateError(ErrorTypes errorType, void* pValue)
+{
+	g_uiErrorCount++;
+	switch (errorType)
+	{
+		case error_type_variable_redeclaration:
+			HANDLE_ERROR("Variable (%s) has been redeclared.", (char*)pValue);
+			break;
+
+		case error_type_variable_not_declared:
+			HANDLE_ERROR("Variable (%s) has been used but not declared.", (char*)pValue);
+			break;
+
+		case error_type_invalid_character_constant:
+			HANDLE_ERROR("Invalid character constant (%s).", (char*)pValue);
+			break;
+
+		default:
+			HANDLE_ERROR("Unknown Error.");
+			break;
+	}
+}
+
+void CheckIfVariableIsDeclared(SymbolTableEntry* pEntry)
+{
+	if (pEntry != NO_SYMBOLIC_LINK && pEntry->bySymbolType == symbol_id_variable)
+	{
+		if (pEntry->symbolDetails.variableDetails.bDeclared == false)
+		{
+			CreateError(error_type_variable_not_declared, NULL);
 		}
 	}
 }

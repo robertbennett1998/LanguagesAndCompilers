@@ -11,8 +11,8 @@ void _spl_flush_stdin()
 
 void spl_Test()
 {
-	int spl_a;
-	int spl_b;
+	int spl_a = 1;
+	int spl_b = 1;
 
 	spl_a = 1;
 	spl_b = 2;

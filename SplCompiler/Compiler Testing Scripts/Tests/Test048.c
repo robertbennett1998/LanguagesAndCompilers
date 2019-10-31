@@ -1,4 +1,3 @@
-/*WARNING (10:8): spl_d is used before it has been assigned to, this will have unexpected consequences!*/
 #include <stdio.h>
 
 void _spl_flush_stdin()
@@ -12,9 +11,9 @@ void _spl_flush_stdin()
 
 void spl_Test()
 {
-	int spl_a, spl_b, spl_c;
-	double spl_d, spl_e;
-	char spl_f, spl_g;
+	int spl_a = 1, spl_b = 1, spl_c = 1;
+	double spl_d = 1, spl_e = 1;
+	char spl_f = 1, spl_g = 1;
 
 	spl_f = spl_d;
 	printf("\n");
@@ -25,10 +24,3 @@ int main()
 	spl_Test();
 	return 0;
 }
-/*WARNING (16:10): spl_a is declared but is neither assigned to or used!*/
-/*WARNING (16:10): spl_b is declared but is neither assigned to or used!*/
-/*WARNING (16:10): spl_c is declared but is neither assigned to or used!*/
-/*WARNING (16:10): spl_d is declared and used but never assigned to, this may have unexpected consequences!*/
-/*WARNING (16:10): spl_e is declared but is neither assigned to or used!*/
-/*WARNING (16:10): spl_f is declared and is assigned to but never used!*/
-/*WARNING (16:10): spl_g is declared but is neither assigned to or used!*/

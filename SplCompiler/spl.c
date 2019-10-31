@@ -11,6 +11,8 @@ extern void yyerror(const char *s);
 extern int yylex();
 extern int yyparse();
 
+#define HANDLE_ERROR(message, ...) { fprintf(stderr, "[ERROR] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "*/\n"); }
+
 #ifdef YYDEBUG
 	extern int yydebug;
 #endif
@@ -29,7 +31,6 @@ int main(void)
 
 void yyerror(const char *s) 
 {
-	printf("EEK, parse error!  Message: %s\n", s);
-	PrintLinePositionUpdate();
+	HANDLE_ERROR("%s.", s);
 	exit(-1);
 }

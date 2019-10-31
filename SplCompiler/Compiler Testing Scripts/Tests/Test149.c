@@ -11,7 +11,7 @@ void _spl_flush_stdin()
 
 void spl_Test()
 {
-	int spl_a;
+	int spl_a = 1;
 
 	spl_a = 1;
 	while ((spl_a <= 0))
@@ -27,4 +27,3 @@ int main()
 	spl_Test();
 	return 0;
 }
-/*WARNING (17:10): spl_a is declared and is assigned to but never used!*/
