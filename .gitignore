@@ -1,6 +1,7 @@
 #directores
 bin/
 intimidiate/
+**/~$*.xlsx
 
 # Prerequisites
 *.d

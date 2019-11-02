@@ -1,10 +1,1 @@
-[WARNING] - Line 11 | Position 8 - spl_x is used before it has been assigned to, this will have unexpected consequences!
-[ERROR] - Line 11 | Position 8 - Variable ((null)) has been used but not declared.
-[WARNING] - Line 17 | Position 10 - spl_a is declared and is assigned to but never used!
-[WARNING] - Line 17 | Position 10 - spl_b is declared but is neither assigned to or used!
-[WARNING] - Line 17 | Position 10 - spl_c is declared but is neither assigned to or used!
-[WARNING] - Line 17 | Position 10 - spl_d is declared but is neither assigned to or used!
-[WARNING] - Line 17 | Position 10 - spl_e is declared but is neither assigned to or used!
-[WARNING] - Line 17 | Position 10 - spl_f is declared but is neither assigned to or used!
-[WARNING] - Line 17 | Position 10 - spl_g is declared but is neither assigned to or used!
-[WARNING] - Line 17 | Position 10 - spl_x is declared and used but never assigned to, this may have unexpected consequences!
+[ERROR] - Line 11 | Position 8 - Variable (x) has been used but not declared.

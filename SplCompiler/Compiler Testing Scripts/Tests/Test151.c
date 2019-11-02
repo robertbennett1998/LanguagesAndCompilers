@@ -13,11 +13,9 @@ void prg_Test()
 {
 	int spl_a = 1;
 
-	int _spl_integer_by = -1;
-	for (spl_a = 5; _spl_integer_by < 0 ? spl_a >= 1 : spl_a <= 1; spl_a += _spl_integer_by)
+	for (spl_a = 5; -1 < 0 ? spl_a >= 1 : spl_a <= 1; spl_a +=-1)
 	{
 		printf("%d", spl_a);
-		_spl_integer_by = -1;
 	}
 	printf("\n");
 }

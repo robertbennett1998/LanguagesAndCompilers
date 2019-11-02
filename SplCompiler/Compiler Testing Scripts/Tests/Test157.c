@@ -13,11 +13,9 @@ void prg_Test()
 {
 	char spl_a = 1;
 
-	char _spl_character_by = 1;
-	for (spl_a = 'a'; _spl_character_by < 0 ? spl_a >= 'g' : spl_a <= 'g'; spl_a += _spl_character_by)
+	for (spl_a = 'a'; 1 < 0 ? spl_a >= 'g' : spl_a <= 'g'; spl_a +=1)
 	{
 		printf("%c", spl_a);
-		_spl_character_by = 1;
 	}
 	printf("\n");
 }

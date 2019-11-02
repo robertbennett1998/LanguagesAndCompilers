@@ -1,0 +1,31 @@
+NotDeclared:
+
+CODE
+
+    a + b -> c;
+    READ(d);
+    NEWLINE;
+    WRITE(e);
+    FOR f IS 2 BY 0-f*f TO -200 DO
+        WRITE(f);
+        NEWLINE
+    ENDFOR;
+    NEWLINE;
+    FOR f IS 2 BY 2 TO 4 DO
+        WRITE(f);
+        NEWLINE
+    ENDFOR;
+    NEWLINE;
+    FOR f IS 2 BY f + 2 TO 90 DO
+        WRITE(f);
+        NEWLINE
+    ENDFOR;
+    NEWLINE;
+    WHILE g = 0 DO
+        NEWLINE
+    ENDWHILE;
+    DO
+        NEWLINE
+    WHILE h = 0 ENDDO
+
+ENDP NotDeclared.

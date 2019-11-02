@@ -3,12 +3,18 @@
     #include <stdbool.h>
     #include <string.h>
 
+	#define NO_PARENT_NODE NULL
     #define NO_CHILD_NODE NULL
     #define NO_SYMBOLIC_LINK NULL
     #define NO_SYMBOL_FOUND NULL
+	#define NO_VARIABLE_USAGE_NODE NULL
 	#define NO_ERRORS NULL
     #define UNKNOWN_SYMBOL_TYPE -1
     #define MAX_IDENTIFIER_LENGTH 51 /*1 extra char for \0*/
+	#define SAFE_ASSIGN(ptr, var, val) if (ptr != NULL) { ptr->var = val; }
+
+	typedef struct _node Node;
+	typedef struct _symbolTableEntry SymbolTableEntry;
 
     /* SYMBOL TABLE */
     typedef enum _symbolTypes
@@ -28,14 +34,36 @@
         unsigned int uiStatementCount;
     } ProgramDetails;
 
+	typedef enum _variableUsageType
+	{
+		variable_usage_declared,
+		variable_usage_assignment,
+		variable_usage_used
+	} VariableUsageType;
+
+	typedef struct _variableUsageDetails
+	{
+		VariableUsageType usageType;
+		unsigned int iLine;
+		unsigned int iPos;
+		Node* pUsageNode;
+		struct _variableUsageDetails * pNextUsage;
+		struct _variableUsageDetails * pPrevUsage;
+	} VariableUsageDetails;
+
     typedef struct _variableDetails
     {
         char acIdentifier[MAX_IDENTIFIER_LENGTH];
         int iType;
-        bool bAssignedTo;
-        bool bUsed;
 		bool bDeclared;
+		VariableUsageDetails* pFirstUsage;
+		VariableUsageDetails* pLastUsage;
     } VariableDetails;
+
+	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
+	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
+	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
+	void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode);
 
     typedef struct _constantDetails
     {
@@ -78,7 +106,7 @@
         OperatorTypes operatorType;
     } OperatorDetails;
 
-    typedef struct _symbolTableEntry
+    struct _symbolTableEntry
     {
         struct _symbolTableEntry* pNextTableEntry;
         struct _symbolTableEntry* pPrevTableEntry;
@@ -92,7 +120,7 @@
             OperatorDetails operatorDetails;
         } symbolDetails;
         
-    } SymbolTableEntry;
+    };
 
     SymbolTableEntry* g_pSymbolTableStart;
     SymbolTableEntry* g_pSymbolTableEnd;
@@ -109,21 +137,18 @@
 
     const char* GetTypeName(const int iType);
 
-    void MarkSymbolAsAssigned(SymbolTableEntry* pEntry);
-    void MarkSymbolAsUsed(SymbolTableEntry* pEntry);
 	void CheckIfVariableIsDeclared(SymbolTableEntry* pEntry);
 
     /* PARSE TREE */
-    typedef struct _node
+    struct _node
     {
         SymbolTableEntry* pSymbolTableEntry;
         unsigned char byNodeIdentifier;
         struct _node* pFirstChild;
         struct _node* pSecondChild;
         struct _node* pThirdChild;
-    } Node;
-
-	void MarkVariableAsDeclared(Node* pNode);
+		struct _node* pParent;
+    };
 
     typedef enum _nodeIdentifiers
     {
@@ -265,15 +290,15 @@ declaration_block :
 
 declaration :
 	identifier_list OF TYPE type SEMI_COLON {
+		Node* pNode = $$ = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, $4, NO_CHILD_NODE);
+
 		Node* pIdentifierListNode = $1;
 		while (pIdentifierListNode != NO_SYMBOL_FOUND)
 		{
 			pIdentifierListNode->pSymbolTableEntry->symbolDetails.variableDetails.iType = $4->pSymbolTableEntry->symbolDetails.typeDetails.iType;
-			MarkVariableAsDeclared(pIdentifierListNode);
+			CreateVariableDeclaredEntry(pIdentifierListNode->pSymbolTableEntry, pNode);
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
-
-		$$ = CreateNode(NO_SYMBOLIC_LINK, id_declaration, $1, $4, NO_CHILD_NODE);
 	};
 
 identifier_list :
@@ -340,9 +365,9 @@ statement :
 
 assignment_statement :
 	expression ASSIGNMENT_OPERATOR IDENTIFIER {
-		MarkSymbolAsAssigned($3);
 		CheckIfVariableIsDeclared($3);
-		$$ = CreateNode($3, id_assignment_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+		Node* pNode = $$ = CreateNode($3, id_assignment_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
+		CreateVariableAssignedEntry($3, pNode);
 	};
 
 value :
@@ -350,9 +375,9 @@ value :
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_value, $2, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	IDENTIFIER {
-		MarkSymbolAsUsed($1);
 		CheckIfVariableIsDeclared($1);
-		$$ = CreateNode($1, id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		Node* pNode = $$ = CreateNode($1, id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		CreateVariableUsedEntry($1, pNode);
 	} |
 	constant {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_value, $1, NO_CHILD_NODE, NO_CHILD_NODE);
@@ -433,9 +458,9 @@ comparator :
 
 read_statement :
 	READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {
-		MarkSymbolAsAssigned($3);
-
-		$$ = CreateNode($3, id_read_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		CheckIfVariableIsDeclared($3);
+		Node* pNode = $$ = CreateNode($3, id_read_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
+		CreateVariableAssignedEntry($3, pNode);
 	};
 
 if_statement :
@@ -466,8 +491,10 @@ comparison :
 
 for_statement :
 	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
-		$$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
-		MarkSymbolAsAssigned($2);
+		CheckIfVariableIsDeclared($2);
+		Node* pNode = $$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
+		CreateVariableAssignedEntry($2, pNode);
+		CreateVariableUsedEntry($2, pNode);
 	};
 
 while_statement :
@@ -491,14 +518,13 @@ SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier)
 	}
 	else
 	{
-		
 		return pEntry;
 	}
 
 	pEntry->pNextTableEntry = NO_SYMBOLIC_LINK;
 	pEntry->bySymbolType = symbol_id_variable;
-	pEntry->symbolDetails.variableDetails.bAssignedTo = false;
-	pEntry->symbolDetails.variableDetails.bUsed = false;
+	pEntry->symbolDetails.variableDetails.pFirstUsage = NO_VARIABLE_USAGE_NODE;
+	pEntry->symbolDetails.variableDetails.pLastUsage = NO_VARIABLE_USAGE_NODE;
 	
 	strncpy(pEntry->symbolDetails.variableDetails.acIdentifier, pIdentifier, MAX_IDENTIFIER_LENGTH);
 
@@ -718,41 +744,16 @@ SymbolTableEntry* GetSymbolTableEntry_Operator(const OperatorTypes operatorType)
 	return NO_SYMBOL_FOUND;
 }
 
-void MarkSymbolAsAssigned(SymbolTableEntry* pEntry)
-{
-	pEntry->symbolDetails.variableDetails.bAssignedTo = true;
-	pEntry->symbolDetails.variableDetails.bUsed = false;
-}
-
-void MarkSymbolAsUsed(SymbolTableEntry* pEntry)
-{
-	if (pEntry->symbolDetails.variableDetails.bAssignedTo == false)
-		HANDLE_WARNING("%s is used before it has been assigned to, this will have unexpected consequences!", pEntry->symbolDetails.variableDetails.acIdentifier);
-
-	pEntry->symbolDetails.variableDetails.bUsed = true;
-}
-
-void MarkVariableAsDeclared(Node* pNode)
-{
-	if (pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK && pNode->pSymbolTableEntry->bySymbolType == symbol_id_variable)
-	{
-		if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.bDeclared == false)
-		{
-			pNode->pSymbolTableEntry->symbolDetails.variableDetails.bDeclared = true;
-		}
-		else
-		{
-			CreateError(error_type_variable_redeclaration, NULL);
-		}
-	}
-}
-
 Node* CreateNode(SymbolTableEntry* pSymbolTableEntry, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild)
 {
 	Node* pNode = malloc(sizeof(Node));
 	memset(pNode, 0, sizeof(Node));
+	pNode->pParent = NO_PARENT_NODE;
 	pNode->pSymbolTableEntry = pSymbolTableEntry;
 	pNode->byNodeIdentifier = byNodeIdentifier;
+	SAFE_ASSIGN(pFirstChild, pParent, pNode)
+	SAFE_ASSIGN(pSecondChild, pParent, pNode)
+	SAFE_ASSIGN(pThirdChild, pParent, pNode)
 	pNode->pFirstChild = pFirstChild;
 	pNode->pSecondChild = pSecondChild;
 	pNode->pThirdChild = pThirdChild;
@@ -782,8 +783,8 @@ void PrintTree(const Node* pStartNode, int iLevel)
 		{
 			printf(" - Symbol (Variable) Info: Identifier = %s - Type = %s - Assigned To = %d - Used = %d\n", 	pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier, 
 																									GetTypeName(pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.iType), 
-																									pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.bAssignedTo, 
-																									pStartNode->pSymbolTableEntry->symbolDetails.variableDetails.bUsed);
+																									false, 
+																									false);
 		}
 		else if (pStartNode->pSymbolTableEntry->bySymbolType == symbol_id_constant)
 		{
@@ -828,22 +829,6 @@ void GenerateAndPrintWarnings()
 	SymbolTableEntry* pEntry = g_pSymbolTableStart;
 	while (pEntry != NO_SYMBOL_FOUND)
 	{
-		if (pEntry->bySymbolType == symbol_id_variable)
-		{
-			if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == false)
-			{
-				HANDLE_WARNING("%s is declared but is neither assigned to or used!", pEntry->symbolDetails.variableDetails.acIdentifier);
-			}
-			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == true && pEntry->symbolDetails.variableDetails.bUsed == false)
-			{
-				HANDLE_WARNING("%s is declared and is assigned to but never used!", pEntry->symbolDetails.variableDetails.acIdentifier);
-			}
-			else if (pEntry->symbolDetails.variableDetails.bAssignedTo == false && pEntry->symbolDetails.variableDetails.bUsed == true)
-			{
-				HANDLE_WARNING("%s is declared and used but never assigned to, this may have unexpected consequences!", pEntry->symbolDetails.variableDetails.acIdentifier);
-			}
-		}
-
 		pEntry = pEntry->pNextTableEntry;
 	}
 }
@@ -1170,69 +1155,86 @@ void Evaluate_StatementList(const Node* const pNode)
 
 		case id_for_statement:
 		{
-			Indent();
 			char* pIdentifier = pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier;
 			char* pByName = NULL;
-			if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
+			if (pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
 			{
-				pByName = "_spl_integer_by";
-
-				static char bDefined = 0;
-				if (!bDefined)
+				Indent();
+				if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
 				{
-					printf("int ");
-					bDefined = 1;
-				}
-				printf("%s = ", pByName);
-				Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
-				printf(";\n");
-			}
-			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
-			{
-				pByName = "_spl_character_by";
+					pByName = "_spl_integer_by";
 
-				static char bDefined = 0;
-				if (!bDefined)
-				{
-					printf("char ");
-					bDefined = 1;
+					static char bDefined = 0;
+					if (!bDefined)
+					{
+						printf("int ");
+						bDefined = 1;
+					}
+					printf("%s = ", pByName);
+					Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+					printf(";\n");
 				}
-				printf("%s = ", pByName);
-				Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
-				printf(";\n");
-			}
-			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
-			{
-				pByName = "_spl_real_by";
+				else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
+				{
+					pByName = "_spl_character_by";
 
-				static char bDefined = 0;
-				if (!bDefined)
-				{
-					printf("double ");
-					bDefined = 1;
+					static char bDefined = 0;
+					if (!bDefined)
+					{
+						printf("char ");
+						bDefined = 1;
+					}
+					printf("%s = ", pByName);
+					Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+					printf(";\n");
 				}
-				printf("%s = ", pByName);
-				Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
-				printf(";\n");
+				else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
+				{
+					pByName = "_spl_real_by";
+
+					static char bDefined = 0;
+					if (!bDefined)
+					{
+						printf("double ");
+						bDefined = 1;
+					}
+					printf("%s = ", pByName);
+					Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+					printf(";\n");
+				}
 			}
 
 			Indent();
 			printf("for (%s = ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pFirstChild);
-			printf("; %s < 0 ? %s >= ", pByName, pIdentifier);
+			printf("; ");
+			Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+			printf(" < 0 ? %s >= ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pThirdChild);
 			printf(" : %s <= ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pThirdChild);
-			printf("; %s += %s", pIdentifier, pByName);
-			printf(")\n");
+			if (pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
+			{
+				printf("; %s += %s", pIdentifier, pByName);
+				printf(")\n");
+			}
+			else
+			{
+				printf("; %s +=", pIdentifier);
+				Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+				printf(")\n");
+			}
 			Indent();
 			printf("{\n");
 			g_iIndentLevel++;
 			Evaluate_StatementList(pNode->pSecondChild);
-			Indent();
-			printf("%s = ", pByName);
-			Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
-			printf(";\n");
+			if (pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
+			{
+				Indent();
+				printf("%s = ", pByName);
+				Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
+				printf(";\n");
+			}
 			g_iIndentLevel--;
 			Indent();
 			printf("}\n");
@@ -1828,13 +1830,64 @@ void CreateError(ErrorTypes errorType, void* pValue)
 	}
 }
 
+void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+{
+	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
+
+	if (pVariableDetails->pFirstUsage != NO_VARIABLE_USAGE_NODE)
+	{
+		CreateError(error_type_variable_redeclaration, &pVariableDetails->acIdentifier[4]);
+	}
+
+	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
+	pUsageDetails->usageType = variable_usage_declared;
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+}
+
+void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+{
+	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
+	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
+	pUsageDetails->usageType = variable_usage_assignment;
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+}
+
+void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+{
+	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
+	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
+	pUsageDetails->usageType = variable_usage_assignment;
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+}
+
+void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode)
+{
+	pUsageDetails->iLine = g_uiCurrentLineNumber;
+	pUsageDetails->iPos = g_ulCurrentLinePosition;
+	pUsageDetails->pUsageNode = pUsageNode;
+	pUsageDetails->pNextUsage = NO_VARIABLE_USAGE_NODE;
+	pUsageDetails->pPrevUsage = NO_VARIABLE_USAGE_NODE;
+
+	if (pVariableDetails->pFirstUsage == NO_VARIABLE_USAGE_NODE)
+	{
+		pVariableDetails->pFirstUsage = pUsageDetails;
+		pVariableDetails->pLastUsage = pUsageDetails;
+	}
+	else
+	{
+		pUsageDetails->pPrevUsage = pVariableDetails->pLastUsage;
+		pVariableDetails->pLastUsage->pNextUsage = pUsageDetails;
+		pVariableDetails->pLastUsage = pUsageDetails;
+	}
+}
+
 void CheckIfVariableIsDeclared(SymbolTableEntry* pEntry)
 {
 	if (pEntry != NO_SYMBOLIC_LINK && pEntry->bySymbolType == symbol_id_variable)
 	{
-		if (pEntry->symbolDetails.variableDetails.bDeclared == false)
+		if (pEntry->symbolDetails.variableDetails.pFirstUsage == NO_VARIABLE_USAGE_NODE || pEntry->symbolDetails.variableDetails.pFirstUsage->usageType != variable_usage_declared)
 		{
-			CreateError(error_type_variable_not_declared, NULL);
+			CreateError(error_type_variable_not_declared,&pEntry->symbolDetails.variableDetails.acIdentifier[4]);
 		}
 	}
 }

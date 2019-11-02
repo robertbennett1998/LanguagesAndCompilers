@@ -1,0 +1,2 @@
+[ERROR] - Line 7 | Position 16 - Variable (a) has been used but not declared.
+[WARNING] - Line 9 | Position 5 - Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.
