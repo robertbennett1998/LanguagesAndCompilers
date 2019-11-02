@@ -179,7 +179,8 @@
 		error_type_unknown = 0,
 		error_type_invalid_character_constant,
 		error_type_variable_not_declared,
-		error_type_variable_redeclaration
+		error_type_variable_redeclaration,
+		error_type_unexpected_symbol
 	} ErrorTypes;
 
 	unsigned int g_uiErrorCount = 0;
@@ -1817,6 +1818,9 @@ void CreateError(ErrorTypes errorType, void* pValue)
 		case error_type_invalid_character_constant:
 			HANDLE_ERROR("Invalid character constant (%s).", (char*)pValue);
 			break;
+
+		case error_type_unexpected_symbol:
+			HANDLE_ERROR("Unexpected symbol (%s).", (char*)pValue);
 
 		default:
 			HANDLE_ERROR("Unknown Error.");

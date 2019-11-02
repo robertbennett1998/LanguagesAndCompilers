@@ -354,8 +354,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 52
-#define YY_END_OF_BUFFER 53
+#define YY_NUM_RULES 53
+#define YY_END_OF_BUFFER 54
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -365,7 +365,7 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[135] =
     {   0,
-        0,    0,   53,   52,   46,   45,   52,   35,   36,   44,
+        0,    0,   54,   52,   46,   45,   52,   35,   36,   44,
        41,   37,   42,   40,   43,   47,   38,   39,   31,   29,
        32,   51,   51,   51,   51,   51,   51,   51,   51,   51,
        51,   51,   51,   51,   46,    0,    0,   28,    0,   47,
@@ -1149,9 +1149,20 @@ YY_RULE_SETUP
 case 52:
 YY_RULE_SETUP
 #line 141 "spl.l"
+{
+    #ifndef PRINT
+        CreateError(error_type_unexpected_symbol, yytext);
+    #else
+        PROCESS_INVALID_TOKEN(INVALID_CHARACTER_CONSTANT, yytext)
+    #endif
+}
+	YY_BREAK
+case 53:
+YY_RULE_SETUP
+#line 149 "spl.l"
 ECHO;
 	YY_BREAK
-#line 1154 "lex.yy.c"
+#line 1165 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2156,7 +2167,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 141 "spl.l"
+#line 149 "spl.l"
 
 
 void PrintToken(const char* pToken)

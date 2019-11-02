@@ -138,6 +138,14 @@ identifier			        (?:(?:[a-zA-Z])[0-9]*)+
 							PROCESS_GENERIC_TOKEN(IDENTIFIER, pIdentifier)
 						}
 
+. {
+    #ifndef PRINT
+        CreateError(error_type_unexpected_symbol, yytext);
+    #else
+        PROCESS_INVALID_TOKEN(INVALID_CHARACTER_CONSTANT, yytext)
+    #endif
+}
+
 %%
 
 void PrintToken(const char* pToken)
