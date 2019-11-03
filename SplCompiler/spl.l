@@ -110,12 +110,14 @@ identifier			        (?:(?:[a-zA-Z])[0-9]*)+
 
 "\n"					ProcessEndOfLine();
 {whitespace}			IncrementLinePosition(strlen(yytext));
-{unsigned_integer}		{
-							ASSIGN_YYLVAL(iVal, atoi(yytext));
+{unsigned_integer}		{ 
+							ASSIGN_YYLVAL(iVal, atol(yytext));
 							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 				
 }
-{real_number}			{ 
-							ASSIGN_YYLVAL(fVal, atof(yytext));
+{real_number}			{
+                            char* pEnd;
+                            ASSIGN_YYLVAL(fVal, atof(yytext));
+                            
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
 						}
 {character_constant}	{

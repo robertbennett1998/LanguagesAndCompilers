@@ -2,6 +2,9 @@
     #include <stdio.h>
     #include <stdbool.h>
     #include <string.h>
+	#include <limits.h>
+	#include <stdlib.h>
+	#include <float.h>
 
 	#define NO_PARENT_NODE NULL
     #define NO_CHILD_NODE NULL
@@ -215,7 +218,7 @@
 
 %union
 {
-	int iVal;
+	long iVal;
 	double fVal;
 	char cVal;
 	Node* pNode;
@@ -224,7 +227,7 @@
 
 %token ENDP DECLARATIONS CODE TYPE_CHARACTER TYPE_INTEGER TYPE_REAL IF ELSE NOT OF TYPE THEN ENDIF AND OR DO WHILE ENDDO ENDWHILE FOR IS BY TO ENDFOR NEWLINE WRITE READ ASSIGNMENT_OPERATOR EQUALITY_OPERATOR NOT_EQUAL_TO_OPERATOR LESS_THAN_OPERATOR MORE_THAN_OPERATOR LESS_EQUAL_TO_OPERATOR MORE_EQUAL_TO_OPERATOR OPEN_BRACKET CLOSE_BRACKET COMMA COLON SEMI_COLON PERIOD ADD_OPERATOR SUBTRACT_OPERATOR DIVISION_OPERATOR MULTIPULCATION_OPERATOR
 %token<cVal> CHARACTER_CONSTANT
-%token<iVal> UNSIGNED_INTEGER SIGNED_INTEGER
+%token<iVal> UNSIGNED_INTEGER
 %token<fVal> REAL
 %token<pSymbolTableEntry> IDENTIFIER
 %type<pNode> program block declaration_block code statement_list declaration identifier_list type statement assignment_statement value expression term write_statement output_list constant comparator read_statement if_statement if_else_statement conditional comparison for_statement while_statement do_statement
@@ -326,7 +329,9 @@ code :
 	statement_list {
 		$$ = $1;
 	} | statement_list SEMI_COLON {
+		g_uiCurrentLineNumber--;
 		HANDLE_WARNING("Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.");
+		g_uiCurrentLineNumber++;
 		$$ = $1;
 	};
 
@@ -409,13 +414,37 @@ term :
 
 constant :
 	REAL {
+		if ($1 > DBL_MAX)
+		{
+			HANDLE_WARNING("Constant (%e) is greater then the maximum value an REAL can store (%e). This value will be set to the maximum value (%e).", $1, DBL_MAX, DBL_MAX);
+			$1 = DBL_MAX;
+		}
+		else if ($1 < -DBL_MAX)
+		{
+			HANDLE_WARNING("Constant (%e) is less then the minimum value an REAL can store (%e). This value will be set to the minimum value (%e).", $1, -DBL_MAX, -DBL_MAX);
+			$1 = -DBL_MAX;
+		}
+
 		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	UNSIGNED_INTEGER {
+		if ($1 > (long)INT_MAX)
+		{
+			HANDLE_WARNING("Constant (%ld) is greater then the maximum value an INTEGER can store (%d). This value will be set to the maximum value (%d).", $1, INT_MAX, INT_MAX);
+			$1 = INT_MAX;
+		}
+		
 		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$1), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	SUBTRACT_OPERATOR UNSIGNED_INTEGER {
-		$2 = -$2;
+		$2 = 0L - $2;
+		
+		if ($2 < (long)INT_MIN)
+		{
+			HANDLE_WARNING("Constant (%ld) is less then the minimum value an INTEGER can store (%d). This value will be set to the minimum value (%d).", $2, INT_MIN, INT_MIN);
+			$2 = INT_MIN;
+		}
+
 		$$ = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &$2), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	} |
 	CHARACTER_CONSTANT {
@@ -466,12 +495,12 @@ read_statement :
 	};
 
 if_statement :
-	IF conditional THEN statement_list ENDIF {
+	IF conditional THEN code ENDIF {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_if_statement, $2, $4, NO_CHILD_NODE);
 	};
 
 if_else_statement :
-	IF conditional THEN statement_list ELSE statement_list ENDIF {
+	IF conditional THEN code ELSE code ENDIF {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_if_else_statement, $2, $4, $6);
 	};
 
@@ -492,7 +521,7 @@ comparison :
 	};
 
 for_statement :
-	FOR IDENTIFIER IS expression BY expression TO expression DO statement_list ENDFOR {
+	FOR IDENTIFIER IS expression BY expression TO expression DO code ENDFOR {
 		CheckIfVariableIsDeclared($2);
 		Node* pNode = $$ = CreateNode($2, id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, $4, $6, $8), $10, NO_CHILD_NODE);
 		CreateVariableAssignedEntry($2, pNode);
@@ -500,7 +529,7 @@ for_statement :
 	};
 
 while_statement :
-	WHILE conditional DO statement_list ENDWHILE {
+	WHILE conditional DO code ENDWHILE {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_while_statement, $2, $4, NO_CHILD_NODE);
 	};
 
@@ -597,7 +626,7 @@ SymbolTableEntry* CreateSymbolTableEntry_Constant(const int iType, const void* p
 	pEntry->symbolDetails.constantDetails.iType = iType;
 	if (iType == TYPE_INTEGER)
 	{
-		pEntry->symbolDetails.constantDetails.value.i = *(int*)pValue;
+		pEntry->symbolDetails.constantDetails.value.i = (int)*(long*)pValue;
 	}
 	else if (iType == TYPE_REAL)
 	{

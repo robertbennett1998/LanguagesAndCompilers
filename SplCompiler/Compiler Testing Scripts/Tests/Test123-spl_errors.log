@@ -1,1 +1,4 @@
-[ERROR] - Line 15 | Position 7 - syntax error.
+[WARNING] - Line 15 | Position 7 - Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.
+[WARNING] - Line 18 | Position 8 - Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.
+
+---- Evaluating Variable Usage ----

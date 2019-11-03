@@ -22,6 +22,8 @@ CODE
 
     2 -> c;
     WRITE(c);
-    NEWLINE
+    NEWLINE;
+
+    3 -> c
 
 ENDP VarUsage.

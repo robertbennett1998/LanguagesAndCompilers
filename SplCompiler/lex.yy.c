@@ -1102,22 +1102,24 @@ IncrementLinePosition(strlen(yytext));
 case 47:
 YY_RULE_SETUP
 #line 113 "spl.l"
-{
-							ASSIGN_YYLVAL(iVal, atoi(yytext));
+{ 
+							ASSIGN_YYLVAL(iVal, atol(yytext));
 							PROCESS_GENERIC_TOKEN(UNSIGNED_INTEGER, yytext) 				
 }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 117 "spl.l"
-{ 
-							ASSIGN_YYLVAL(fVal, atof(yytext));
+{
+                            char* pEnd;
+                            ASSIGN_YYLVAL(fVal, atof(yytext));
+                            
 							PROCESS_GENERIC_TOKEN(REAL, yytext) 
 						}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 121 "spl.l"
+#line 123 "spl.l"
 {
 							ASSIGN_YYLVAL(cVal, yytext[1]);
 							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
@@ -1125,7 +1127,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 125 "spl.l"
+#line 127 "spl.l"
 {
                                     IncrementLinePosition(strlen(yytext));
                                     #ifndef PRINT
@@ -1137,7 +1139,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 133 "spl.l"
+#line 135 "spl.l"
 {
 							char* pIdentifier = malloc(strlen(yytext) + 5);
 							strcpy(pIdentifier, "spl_");
@@ -1148,7 +1150,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 141 "spl.l"
+#line 143 "spl.l"
 {
     #ifndef PRINT
         CreateError(error_type_unexpected_symbol, yytext);
@@ -1159,10 +1161,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 149 "spl.l"
+#line 151 "spl.l"
 ECHO;
 	YY_BREAK
-#line 1165 "lex.yy.c"
+#line 1167 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2167,7 +2169,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 149 "spl.l"
+#line 151 "spl.l"
 
 
 void PrintToken(const char* pToken)

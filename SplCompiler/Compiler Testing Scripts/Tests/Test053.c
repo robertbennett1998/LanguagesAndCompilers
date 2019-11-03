@@ -15,7 +15,7 @@ void prg_Test()
 	double spl_d = 1, spl_e = 1;
 	char spl_f = 1, spl_g = 1;
 
-	spl_a = -2147483648;
+	spl_a = 2147483647;
 	printf("\n");
 }
 
