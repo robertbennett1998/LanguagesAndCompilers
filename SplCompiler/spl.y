@@ -36,7 +36,7 @@
 
 	typedef enum _variableUsageType
 	{
-		variable_usage_declared,
+		variable_usage_declaration,
 		variable_usage_assignment,
 		variable_usage_used
 	} VariableUsageType;
@@ -44,8 +44,8 @@
 	typedef struct _variableUsageDetails
 	{
 		VariableUsageType usageType;
-		unsigned int iLine;
-		unsigned int iPos;
+		unsigned int uiLine;
+		unsigned int uiPos;
 		Node* pUsageNode;
 		struct _variableUsageDetails * pNextUsage;
 		struct _variableUsageDetails * pPrevUsage;
@@ -60,6 +60,7 @@
 		VariableUsageDetails* pLastUsage;
     } VariableDetails;
 
+	void EvaluateVariableUsage();
 	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
 	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
 	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
@@ -209,7 +210,7 @@
 	} ErrorTypes;
 
 	unsigned int g_uiErrorCount = 0;
-	void CreateError(ErrorTypes errorType, void* pValue);
+	void CreateError(ErrorTypes errorType, const void* const pValue);
 %}
 
 %union
@@ -266,6 +267,7 @@ program :
 		#endif
 
 		$$ = pParseTree;
+		EvaluateVariableUsage();
 		if (g_uiErrorCount == 0)
 		{
         	GenerateCode(pParseTree);
@@ -825,12 +827,13 @@ void PrintTree(const Node* pStartNode, int iLevel)
 
 void GenerateAndPrintWarnings()
 {
-	
 	SymbolTableEntry* pEntry = g_pSymbolTableStart;
 	while (pEntry != NO_SYMBOL_FOUND)
 	{
 		pEntry = pEntry->pNextTableEntry;
 	}
+
+	EvaluateVariableUsage();
 }
 
 const char* GetTypeName(const int iType)
@@ -1804,7 +1807,7 @@ void Evaluate_DeclarationBlock(const Node* const pNode)
 	}
 }
 
-void CreateError(ErrorTypes errorType, void* pValue)
+void CreateError(ErrorTypes errorType, const void* const pValue)
 {
 	g_uiErrorCount++;
 	switch (errorType)
@@ -1830,17 +1833,76 @@ void CreateError(ErrorTypes errorType, void* pValue)
 	}
 }
 
+void EvaluateVariableUsage()
+{
+	fprintf(stderr, "\n---- Evaluating Variable Usage ----\n");
+	SymbolTableEntry* pSymbol = g_pSymbolTableStart;
+	while (pSymbol != NO_SYMBOL_FOUND)
+	{
+		if (pSymbol->bySymbolType == symbol_id_variable)
+		{
+			VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
+			const char* pVariableIdentifier = &pVariableDetails->acIdentifier[4];
+			if (pVariableDetails->pFirstUsage == NO_VARIABLE_USAGE_NODE || pVariableDetails->pFirstUsage->usageType != variable_usage_declaration)
+			{
+				CreateError(error_type_variable_not_declared, pVariableIdentifier);
+				pSymbol = pSymbol->pNextTableEntry;
+				continue;
+			}
+
+			VariableUsageDetails* pUsageNode = pVariableDetails->pFirstUsage->pNextUsage;
+			bool bUsedOnce = false, bUsed = false;
+			VariableUsageDetails* pAssigned = NO_VARIABLE_USAGE_NODE;
+			while (pUsageNode != NO_VARIABLE_USAGE_NODE)
+			{
+				if (pUsageNode->usageType == variable_usage_declaration)
+				{
+					CreateError(error_type_variable_redeclaration, pVariableIdentifier);
+					break;
+				}
+				else if (pUsageNode->usageType == variable_usage_assignment)
+				{
+					if (pUsageNode->pPrevUsage->usageType == variable_usage_assignment && bUsed == false)
+					{
+						HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant.", pVariableIdentifier, pUsageNode->pPrevUsage->uiLine, pUsageNode->pPrevUsage->uiPos);
+					}
+
+					bUsed = false;
+					pAssigned = pUsageNode;
+				}
+				else if (pUsageNode->usageType == variable_usage_used)
+				{
+					if (pAssigned == NO_VARIABLE_USAGE_NODE)
+					{
+						HANDLE_WARNING("Variable %s is used at line: %d | pos: %d before it has been assigned to. It will have a default value of 1.", pVariableIdentifier, pUsageNode->pPrevUsage->uiLine, pUsageNode->pPrevUsage->uiPos);
+					}
+
+					bUsed = true;
+					bUsedOnce = true;
+				}
+
+				pUsageNode = pUsageNode->pNextUsage;
+			};
+
+			if (bUsedOnce == false)
+			{
+				HANDLE_WARNING("The variable %s is never used.", pVariableIdentifier);
+			}
+			else if (bUsed == false)
+			{
+				HANDLE_WARNING("The variable %s is not used after the assignment statement (line: %d | pos: %d).", pVariableIdentifier,  pAssigned->uiLine, pAssigned->uiPos);
+			}
+		}
+
+		pSymbol = pSymbol->pNextTableEntry;
+	};
+}
+
 void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
-
-	if (pVariableDetails->pFirstUsage != NO_VARIABLE_USAGE_NODE)
-	{
-		CreateError(error_type_variable_redeclaration, &pVariableDetails->acIdentifier[4]);
-	}
-
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
-	pUsageDetails->usageType = variable_usage_declared;
+	pUsageDetails->usageType = variable_usage_declaration;
 	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
 }
 
@@ -1856,14 +1918,14 @@ void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
-	pUsageDetails->usageType = variable_usage_assignment;
+	pUsageDetails->usageType = variable_usage_used;
 	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
 }
 
 void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode)
 {
-	pUsageDetails->iLine = g_uiCurrentLineNumber;
-	pUsageDetails->iPos = g_ulCurrentLinePosition;
+	pUsageDetails->uiLine = g_uiCurrentLineNumber;
+	pUsageDetails->uiPos = g_ulCurrentLinePosition;
 	pUsageDetails->pUsageNode = pUsageNode;
 	pUsageDetails->pNextUsage = NO_VARIABLE_USAGE_NODE;
 	pUsageDetails->pPrevUsage = NO_VARIABLE_USAGE_NODE;
@@ -1885,7 +1947,7 @@ void CheckIfVariableIsDeclared(SymbolTableEntry* pEntry)
 {
 	if (pEntry != NO_SYMBOLIC_LINK && pEntry->bySymbolType == symbol_id_variable)
 	{
-		if (pEntry->symbolDetails.variableDetails.pFirstUsage == NO_VARIABLE_USAGE_NODE || pEntry->symbolDetails.variableDetails.pFirstUsage->usageType != variable_usage_declared)
+		if (pEntry->symbolDetails.variableDetails.pFirstUsage == NO_VARIABLE_USAGE_NODE || pEntry->symbolDetails.variableDetails.pFirstUsage->usageType != variable_usage_declaration)
 		{
 			CreateError(error_type_variable_not_declared,&pEntry->symbolDetails.variableDetails.acIdentifier[4]);
 		}

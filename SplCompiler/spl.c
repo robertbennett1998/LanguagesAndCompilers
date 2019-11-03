@@ -24,8 +24,7 @@ int main(void)
     #endif
 
 	int iRes = yyparse();
-	GenerateAndPrintWarnings();
-
+	
 	return iRes;
 }
 

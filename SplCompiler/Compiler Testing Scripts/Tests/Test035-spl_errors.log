@@ -1,1 +1,8 @@
-[ERROR] - Line 6 | Position 32 - Variable (a) has been redeclared.
+
+---- Evaluating Variable Usage ----
+[ERROR] - Line 17 | Position 12 - Variable (a) has been redeclared.
+[WARNING] - Line 17 | Position 12 - The variable a is never used.
+[WARNING] - Line 17 | Position 12 - The variable b is never used.
+[WARNING] - Line 17 | Position 12 - The variable c is never used.
+[WARNING] - Line 17 | Position 12 - The variable e is never used.
+[WARNING] - Line 17 | Position 12 - The variable f is never used.

@@ -1,0 +1,5 @@
+
+---- Evaluating Variable Usage ----
+[WARNING] - Line 16 | Position 2 - The variable a is never used.
+[WARNING] - Line 16 | Position 2 - The variable b is never used.
+[WARNING] - Line 16 | Position 2 - The variable c is never used.
