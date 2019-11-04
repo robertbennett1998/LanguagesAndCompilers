@@ -141,11 +141,7 @@ identifier			        (?:(?:[a-zA-Z])[0-9]*)+
 						}
 
 . {
-    #ifndef PRINT
-        CreateError(error_type_unexpected_symbol, yytext);
-    #else
-        PROCESS_INVALID_TOKEN(INVALID_CHARACTER_CONSTANT, yytext)
-    #endif
+    CreateError(error_type_unexpected_symbol, yytext);
 }
 
 %%

@@ -1,0 +1,23 @@
+FinalTypes:
+
+DECLARATIONS
+
+    int OF TYPE INTEGER;
+    char OF TYPE CHARACTER;
+    real OF TYPE REAL;
+
+CODE
+
+    2 -> int;
+    'a' -> char;
+    1.23 -> real;
+
+    int * real -> int;
+    int * char -> int;
+    int * real -> real;
+    int * char -> int;
+    real * char -> real;
+    real * char -> char
+
+
+ENDP FinalTypes.

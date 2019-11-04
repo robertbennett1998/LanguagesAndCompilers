@@ -1,0 +1,40 @@
+Limits:
+
+DECLARATIONS
+    
+    int OF TYPE INTEGER;
+    char OF TYPE CHARACTER;
+    real OF TYPE REAL;
+
+CODE
+
+    READ(int);
+    NEWLINE;
+    READ(char);
+    NEWLINE;
+    READ(real);
+    NEWLINE;
+    NEWLINE;
+
+    WRITE((int + int + char));
+    NEWLINE;
+    WRITE((int + char));
+    NEWLINE;
+    WRITE((char + int));
+    NEWLINE;
+    WRITE((real + int));
+    NEWLINE;
+    WRITE((int + real));
+    NEWLINE;
+    WRITE((char + real));
+    NEWLINE;
+    WRITE((real + char));
+    NEWLINE;
+    WRITE((int + char + real));
+    NEWLINE;
+    WRITE((char + int + real));
+    NEWLINE;
+    WRITE((int + real + char));
+    NEWLINE;
+    WRITE((real + char + int))
+ENDP Limits.

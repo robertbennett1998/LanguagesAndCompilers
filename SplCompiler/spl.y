@@ -209,7 +209,8 @@
 		error_type_invalid_character_constant,
 		error_type_variable_not_declared,
 		error_type_variable_redeclaration,
-		error_type_unexpected_symbol
+		error_type_unexpected_symbol,
+		error_type_invalid_type_conversion
 	} ErrorTypes;
 
 	unsigned int g_uiErrorCount = 0;
@@ -375,6 +376,19 @@ assignment_statement :
 		CheckIfVariableIsDeclared($3);
 		Node* pNode = $$ = CreateNode($3, id_assignment_statement, $1, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableAssignedEntry($3, pNode);
+		int iExpressionType = GetFinalTypeOfExpression($1);
+		if (iExpressionType == TYPE_REAL && $3->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
+		{
+			CreateError(error_type_invalid_type_conversion, NULL);
+		} 
+		else if (iExpressionType == TYPE_INTEGER && $3->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
+		{
+			HANDLE_WARNING("An integer has been assigned to a variable of type characters.");
+		}
+		else if (iExpressionType == TYPE_REAL && $3->symbolDetails.variableDetails.iType == TYPE_INTEGER)
+		{
+			HANDLE_WARNING("A real has been assigned to a variable of type integer, this may cause a loss of precision.");
+		}
 	};
 
 value :
@@ -1855,6 +1869,11 @@ void CreateError(ErrorTypes errorType, const void* const pValue)
 
 		case error_type_unexpected_symbol:
 			HANDLE_ERROR("Unexpected symbol (%s).", (char*)pValue);
+			break;
+
+		case error_type_invalid_type_conversion:
+			HANDLE_ERROR("Invalid type conversion.");
+			break;
 
 		default:
 			HANDLE_ERROR("Unknown Error.");
