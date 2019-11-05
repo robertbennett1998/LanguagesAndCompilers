@@ -141,7 +141,9 @@ identifier			        (?:(?:[a-zA-Z])[0-9]*)+
 						}
 
 . {
-    CreateError(error_type_unexpected_symbol, yytext);
+    #ifndef PRINT
+        CreateError(error_type_unexpected_symbol, yytext);
+    #endif
 }
 
 %%

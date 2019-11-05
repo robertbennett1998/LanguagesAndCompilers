@@ -12,6 +12,9 @@ CODE
     'a' -> char;
     1.23 -> real;
 
+    int + 1 -> int;
+    int + 1 -> int;
+
     int * real -> int;
     int * char -> int;
     int * real -> real;

@@ -1154,17 +1154,15 @@ YY_RULE_SETUP
 {
     #ifndef PRINT
         CreateError(error_type_unexpected_symbol, yytext);
-    #else
-        PROCESS_INVALID_TOKEN(INVALID_CHARACTER_CONSTANT, yytext)
     #endif
 }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 151 "spl.l"
+#line 149 "spl.l"
 ECHO;
 	YY_BREAK
-#line 1167 "lex.yy.c"
+#line 1165 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2169,7 +2167,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 151 "spl.l"
+#line 149 "spl.l"
 
 
 void PrintToken(const char* pToken)
