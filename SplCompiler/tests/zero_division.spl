@@ -1,0 +1,14 @@
+ZeroDivision:
+
+DECLARATIONS
+
+a OF TYPE INTEGER;
+b, c OF TYPE REAL;
+
+CODE
+
+    1 / 0 -> a;
+    1.0 + b / 0.0 -> c;
+    1.0 / 0.00000000001 -> b;
+
+ENDP ZeroDivision.

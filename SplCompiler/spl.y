@@ -212,12 +212,13 @@
 		error_type_unexpected_symbol,
 		error_type_invalid_type_conversion_double_char,
 		error_type_invalid_operation_char_multipulcation,
-		error_type_invalid_operation_char_division
+		error_type_invalid_operation_char_division,
+		error_type_division_by_zero
 	} ErrorTypes;
 
 	unsigned int g_uiErrorCount = 0;
 	void CreateError(ErrorTypes errorType, const void* const pValue);
-
+	void CheckForDivideByZero(const Node* const pNode);
 	void EvaluateTree(Node* pNode);
 %}
 
@@ -277,6 +278,7 @@ program :
 		$$ = pParseTree;
 		EvaluateVariableUsage();
 		EvaluateTree(pParseTree);
+		CheckForDivideByZero(pParseTree);
 		if (g_uiErrorCount == 0)
 		{
         	GenerateCode(pParseTree);
@@ -438,6 +440,7 @@ term :
 		{
 			CreateError(error_type_invalid_operation_char_division, NULL);
 		}
+
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, $1, $3, NO_CHILD_NODE);
 	} |
 	value {
@@ -2216,9 +2219,10 @@ void AssignChar(void** pValue, const int iType, int cValue)
 	}
 }
 
+bool g_bExitEvaluation = false;
 void* EvaluateConstantExpression(Node* pNode, int* iType)
 {
-	if (pNode == NULL)
+	if (pNode == NULL || g_bExitEvaluation == true)
 	{
 		return NULL;
 	}
@@ -2346,10 +2350,6 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 					{
 						AssignReal(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
 					}
-					else if (iTypeOne == TYPE_INTEGER && iTypeTwo == TYPE_CHARACTER)
-					{
-						AssignChar(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
 					else if (iTypeOne == TYPE_REAL && iTypeTwo == TYPE_INTEGER)
 					{
 						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
@@ -2358,60 +2358,52 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 					{
 						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
 					}
-					else if (iTypeOne == TYPE_REAL && iTypeTwo == TYPE_CHARACTER)
-					{
-						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_INTEGER)
-					{
-						AssignChar(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_REAL)
-					{
-						AssignReal(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_CHARACTER)
-					{
-						AssignChar(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) * *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
 				}
 				else if (pNode->pSymbolTableEntry != NULL && pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_division)
 				{
 					if (iTypeOne == TYPE_INTEGER && iTypeTwo == TYPE_INTEGER)
 					{
-						AssignInt(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
+						int iDenom = *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo);
+						if (iDenom == 0)
+						{
+							g_bExitEvaluation = true;
+							return NULL;
+						}
+
+						AssignInt(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / iDenom);
 					}
 					else if (iTypeOne == TYPE_INTEGER && iTypeTwo == TYPE_REAL)
 					{
-						AssignReal(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_INTEGER && iTypeTwo == TYPE_CHARACTER)
-					{
-						AssignChar(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
+						double dDenom = *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo);
+						if (dDenom == 0.0)
+						{
+							g_bExitEvaluation = true;
+							return NULL;
+						}
+
+						AssignReal(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / dDenom);
 					}
 					else if (iTypeOne == TYPE_REAL && iTypeTwo == TYPE_INTEGER)
 					{
-						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
+						int iDenom = *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo);
+						if (iDenom == 0)
+						{
+							g_bExitEvaluation = true;
+							return NULL;
+						}
+
+						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / iDenom);
 					}
 					else if (iTypeOne == TYPE_REAL && iTypeTwo == TYPE_REAL)
 					{
-						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_REAL && iTypeTwo == TYPE_CHARACTER)
-					{
-						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_INTEGER)
-					{
-						AssignReal(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_REAL)
-					{
-						AssignReal(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
-					}
-					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_CHARACTER)
-					{
-						AssignChar(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
+						double dDenom = *(double*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo);
+						if (dDenom == 0.0)
+						{
+							g_bExitEvaluation = true;
+							return NULL;
+						}
+
+						AssignReal(&pFinalValue, *iType, *(double*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) / dDenom);
 					}
 				}
 			}
@@ -2452,6 +2444,34 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 	return pFinalValue;
 }
 
+void CheckForDivideByZero(const Node* const pNode)
+{
+	if (pNode == NULL)
+	{
+		return;
+	}
+
+	if (pNode->byNodeIdentifier == id_term && pNode->pSymbolTableEntry != NO_SYMBOLIC_LINK && pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_division)
+	{
+		if (pNode->pSecondChild->pFirstChild != NO_CHILD_NODE && pNode->pSecondChild->pFirstChild->byNodeIdentifier == id_constant)
+		{
+			if (pNode->pSecondChild->pFirstChild->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_INTEGER && pNode->pSecondChild->pFirstChild->pSymbolTableEntry->symbolDetails.constantDetails.value.i == 0)
+			{
+				CreateError(error_type_division_by_zero, NULL);
+			}
+			else if (pNode->pSecondChild->pFirstChild->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL && pNode->pSecondChild->pFirstChild->pSymbolTableEntry->symbolDetails.constantDetails.value.f == 0.0)
+			{
+				CreateError(error_type_division_by_zero, NULL);
+			}
+			return;
+		}
+	}
+
+	CheckForDivideByZero(pNode->pFirstChild);
+	CheckForDivideByZero(pNode->pSecondChild);
+	CheckForDivideByZero(pNode->pThirdChild);
+}
+
 void EvaluateTree(Node* pNode)
 {
 	if (pNode == NULL)
@@ -2467,28 +2487,34 @@ void EvaluateTree(Node* pNode)
 		if (bIsConst)
 		{
 			void* pValue = EvaluateConstantExpression(pNode, &iType);
-			Node* pParentNode = pNode->pParent;
-			if (pParentNode->pFirstChild == pNode)
+			if (pValue != NULL)
 			{
-				/*DeleteNode(pNode);*/
-				pParentNode->pFirstChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
-			}
-			else if (pParentNode->pSecondChild == pNode)
-			{
-				/*DeleteNode(pNode);*/
-				pParentNode->pSecondChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
-			}
-			else if (pParentNode->pThirdChild == pNode)
-			{
-				/*DeleteNode(pNode);*/
-				pParentNode->pThirdChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+				Node* pParentNode = pNode->pParent;
+				if (pParentNode->pFirstChild == pNode)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pFirstChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+				}
+				else if (pParentNode->pSecondChild == pNode)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pSecondChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+				}
+				else if (pParentNode->pThirdChild == pNode)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pThirdChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+				}
 			}
 			return;
 		}
 	}
 
+	g_bExitEvaluation = false;
 	EvaluateTree(pNode->pFirstChild);
+	g_bExitEvaluation = false;
 	EvaluateTree(pNode->pSecondChild);
+	g_bExitEvaluation = false;
 	EvaluateTree(pNode->pThirdChild);
 }
 
