@@ -273,8 +273,8 @@ program :
 		#endif
 
 		$$ = pParseTree;
-		EvaluateTree(pParseTree);
 		EvaluateVariableUsage();
+		EvaluateTree(pParseTree);
 		if (g_uiErrorCount == 0)
 		{
         	GenerateCode(pParseTree);
@@ -2365,27 +2365,27 @@ void EvaluateTree(Node* pNode)
 		return;
 	}
 
-	if (pNode->byNodeIdentifier == id_expression)
+	if (pNode->byNodeIdentifier == id_expression || pNode->byNodeIdentifier == id_term)
 	{
 		bool bIsConst = true;
 		int iType = 0;
-		void* pValue = EvaluateConstantExpression(EvaluateExpresion(pNode, &bIsConst), &iType);
-		if (iType == TYPE_INTEGER)
-		{
-			printf("Value: %d\n", *(int*)pValue);
-		}
-		else if (iType == TYPE_REAL)
-		{
-			printf("Value: %lf\n", *(double*)pValue);
-		}
-		else if (iType == TYPE_CHARACTER)
-		{
-			printf("Value: %d\n", *(int*)pValue);
-		}
-
+		EvaluateExpresion(pNode, &bIsConst);
 		if (bIsConst)
 		{
-			printf("Expression is const\n");
+			printf("Expression is const - ");
+			void* pValue = EvaluateConstantExpression(pNode, &iType);
+			if (iType == TYPE_INTEGER)
+			{
+				printf("Value: %d\n", *(int*)pValue);
+			}
+			else if (iType == TYPE_REAL)
+			{
+				printf("Value: %lf\n", *(double*)pValue);
+			}
+			else if (iType == TYPE_CHARACTER)
+			{
+				printf("Value: %d\n", *(int*)pValue);
+			}
 		}
 		else
 		{
