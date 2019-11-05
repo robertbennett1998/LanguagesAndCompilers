@@ -2,6 +2,7 @@ Operator:
 
 DECLARATIONS
     a OF TYPE CHARACTER;
+    b OF TYPE INTEGER;
 
 CODE
 
@@ -10,8 +11,10 @@ CODE
     2 * a -> a;
     2 / a -> a;
     'a' * 2 -> a;
+    97 * 2 -> a;
     'a' / 2 -> a;
     2 * 'a' -> a;
-    2 / 'a' -> a
+    2 / 'a' -> a;
+    2 * 'a' -> b
 
 ENDP Operator.
