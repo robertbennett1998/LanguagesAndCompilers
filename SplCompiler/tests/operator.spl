@@ -1,0 +1,17 @@
+Operator:
+
+DECLARATIONS
+    a OF TYPE CHARACTER;
+
+CODE
+
+    a * 2 -> a;
+    a / 2 -> a;
+    2 * a -> a;
+    2 / a -> a;
+    'a' * 2 -> a;
+    'a' / 2 -> a;
+    2 * 'a' -> a;
+    2 / 'a' -> a
+
+ENDP Operator.

@@ -210,7 +210,9 @@
 		error_type_variable_not_declared,
 		error_type_variable_redeclaration,
 		error_type_unexpected_symbol,
-		error_type_invalid_type_conversion
+		error_type_invalid_type_conversion_double_char,
+		error_type_invalid_operation_char_multipulcation,
+		error_type_invalid_operation_char_division
 	} ErrorTypes;
 
 	unsigned int g_uiErrorCount = 0;
@@ -382,7 +384,7 @@ assignment_statement :
 		int iExpressionType = GetFinalTypeOfExpression($1, -1);
 		if (iExpressionType == TYPE_REAL && $3->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 		{
-			CreateError(error_type_invalid_type_conversion, NULL);
+			CreateError(error_type_invalid_type_conversion_double_char, NULL);
 		} 
 		else if (iExpressionType == TYPE_INTEGER && $3->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 		{
@@ -420,9 +422,22 @@ expression :
 
 term :
 	term MULTIPULCATION_OPERATOR value {
+		int iTermType = GetFinalTypeOfExpression($1, -1);
+		int iValueType = GetFinalTypeOfExpression($3, -1);
+		if (iValueType == TYPE_CHARACTER || iTermType == TYPE_CHARACTER)
+		{
+			CreateError(error_type_invalid_operation_char_multipulcation, NULL);
+		}
+
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_multipulcation), id_term, $1, $3, NO_CHILD_NODE);
 	} |
 	term DIVISION_OPERATOR value {
+		int iTermType = GetFinalTypeOfExpression($1, -1);
+		int iValueType = GetFinalTypeOfExpression($3, -1);
+		if (iValueType == TYPE_CHARACTER || iTermType == TYPE_CHARACTER)
+		{
+			CreateError(error_type_invalid_operation_char_division, NULL);
+		}
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, $1, $3, NO_CHILD_NODE);
 	} |
 	value {
@@ -1922,8 +1937,16 @@ void CreateError(ErrorTypes errorType, const void* const pValue)
 			HANDLE_ERROR("Unexpected symbol (%s).", (char*)pValue);
 			break;
 
-		case error_type_invalid_type_conversion:
-			HANDLE_ERROR("Invalid type conversion.");
+		case error_type_invalid_type_conversion_double_char:
+			HANDLE_ERROR("Invalid type conversion (real to character).");
+			break;
+
+		case error_type_invalid_operation_char_multipulcation:
+			HANDLE_ERROR("Cannot apply the multipulcation operator to a character type.");
+			break;
+
+		case error_type_invalid_operation_char_division:
+			HANDLE_ERROR("Cannot apply the division operator to a character type.");
 			break;
 
 		default:
