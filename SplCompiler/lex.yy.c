@@ -1141,6 +1141,15 @@ case 51:
 YY_RULE_SETUP
 #line 135 "spl.l"
 {
+                            #ifndef PRINT
+                                int iCount = strlen(yytext);
+                                if (iCount > 50)
+                                {
+                                    CreateError(error_type_identifier_too_long, &iCount);
+                                    exit(1);
+                                }
+                            #endif
+
 							char* pIdentifier = malloc(strlen(yytext) + 5);
 							strcpy(pIdentifier, "spl_");
 							strcat(pIdentifier, yytext);
@@ -1150,7 +1159,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 143 "spl.l"
+#line 152 "spl.l"
 {
     #ifndef PRINT
         CreateError(error_type_unexpected_symbol, yytext);
@@ -1159,10 +1168,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 149 "spl.l"
+#line 158 "spl.l"
 ECHO;
 	YY_BREAK
-#line 1165 "lex.yy.c"
+#line 1174 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2167,7 +2176,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 149 "spl.l"
+#line 158 "spl.l"
 
 
 void PrintToken(const char* pToken)

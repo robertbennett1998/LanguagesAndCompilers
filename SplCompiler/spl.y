@@ -13,7 +13,7 @@
 	#define NO_VARIABLE_USAGE_NODE NULL
 	#define NO_ERRORS NULL
     #define UNKNOWN_SYMBOL_TYPE -1
-    #define MAX_IDENTIFIER_LENGTH 51 /*1 extra char for \0*/
+    #define MAX_IDENTIFIER_LENGTH 55 /*4 extra for spl_ 1 extra char for \0*/
 	#define SAFE_ASSIGN(ptr, var, val) if (ptr != NULL) { ptr->var = val; }
 
 	typedef struct _node Node;
@@ -213,7 +213,8 @@
 		error_type_invalid_type_conversion_double_char,
 		error_type_invalid_operation_char_multipulcation,
 		error_type_invalid_operation_char_division,
-		error_type_division_by_zero
+		error_type_division_by_zero,
+		error_type_identifier_too_long
 	} ErrorTypes;
 
 	unsigned int g_uiErrorCount = 0;
@@ -1353,7 +1354,6 @@ void Evaluate_StatementList(const Node* const pNode)
 			Indent();
 			printf("}\n");
 
-
 			break;
 		}
 
@@ -1950,6 +1950,14 @@ void CreateError(ErrorTypes errorType, const void* const pValue)
 
 		case error_type_invalid_operation_char_division:
 			HANDLE_ERROR("Cannot apply the division operator to a character type.");
+			break;
+
+		case error_type_identifier_too_long:
+			HANDLE_ERROR("Identifier is too long (%d characters). Max length is 50 characters.", *(int*)pValue);
+			break;
+
+		case error_type_division_by_zero:
+			HANDLE_ERROR("Division by constant zero. This is undefined.");
 			break;
 
 		default:

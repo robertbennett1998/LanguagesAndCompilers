@@ -133,6 +133,15 @@ identifier			        (?:(?:[a-zA-Z])[0-9]*)+
                                     #endif
                                 }
 {identifier}			{
+                            #ifndef PRINT
+                                int iCount = strlen(yytext);
+                                if (iCount > 50)
+                                {
+                                    CreateError(error_type_identifier_too_long, &iCount);
+                                    exit(1);
+                                }
+                            #endif
+
 							char* pIdentifier = malloc(strlen(yytext) + 5);
 							strcpy(pIdentifier, "spl_");
 							strcat(pIdentifier, yytext);
