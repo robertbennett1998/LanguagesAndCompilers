@@ -4,7 +4,7 @@ Calculator:
 DECLARATIONS
     space, period, bra, ket OF TYPE CHARACTER;
     choice OF TYPE CHARACTER;
-    iA, iB, iRes OF TYPE INTEGER;
+    i, iA, iB, iRes OF TYPE INTEGER;
     rA, rB, rRes OF TYPE REAL;
 
 CODE
@@ -19,7 +19,7 @@ CODE
 
     DO
         0 -> choice;
-        WRITE('P', 'l', 'e', 'a', 's', 'e', space , 's', 'e', 'l', 'e', 'c', 't', space , 'a', 'n', space , 'o', 'p', 'e', 'r', 'a', 't', 'i', 'o', 'n', period , space , 'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', space , bra , 'a', ket , period , space , 'S', 'u', 'b', 't', 'r', 'a', 'c', 't', 'i', 'o', 'n', space , bra , 's', ket , period , space , 'D', 'i', 'v', 'i', 's', 'i', 'o', 'n', space , bra , 'd', ket , period , space , 'M', 'u', 'l', 't', 'i', 'p', 'u', 'l', 'c', 'a', 't', 'i', 'o', 'n', space , bra , 'm', ket , period , space , 'O', 'r', space , 't', 'o', space , 'q', 'u', 'i', 't', space , bra , 'q', ket , period);
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space , 's', 'e', 'l', 'e', 'c', 't', space , 'a', 'n', space , 'o', 'p', 'e', 'r', 'a', 't', 'i', 'o', 'n', period , space , 'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', space , bra , 'a', ket , period , space , 'S', 'u', 'b', 't', 'r', 'a', 'c', 't', 'i', 'o', 'n', space , bra , 's', ket , period , space , 'D', 'i', 'v', 'i', 's', 'i', 'o', 'n', space , bra , 'd', ket , period , space , 'M', 'u', 'l', 't', 'i', 'p', 'u', 'l', 'c', 'a', 't', 'i', 'o', 'n', space , bra , 'm', ket , period, space, 'P', 'o', 'w', 'e', 'r', space, bra, 'p', ket, period, space , 'O', 'r', space , 't', 'o', space , 'q', 'u', 'i', 't', space , bra , 'q', ket , period);
         NEWLINE;
         READ(choice);
 
@@ -295,6 +295,44 @@ CODE
                             0 -> choice;
                         ENDIF
                     WHILE choice <> 'q' AND choice <> 0 ENDDO;
+                ENDIF
+            WHILE choice <> 'q' AND choice <> 0 ENDDO;
+        ENDIF;
+
+        IF choice = 'p' THEN
+            WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', space, 't', 'y', 'p', 'e', space, 'f', 'o', 'r', space, 't', 'h', 'e', space, 'f', 'i', 'r', 's', 't', space, 'o', 'p', 'e', 'r', 'a', 'n', 'd', space, 'o', 'f', space, 't', 'h', 'e', space, 'c', 'h', 'o', 's', 'e', 'n', space, 'o', 'p', 'e', 'r', 'a', 't', 'i', 'o', 'n', period, space, 'I', 'n', 't', 'e', 'g', 'e', 'r', space, bra, 'i', ket, period, space, 'R', 'e', 'a', 'l', space, bra, 'r', ket, period, space, 'O', 'r', space, 't', 'o', space, 'q', 'u', 'i', 't', space, bra, 'q', ket, period);
+            NEWLINE;
+            DO
+                READ(choice);
+                IF choice = 'i' THEN
+                    WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', 'n', space, 'i', 'n', 't', 'e', 'g', 'e', 'r', period);
+                    NEWLINE;
+                    READ(iA);
+                    WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', 'n', space, 'i', 'n', 't', 'e', 'g', 'e', 'r', period);
+                    NEWLINE;
+                    READ(iB);
+                    iA -> iRes;
+                    FOR i IS 1 BY 1 TO iB - 1 DO
+                        iA * iRes -> iRes;
+                    ENDFOR;
+                    WRITE('A', 'n', 's', 'w', 'e', 'r', period, space, iRes);
+                    NEWLINE;
+                    0 -> choice;
+                ENDIF;
+                IF choice = 'r' THEN
+                    WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', space, 'r', 'e', 'a', 'l', period);
+                    NEWLINE;
+                    READ(rA);
+                    WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', 'n', space, 'i', 'n', 't', 'e', 'g', 'e', 'r', period);
+                    NEWLINE;
+                    READ(iB);
+                    rA -> rRes;
+                    FOR i IS 1 BY 1 TO iB - 1 DO
+                            rA * rRes -> rRes;
+                    ENDFOR;
+                    WRITE('A', 'n', 's', 'w', 'e', 'r', period, space, rRes);
+                    NEWLINE;
+                    0 -> choice;
                 ENDIF
             WHILE choice <> 'q' AND choice <> 0 ENDDO;
         ENDIF
