@@ -1,0 +1,36 @@
+AssignmentOptimisation:
+
+DECLARATIONS
+
+a OF TYPE INTEGER;
+
+CODE
+
+    1 -> a;
+    2 -> a;
+    WRITE(a);
+    NEWLINE;
+
+    3 -> a;
+    a + 1 -> a;
+    WRITE(a);
+    NEWLINE;
+
+    READ(a);
+    4 -> a;
+    WRITE(a);
+    NEWLINE;
+
+    5 -> a;
+    READ(a);
+    6 -> a;
+    WRITE(a);
+    NEWLINE;
+
+    7 -> a;
+    READ(a);
+    a + 1 -> a;
+    WRITE(a);
+    NEWLINE
+
+ENDP AssignmentOptimisation.
