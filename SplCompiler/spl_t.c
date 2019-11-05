@@ -114,7 +114,7 @@
 		VariableUsageType usageType;
 		unsigned int uiLine;
 		unsigned int uiPos;
-		Node* pUsageNode;
+		Node* pParentNode;
 		struct _variableUsageDetails * pNextUsage;
 		struct _variableUsageDetails * pPrevUsage;
 	} VariableUsageDetails;
@@ -129,10 +129,10 @@
     } VariableDetails;
 
 	void EvaluateVariableUsage();
-	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
-	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
-	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
-	void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode);
+	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
+	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
+	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
+	void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pParentNode);
 
     typedef struct _constantDetails
     {
@@ -638,7 +638,7 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   129
+#define YYLAST   128
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  51
@@ -647,7 +647,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  59
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  121
+#define YYNSTATES  120
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -759,19 +759,18 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-     -28,    13,    30,    55,   -49,     7,    -1,    66,   -49,     0,
-     -49,     3,    33,    -1,    33,    12,   -49,    61,    77,    58,
-      67,   -49,   -49,   -49,   -49,   -49,    62,   -49,   -49,   -49,
-      28,    48,   -49,   -49,   -49,   -49,   -49,   -49,   -49,   -49,
-      68,    -1,   -49,   104,    69,    33,    53,    21,   -49,   -10,
-      74,    93,    58,    70,   -24,   -49,    -1,    71,    58,    58,
-      58,    58,    80,   -49,   103,   -49,   -49,   -49,   -49,   -49,
-     -49,   -49,   -49,    58,    -1,    33,    33,    33,    -1,    -1,
-      58,   -49,    35,    85,   -49,   -49,   -49,    48,    48,   -49,
-     -49,   -49,   -49,   -49,   -49,    83,    57,     1,   -49,   -49,
-      59,   105,     8,   -49,    58,   -49,   -49,    -1,   -49,   -49,
-     -49,    58,   -49,   110,   -19,   -49,    58,    11,    -1,   101,
-     -49
+     -41,   -22,    21,    20,   -49,   -19,    63,    32,   -49,    -4,
+     -49,    -5,     0,    63,     0,     1,   -49,     8,    17,    71,
+      23,   -49,   -49,   -49,   -49,   -49,    39,   -49,   -49,   -49,
+     -14,    -7,   -49,   -49,   -49,   -49,   -49,   -49,   -49,   -49,
+      49,    63,   -49,    60,    52,     0,    43,    46,   -49,    84,
+      41,    82,    71,    59,   -24,   -49,    63,    64,    71,    71,
+      71,    71,    74,   -49,    88,   -49,   -49,   -49,   -49,   -49,
+     -49,   -49,   -49,    71,    63,     0,     0,     0,    63,    71,
+     -49,    45,    79,   -49,   -49,   -49,    -7,    -7,   -49,   -49,
+     -49,   -49,   -49,   -49,    81,    54,     7,   -49,   -49,    36,
+     102,    -1,   -49,    71,   -49,   -49,    63,   -49,   -49,   -49,
+      71,   -49,   109,   -17,   -49,    71,    -3,    63,    99,   -49
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -787,26 +786,25 @@ static const yytype_uint8 yydefact[] =
        0,     0,     0,     0,     0,    37,    14,     0,     0,     0,
        0,     0,     0,     3,     0,     9,    56,    43,    44,    45,
       46,    47,    48,     0,     0,     0,     0,     0,     0,     0,
-       0,    41,     0,     0,    26,    16,    25,    30,    29,    33,
-      32,     2,    10,    11,    12,     0,    55,     0,    53,    54,
-       0,     0,     0,    39,     0,    49,     7,     0,    50,    59,
-      58,     0,    42,     0,     0,    51,     0,     0,     0,     0,
-      57
+      41,     0,     0,    26,    16,    25,    30,    29,    33,    32,
+       2,    10,    11,    12,     0,    55,     0,    53,    54,     0,
+       0,     0,    39,     0,    49,     7,     0,    50,    59,    58,
+       0,    42,     0,     0,    51,     0,     0,     0,     0,    57
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -49,   -49,   -49,   -49,   119,   -49,   -49,   -40,   116,   -33,
-     -49,   -48,   -12,    54,   -49,   -49,   -49,   -49,   -49,   -49,
-     -49,   -11,   -35,   -49,   -49,   -49
+     -49,   -49,   -49,   -49,   117,   -49,   -49,   -13,   -49,    72,
+     -49,   -48,    -9,    30,   -49,   -49,   -49,   -49,   -49,   -49,
+     -49,    -8,   -43,   -49,   -49,   -49
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     7,     9,    10,    11,    95,    25,    26,    27,
-      28,    29,    30,    31,    32,    33,    82,    73,    34,    35,
+      -1,     2,     7,     9,    10,    11,    94,    25,    26,    27,
+      28,    29,    30,    31,    32,    33,    81,    73,    34,    35,
       36,    47,    48,    37,    38,    39
 };
 
@@ -815,36 +813,36 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      46,    63,    46,    50,    81,    41,   116,    54,    12,    77,
-      66,   107,    89,    90,    84,    43,   108,    13,    14,    58,
-      59,    15,     1,    85,    58,    59,    16,    17,    18,   118,
-       4,    78,   111,    46,    97,    74,    19,    75,    76,   101,
-      98,    99,    44,    20,    45,    85,    21,    22,    23,    24,
-       8,    58,    59,     3,    58,    59,   112,     8,    57,     5,
-       6,    96,    51,    46,    46,    46,   100,   113,   102,    40,
-      19,    58,    59,   103,   104,    75,    76,    20,   119,   109,
-      21,    22,    23,    24,    67,    68,    69,    70,    71,    72,
-      75,    76,    79,    60,    61,    19,    58,    59,    52,   114,
-      58,    59,    20,    56,   117,    21,    22,    23,    24,    92,
-      93,    94,    87,    88,    53,    55,    80,    64,    62,    65,
-      83,    86,    91,   105,   106,   115,   110,   120,    42,    49
+      49,    41,    66,    46,    80,    46,    50,    43,   115,     1,
+      54,    45,    88,    89,    83,   117,    57,   106,     3,    58,
+      59,     4,   107,   110,     5,     6,    58,    59,    63,    58,
+      59,     8,    97,    98,    44,    40,    46,    19,    60,    61,
+      58,    59,    58,    59,    20,    52,     8,    21,    22,    23,
+      24,    51,    75,    76,    53,   111,   108,    75,    76,    78,
+      74,    96,    75,    76,    95,   100,    46,    46,    46,    99,
+     101,    55,    12,    64,    67,    68,    69,    70,    71,    72,
+      56,    13,    14,   102,   103,    15,    58,    59,    86,    87,
+      16,    17,    18,   112,    91,    92,    93,    58,    59,    62,
+      19,   113,    65,    77,   118,    79,   116,    20,    19,    82,
+      21,    22,    23,    24,    85,    20,    90,   104,    21,    22,
+      23,    24,   105,   109,   114,   119,    42,     0,    84
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
-      12,    41,    14,    14,    52,     5,    25,    19,     9,    19,
-      45,    10,    60,    61,    38,    12,    15,    18,    19,    43,
-      44,    22,    50,    56,    43,    44,    27,    28,    29,    18,
-       0,    41,    24,    45,    74,    14,    37,    16,    17,    79,
-      75,    76,    39,    44,    11,    78,    47,    48,    49,    50,
-      50,    43,    44,    40,    43,    44,   104,    50,    30,     4,
-       5,    73,    50,    75,    76,    77,    77,   107,    80,     3,
-      37,    43,    44,    38,    39,    16,    17,    44,   118,    20,
-      47,    48,    49,    50,    31,    32,    33,    34,    35,    36,
-      16,    17,    18,    45,    46,    37,    43,    44,    37,   111,
-      43,    44,    44,    41,   116,    47,    48,    49,    50,     6,
-       7,     8,    58,    59,    37,    48,    23,    13,    50,    50,
-      50,    50,    42,    38,    41,    15,    21,    26,     9,    13
+      13,     5,    45,    12,    52,    14,    14,    12,    25,    50,
+      19,    11,    60,    61,    38,    18,    30,    10,    40,    43,
+      44,     0,    15,    24,     4,     5,    43,    44,    41,    43,
+      44,    50,    75,    76,    39,     3,    45,    37,    45,    46,
+      43,    44,    43,    44,    44,    37,    50,    47,    48,    49,
+      50,    50,    16,    17,    37,   103,    20,    16,    17,    18,
+      14,    74,    16,    17,    73,    78,    75,    76,    77,    77,
+      79,    48,     9,    13,    31,    32,    33,    34,    35,    36,
+      41,    18,    19,    38,    39,    22,    43,    44,    58,    59,
+      27,    28,    29,   106,     6,     7,     8,    43,    44,    50,
+      37,   110,    50,    19,   117,    23,   115,    44,    37,    50,
+      47,    48,    49,    50,    50,    44,    42,    38,    47,    48,
+      49,    50,    41,    21,    15,    26,     9,    -1,    56
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -855,15 +853,14 @@ static const yytype_uint8 yystos[] =
       55,    56,     9,    18,    19,    22,    27,    28,    29,    37,
       44,    47,    48,    49,    50,    58,    59,    60,    61,    62,
       63,    64,    65,    66,    69,    70,    71,    74,    75,    76,
-       3,     5,    55,    12,    39,    11,    63,    72,    73,    59,
+       3,     5,    55,    12,    39,    11,    63,    72,    73,    58,
       72,    50,    37,    37,    63,    48,    41,    30,    43,    44,
       45,    46,    50,    58,    13,    50,    73,    31,    32,    33,
-      34,    35,    36,    68,    14,    16,    17,    19,    41,    18,
-      23,    62,    67,    50,    38,    60,    50,    64,    64,    62,
-      62,    42,     6,     7,     8,    57,    63,    58,    73,    73,
-      72,    58,    63,    38,    39,    38,    41,    10,    15,    20,
-      21,    24,    62,    58,    63,    15,    25,    63,    18,    58,
-      26
+      34,    35,    36,    68,    14,    16,    17,    19,    18,    23,
+      62,    67,    50,    38,    60,    50,    64,    64,    62,    62,
+      42,     6,     7,     8,    57,    63,    58,    73,    73,    72,
+      58,    63,    38,    39,    38,    41,    10,    15,    20,    21,
+      24,    62,    58,    63,    15,    25,    63,    18,    58,    26
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -1603,7 +1600,7 @@ yyreduce:
         	GenerateCode(pParseTree);
 		}
 	}
-#line 1607 "spl_t.c" /* yacc.c:1646  */
+#line 1604 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 3:
@@ -1611,7 +1608,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_block, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1615 "spl_t.c" /* yacc.c:1646  */
+#line 1612 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 4:
@@ -1619,7 +1616,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_block, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1623 "spl_t.c" /* yacc.c:1646  */
+#line 1620 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 5:
@@ -1627,7 +1624,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration_block, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1631 "spl_t.c" /* yacc.c:1646  */
+#line 1628 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 6:
@@ -1635,7 +1632,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration_block, (yyvsp[-1].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1639 "spl_t.c" /* yacc.c:1646  */
+#line 1636 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 7:
@@ -1651,7 +1648,7 @@ yyreduce:
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 	}
-#line 1655 "spl_t.c" /* yacc.c:1646  */
+#line 1652 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 8:
@@ -1659,7 +1656,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_identifier_list, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1663 "spl_t.c" /* yacc.c:1646  */
+#line 1660 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 9:
@@ -1667,7 +1664,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_identifier_list, (yyvsp[-2].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1671 "spl_t.c" /* yacc.c:1646  */
+#line 1668 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 10:
@@ -1675,7 +1672,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_CHARACTER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1679 "spl_t.c" /* yacc.c:1646  */
+#line 1676 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 11:
@@ -1683,7 +1680,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_INTEGER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1687 "spl_t.c" /* yacc.c:1646  */
+#line 1684 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 12:
@@ -1691,7 +1688,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_REAL), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1695 "spl_t.c" /* yacc.c:1646  */
+#line 1692 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 13:
@@ -1699,7 +1696,7 @@ yyreduce:
     {
 		(yyval.pNode) = (yyvsp[0].pNode);
 	}
-#line 1703 "spl_t.c" /* yacc.c:1646  */
+#line 1700 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 14:
@@ -1710,7 +1707,7 @@ yyreduce:
 		g_uiCurrentLineNumber++;
 		(yyval.pNode) = (yyvsp[-1].pNode);
 	}
-#line 1714 "spl_t.c" /* yacc.c:1646  */
+#line 1711 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 15:
@@ -1718,7 +1715,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement_list, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1722 "spl_t.c" /* yacc.c:1646  */
+#line 1719 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 16:
@@ -1726,7 +1723,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement_list, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1730 "spl_t.c" /* yacc.c:1646  */
+#line 1727 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 17:
@@ -1734,7 +1731,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1738 "spl_t.c" /* yacc.c:1646  */
+#line 1735 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 18:
@@ -1742,7 +1739,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1746 "spl_t.c" /* yacc.c:1646  */
+#line 1743 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 19:
@@ -1750,7 +1747,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1754 "spl_t.c" /* yacc.c:1646  */
+#line 1751 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 20:
@@ -1758,7 +1755,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1762 "spl_t.c" /* yacc.c:1646  */
+#line 1759 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 21:
@@ -1766,7 +1763,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1770 "spl_t.c" /* yacc.c:1646  */
+#line 1767 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 22:
@@ -1774,7 +1771,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1778 "spl_t.c" /* yacc.c:1646  */
+#line 1775 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 23:
@@ -1782,7 +1779,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1786 "spl_t.c" /* yacc.c:1646  */
+#line 1783 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 24:
@@ -1790,7 +1787,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1794 "spl_t.c" /* yacc.c:1646  */
+#line 1791 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 25:
@@ -1813,7 +1810,7 @@ yyreduce:
 			HANDLE_WARNING("A real has been assigned to a variable of type integer, this may cause a loss of precision.");
 		}
 	}
-#line 1817 "spl_t.c" /* yacc.c:1646  */
+#line 1814 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 26:
@@ -1821,7 +1818,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_value, (yyvsp[-1].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1825 "spl_t.c" /* yacc.c:1646  */
+#line 1822 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 27:
@@ -1831,7 +1828,7 @@ yyreduce:
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableUsedEntry((yyvsp[0].pSymbolTableEntry), pNode);
 	}
-#line 1835 "spl_t.c" /* yacc.c:1646  */
+#line 1832 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 28:
@@ -1839,7 +1836,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_value, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1843 "spl_t.c" /* yacc.c:1646  */
+#line 1840 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 29:
@@ -1847,7 +1844,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1851 "spl_t.c" /* yacc.c:1646  */
+#line 1848 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 30:
@@ -1855,7 +1852,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1859 "spl_t.c" /* yacc.c:1646  */
+#line 1856 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 31:
@@ -1863,7 +1860,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_expression, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1867 "spl_t.c" /* yacc.c:1646  */
+#line 1864 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 32:
@@ -1871,7 +1868,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_multipulcation), id_term, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1875 "spl_t.c" /* yacc.c:1646  */
+#line 1872 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 33:
@@ -1879,7 +1876,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1883 "spl_t.c" /* yacc.c:1646  */
+#line 1880 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 34:
@@ -1887,7 +1884,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_term, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1891 "spl_t.c" /* yacc.c:1646  */
+#line 1888 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 35:
@@ -1906,7 +1903,7 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &(yyvsp[0].fVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1910 "spl_t.c" /* yacc.c:1646  */
+#line 1907 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 36:
@@ -1920,7 +1917,7 @@ yyreduce:
 		
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &(yyvsp[0].iVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1924 "spl_t.c" /* yacc.c:1646  */
+#line 1921 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 37:
@@ -1936,7 +1933,7 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &(yyvsp[0].iVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1940 "spl_t.c" /* yacc.c:1646  */
+#line 1937 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 38:
@@ -1944,7 +1941,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &(yyvsp[0].cVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1948 "spl_t.c" /* yacc.c:1646  */
+#line 1945 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 39:
@@ -1952,7 +1949,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, (yyvsp[-1].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1956 "spl_t.c" /* yacc.c:1646  */
+#line 1953 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 40:
@@ -1960,7 +1957,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1964 "spl_t.c" /* yacc.c:1646  */
+#line 1961 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 41:
@@ -1968,7 +1965,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_output_list, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1972 "spl_t.c" /* yacc.c:1646  */
+#line 1969 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 42:
@@ -1976,7 +1973,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_output_list, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1980 "spl_t.c" /* yacc.c:1646  */
+#line 1977 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 43:
@@ -1984,7 +1981,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_equality), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1988 "spl_t.c" /* yacc.c:1646  */
+#line 1985 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 44:
@@ -1992,7 +1989,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1996 "spl_t.c" /* yacc.c:1646  */
+#line 1993 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 45:
@@ -2000,7 +1997,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2004 "spl_t.c" /* yacc.c:1646  */
+#line 2001 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 46:
@@ -2008,7 +2005,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2012 "spl_t.c" /* yacc.c:1646  */
+#line 2009 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 47:
@@ -2016,7 +2013,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2020 "spl_t.c" /* yacc.c:1646  */
+#line 2017 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 48:
@@ -2024,7 +2021,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2028 "spl_t.c" /* yacc.c:1646  */
+#line 2025 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 49:
@@ -2034,7 +2031,7 @@ yyreduce:
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[-1].pSymbolTableEntry), id_read_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableAssignedEntry((yyvsp[-1].pSymbolTableEntry), pNode);
 	}
-#line 2038 "spl_t.c" /* yacc.c:1646  */
+#line 2035 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 50:
@@ -2042,7 +2039,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_if_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2046 "spl_t.c" /* yacc.c:1646  */
+#line 2043 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 51:
@@ -2050,7 +2047,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_if_else_statement, (yyvsp[-5].pNode), (yyvsp[-3].pNode), (yyvsp[-1].pNode));
 	}
-#line 2054 "spl_t.c" /* yacc.c:1646  */
+#line 2051 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 52:
@@ -2058,7 +2055,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_conditional, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2062 "spl_t.c" /* yacc.c:1646  */
+#line 2059 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 53:
@@ -2066,7 +2063,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2070 "spl_t.c" /* yacc.c:1646  */
+#line 2067 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 54:
@@ -2074,7 +2071,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2078 "spl_t.c" /* yacc.c:1646  */
+#line 2075 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 55:
@@ -2082,7 +2079,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_comparison, (yyvsp[-2].pNode), (yyvsp[-1].pNode), (yyvsp[0].pNode));
 	}
-#line 2086 "spl_t.c" /* yacc.c:1646  */
+#line 2083 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 56:
@@ -2090,7 +2087,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_comparison, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2094 "spl_t.c" /* yacc.c:1646  */
+#line 2091 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 57:
@@ -2101,7 +2098,7 @@ yyreduce:
 		CreateVariableAssignedEntry((yyvsp[-9].pSymbolTableEntry), pNode);
 		CreateVariableUsedEntry((yyvsp[-9].pSymbolTableEntry), pNode);
 	}
-#line 2105 "spl_t.c" /* yacc.c:1646  */
+#line 2102 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 58:
@@ -2109,7 +2106,7 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_while_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2113 "spl_t.c" /* yacc.c:1646  */
+#line 2110 "spl_t.c" /* yacc.c:1646  */
     break;
 
   case 59:
@@ -2117,11 +2114,11 @@ yyreduce:
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2121 "spl_t.c" /* yacc.c:1646  */
+#line 2118 "spl_t.c" /* yacc.c:1646  */
     break;
 
 
-#line 2125 "spl_t.c" /* yacc.c:1646  */
+#line 2122 "spl_t.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2831,10 +2828,10 @@ void Evaluate(const Node* const pNode)
 		case id_program:
 		{
 			g_iIndentLevel = 0;
-			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tdo\n\t{\n\t\tc = getchar();\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tfprintf(stderr, \"\\nWARNING: Discarding the following invalid input/extra characters from the stdin stream: \");\n\tdo\n\t{\n\t\tc = getchar();\n\t\tif (c != EOF)\n\t\t{\n\t\t\tfprintf(stderr,\"%%c\", c);\n\t\t}\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			Evaluate(pNode->pFirstChild);
 			printf("}\n\n");
-			printf("int main()\n{\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("int main()\n{\n\tfprintf(stderr, \"----------------RUNTIME WARNINGS & ERRORS----------------\");\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			break;
 		}
 
@@ -2878,14 +2875,68 @@ void GenerateCode(const Node* const pStartNode)
 	Evaluate(pStartNode);
 }
 
+void WriteReadStatement(const Node* const pNode, const char* pFormat)
+{
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("char _spl_bDiscardedCharsFlag = 0;\n");
+	Indent();
+	printf("while (scanf(\"%s\", &%s) != 1)\n", pFormat, pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("char c = getchar();\n");
+	Indent();
+	printf("if (c == '\\n' || c == ' ' || c == EOF)\n");
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("break;\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("}\n");
+	Indent();
+	printf("if (_spl_bDiscardedCharsFlag == 0)\n");
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("fprintf(stderr, \"\\nWARNING: Discarding the following invalid input/extra characters from the stdin stream: \");\n");
+	Indent();
+	printf("_spl_bDiscardedCharsFlag = 1;\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("}\n");
+	Indent();
+	printf("fprintf(stderr,\"%%c\", c);\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("};\n");
+
+	Indent();
+	printf("_spl_flush_stdin();\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("}\n");
+}
+
 void Evaluate_StatementList(const Node* const pNode)
 {
+	if (pNode == NULL)
+		return;
+
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_statement_list:
 		{
-			Evaluate_StatementList(pNode->pFirstChild);
-
+			if (pNode->pFirstChild != NO_CHILD_NODE)
+			{
+				Evaluate_StatementList(pNode->pFirstChild);
+			}
 			if (pNode->pSecondChild != NO_CHILD_NODE)
 			{
 				Evaluate_StatementList(pNode->pSecondChild);
@@ -2918,42 +2969,20 @@ void Evaluate_StatementList(const Node* const pNode)
 
 		case id_read_statement:
 		{
-			Indent();
-			printf("while (scanf(\"");
+			
 			if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 			{
-				printf(" %%c");
+				WriteReadStatement(pNode, " %c");
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
 			{
-				printf("%%d");
+				WriteReadStatement(pNode, "%d");
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
 			{
-				printf("%%lf");
+				WriteReadStatement(pNode, "%lf");
 			}
-			printf("\", &%s) != 1)\n", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
-			Indent();
-			printf("{\n");
-			g_iIndentLevel++;
-			Indent();
-			printf("char c = getchar();\n");
-			Indent();
-			printf("if (c == '\\n' || c == ' ' || c == EOF)\n");
-			Indent();
-			printf("{\n");
-			g_iIndentLevel++;
-			Indent();
-			printf("break;\n");
-			g_iIndentLevel--;
-			Indent();
-			printf("}\n");
-			g_iIndentLevel--;
-			Indent();
-			printf("};\n");
 
-			Indent();
-			printf("_spl_flush_stdin();\n");
 			break;
 		}
 
@@ -3713,38 +3742,61 @@ void EvaluateVariableUsage()
 				continue;
 			}
 
-			VariableUsageDetails* pUsageNode = pVariableDetails->pFirstUsage->pNextUsage;
+			VariableUsageDetails* pUsage = pVariableDetails->pFirstUsage->pNextUsage;
 			bool bUsedOnce = false, bUsed = false;
 			VariableUsageDetails* pAssigned = NO_VARIABLE_USAGE_NODE;
-			while (pUsageNode != NO_VARIABLE_USAGE_NODE)
+			while (pUsage != NO_VARIABLE_USAGE_NODE)
 			{
-				if (pUsageNode->usageType == variable_usage_declaration)
+				if (pUsage->usageType == variable_usage_declaration)
 				{
 					CreateError(error_type_variable_redeclaration, pVariableIdentifier);
 					break;
 				}
-				else if (pUsageNode->usageType == variable_usage_assignment)
+				else if (pUsage->usageType == variable_usage_assignment)
 				{
-					if (pUsageNode->pPrevUsage->usageType == variable_usage_assignment && bUsed == false)
+					if (pUsage->pPrevUsage->usageType == variable_usage_assignment && bUsed == false)
 					{
-						HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant.", pVariableIdentifier, pUsageNode->pPrevUsage->uiLine, pUsageNode->pPrevUsage->uiPos);
+						/*Find statement*/
+						Node* pStatement = pUsage->pPrevUsage->pParentNode;
+						while (pStatement->byNodeIdentifier != id_statement)
+						{
+							pStatement = pStatement->pParent;
+						};
+
+						if (pStatement == pStatement->pParent->pFirstChild)
+						{
+							pStatement->pParent->pFirstChild = NO_CHILD_NODE;
+						}
+						else if (pStatement == pStatement->pParent->pSecondChild)
+						{
+							pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+						}
+
+						if (pStatement->pFirstChild->byNodeIdentifier == id_read_statement)
+						{
+							HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant; therefore, this statement has been optimised out. Warning this was a read statement.", pVariableIdentifier, pUsage->pPrevUsage->uiLine, pUsage->pPrevUsage->uiPos);
+						}
+						else
+						{
+							HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant; therefore, this statement has been optimised out.", pVariableIdentifier, pUsage->pPrevUsage->uiLine, pUsage->pPrevUsage->uiPos);
+						}
 					}
 
 					bUsed = false;
-					pAssigned = pUsageNode;
+					pAssigned = pUsage;
 				}
-				else if (pUsageNode->usageType == variable_usage_used)
+				else if (pUsage->usageType == variable_usage_used)
 				{
 					if (pAssigned == NO_VARIABLE_USAGE_NODE)
 					{
-						HANDLE_WARNING("Variable %s is used at line: %d | pos: %d before it has been assigned to. It will have a default value of 1.", pVariableIdentifier, pUsageNode->pPrevUsage->uiLine, pUsageNode->pPrevUsage->uiPos);
+						HANDLE_WARNING("Variable %s is used at line: %d | pos: %d before it has been assigned to. It will have a default value of 1.", pVariableIdentifier, pUsage->pPrevUsage->uiLine, pUsage->pPrevUsage->uiPos);
 					}
 
 					bUsed = true;
 					bUsedOnce = true;
 				}
 
-				pUsageNode = pUsageNode->pNextUsage;
+				pUsage = pUsage->pNextUsage;
 			};
 
 			if (bUsedOnce == false)
@@ -3761,35 +3813,35 @@ void EvaluateVariableUsage()
 	};
 }
 
-void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pParentNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
 	pUsageDetails->usageType = variable_usage_declaration;
-	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pParentNode);
 }
 
-void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pParentNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
 	pUsageDetails->usageType = variable_usage_assignment;
-	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pParentNode);
 }
 
-void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pParentNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
 	pUsageDetails->usageType = variable_usage_used;
-	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pParentNode);
 }
 
-void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode)
+void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pParentNode)
 {
 	pUsageDetails->uiLine = g_uiCurrentLineNumber;
 	pUsageDetails->uiPos = g_ulCurrentLinePosition;
-	pUsageDetails->pUsageNode = pUsageNode;
+	pUsageDetails->pParentNode = pParentNode;
 	pUsageDetails->pNextUsage = NO_VARIABLE_USAGE_NODE;
 	pUsageDetails->pPrevUsage = NO_VARIABLE_USAGE_NODE;
 

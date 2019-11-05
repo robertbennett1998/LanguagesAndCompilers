@@ -31,5 +31,5 @@ int main(void)
 void yyerror(const char *s) 
 {
 	HANDLE_ERROR("%s.", s);
-	exit(-1);
+	exit(1);
 }

@@ -49,7 +49,7 @@
 		VariableUsageType usageType;
 		unsigned int uiLine;
 		unsigned int uiPos;
-		Node* pUsageNode;
+		Node* pParentNode;
 		struct _variableUsageDetails * pNextUsage;
 		struct _variableUsageDetails * pPrevUsage;
 	} VariableUsageDetails;
@@ -64,10 +64,10 @@
     } VariableDetails;
 
 	void EvaluateVariableUsage();
-	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
-	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
-	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode);
-	void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode);
+	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
+	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
+	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
+	void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pParentNode);
 
     typedef struct _constantDetails
     {
@@ -1035,10 +1035,10 @@ void Evaluate(const Node* const pNode)
 		case id_program:
 		{
 			g_iIndentLevel = 0;
-			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tdo\n\t{\n\t\tc = getchar();\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tfprintf(stderr, \"\\nWARNING: Discarding the following invalid input/extra characters from the stdin stream: \");\n\tdo\n\t{\n\t\tc = getchar();\n\t\tif (c != EOF)\n\t\t{\n\t\t\tfprintf(stderr,\"%%c\", c);\n\t\t}\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			Evaluate(pNode->pFirstChild);
 			printf("}\n\n");
-			printf("int main()\n{\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("int main()\n{\n\tfprintf(stderr, \"----------------RUNTIME WARNINGS & ERRORS----------------\");\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			break;
 		}
 
@@ -1082,14 +1082,68 @@ void GenerateCode(const Node* const pStartNode)
 	Evaluate(pStartNode);
 }
 
+void WriteReadStatement(const Node* const pNode, const char* pFormat)
+{
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("char _spl_bDiscardedCharsFlag = 0;\n");
+	Indent();
+	printf("while (scanf(\"%s\", &%s) != 1)\n", pFormat, pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("char c = getchar();\n");
+	Indent();
+	printf("if (c == '\\n' || c == ' ' || c == EOF)\n");
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("break;\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("}\n");
+	Indent();
+	printf("if (_spl_bDiscardedCharsFlag == 0)\n");
+	Indent();
+	printf("{\n");
+	g_iIndentLevel++;
+	Indent();
+	printf("fprintf(stderr, \"\\nWARNING: Discarding the following invalid input/extra characters from the stdin stream: \");\n");
+	Indent();
+	printf("_spl_bDiscardedCharsFlag = 1;\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("}\n");
+	Indent();
+	printf("fprintf(stderr,\"%%c\", c);\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("};\n");
+
+	Indent();
+	printf("_spl_flush_stdin();\n");
+	g_iIndentLevel--;
+	Indent();
+	printf("}\n");
+}
+
 void Evaluate_StatementList(const Node* const pNode)
 {
+	if (pNode == NULL)
+		return;
+
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_statement_list:
 		{
-			Evaluate_StatementList(pNode->pFirstChild);
-
+			if (pNode->pFirstChild != NO_CHILD_NODE)
+			{
+				Evaluate_StatementList(pNode->pFirstChild);
+			}
 			if (pNode->pSecondChild != NO_CHILD_NODE)
 			{
 				Evaluate_StatementList(pNode->pSecondChild);
@@ -1122,42 +1176,20 @@ void Evaluate_StatementList(const Node* const pNode)
 
 		case id_read_statement:
 		{
-			Indent();
-			printf("while (scanf(\"");
+			
 			if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 			{
-				printf(" %%c");
+				WriteReadStatement(pNode, " %c");
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
 			{
-				printf("%%d");
+				WriteReadStatement(pNode, "%d");
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
 			{
-				printf("%%lf");
+				WriteReadStatement(pNode, "%lf");
 			}
-			printf("\", &%s) != 1)\n", pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
-			Indent();
-			printf("{\n");
-			g_iIndentLevel++;
-			Indent();
-			printf("char c = getchar();\n");
-			Indent();
-			printf("if (c == '\\n' || c == ' ' || c == EOF)\n");
-			Indent();
-			printf("{\n");
-			g_iIndentLevel++;
-			Indent();
-			printf("break;\n");
-			g_iIndentLevel--;
-			Indent();
-			printf("}\n");
-			g_iIndentLevel--;
-			Indent();
-			printf("};\n");
 
-			Indent();
-			printf("_spl_flush_stdin();\n");
 			break;
 		}
 
@@ -1917,38 +1949,61 @@ void EvaluateVariableUsage()
 				continue;
 			}
 
-			VariableUsageDetails* pUsageNode = pVariableDetails->pFirstUsage->pNextUsage;
+			VariableUsageDetails* pUsage = pVariableDetails->pFirstUsage->pNextUsage;
 			bool bUsedOnce = false, bUsed = false;
 			VariableUsageDetails* pAssigned = NO_VARIABLE_USAGE_NODE;
-			while (pUsageNode != NO_VARIABLE_USAGE_NODE)
+			while (pUsage != NO_VARIABLE_USAGE_NODE)
 			{
-				if (pUsageNode->usageType == variable_usage_declaration)
+				if (pUsage->usageType == variable_usage_declaration)
 				{
 					CreateError(error_type_variable_redeclaration, pVariableIdentifier);
 					break;
 				}
-				else if (pUsageNode->usageType == variable_usage_assignment)
+				else if (pUsage->usageType == variable_usage_assignment)
 				{
-					if (pUsageNode->pPrevUsage->usageType == variable_usage_assignment && bUsed == false)
+					if (pUsage->pPrevUsage->usageType == variable_usage_assignment && bUsed == false)
 					{
-						HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant.", pVariableIdentifier, pUsageNode->pPrevUsage->uiLine, pUsageNode->pPrevUsage->uiPos);
+						/*Find statement*/
+						Node* pStatement = pUsage->pPrevUsage->pParentNode;
+						while (pStatement->byNodeIdentifier != id_statement)
+						{
+							pStatement = pStatement->pParent;
+						};
+
+						if (pStatement == pStatement->pParent->pFirstChild)
+						{
+							pStatement->pParent->pFirstChild = NO_CHILD_NODE;
+						}
+						else if (pStatement == pStatement->pParent->pSecondChild)
+						{
+							pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+						}
+
+						if (pStatement->pFirstChild->byNodeIdentifier == id_read_statement)
+						{
+							HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant; therefore, this statement has been optimised out. Warning this was a read statement.", pVariableIdentifier, pUsage->pPrevUsage->uiLine, pUsage->pPrevUsage->uiPos);
+						}
+						else
+						{
+							HANDLE_WARNING("Previous usage of variable %s was an assignment, therefore the assignment at line: %d | pos: %d was redundant; therefore, this statement has been optimised out.", pVariableIdentifier, pUsage->pPrevUsage->uiLine, pUsage->pPrevUsage->uiPos);
+						}
 					}
 
 					bUsed = false;
-					pAssigned = pUsageNode;
+					pAssigned = pUsage;
 				}
-				else if (pUsageNode->usageType == variable_usage_used)
+				else if (pUsage->usageType == variable_usage_used)
 				{
 					if (pAssigned == NO_VARIABLE_USAGE_NODE)
 					{
-						HANDLE_WARNING("Variable %s is used at line: %d | pos: %d before it has been assigned to. It will have a default value of 1.", pVariableIdentifier, pUsageNode->pPrevUsage->uiLine, pUsageNode->pPrevUsage->uiPos);
+						HANDLE_WARNING("Variable %s is used at line: %d | pos: %d before it has been assigned to. It will have a default value of 1.", pVariableIdentifier, pUsage->pPrevUsage->uiLine, pUsage->pPrevUsage->uiPos);
 					}
 
 					bUsed = true;
 					bUsedOnce = true;
 				}
 
-				pUsageNode = pUsageNode->pNextUsage;
+				pUsage = pUsage->pNextUsage;
 			};
 
 			if (bUsedOnce == false)
@@ -1965,35 +2020,35 @@ void EvaluateVariableUsage()
 	};
 }
 
-void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pParentNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
 	pUsageDetails->usageType = variable_usage_declaration;
-	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pParentNode);
 }
 
-void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pParentNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
 	pUsageDetails->usageType = variable_usage_assignment;
-	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pParentNode);
 }
 
-void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pUsageNode)
+void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pParentNode)
 {
 	VariableDetails* pVariableDetails = &pSymbol->symbolDetails.variableDetails;
 	VariableUsageDetails* pUsageDetails = malloc(sizeof(VariableUsageDetails));
 	pUsageDetails->usageType = variable_usage_used;
-	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pUsageNode);
+	CreateVariableUsageEntry(pUsageDetails, pVariableDetails, pParentNode);
 }
 
-void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pUsageNode)
+void CreateVariableUsageEntry(VariableUsageDetails* pUsageDetails, VariableDetails* pVariableDetails, Node* pParentNode)
 {
 	pUsageDetails->uiLine = g_uiCurrentLineNumber;
 	pUsageDetails->uiPos = g_ulCurrentLinePosition;
-	pUsageDetails->pUsageNode = pUsageNode;
+	pUsageDetails->pParentNode = pParentNode;
 	pUsageDetails->pNextUsage = NO_VARIABLE_USAGE_NODE;
 	pUsageDetails->pPrevUsage = NO_VARIABLE_USAGE_NODE;
 

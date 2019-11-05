@@ -14,10 +14,25 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
-void prg_Test()
+void prg_AssignmentOptimisation()
 {
 	int spl_a = 1;
+	char spl_b = 1;
+	double spl_c = 1;
 
+	spl_a = 2;
+	printf("%d", spl_a);
+	printf("\n");
+	spl_a = 3;
+	spl_a = (spl_a + 1);
+	printf("%d", spl_a);
+	printf("\n");
+	spl_a = 5;
+	printf("%d", spl_a);
+	printf("\n");
+	spl_a = 7;
+	printf("%d", spl_a);
+	printf("\n");
 	{
 		char _spl_bDiscardedCharsFlag = 0;
 		while (scanf("%d", &spl_a) != 1)
@@ -36,13 +51,24 @@ void prg_Test()
 		};
 		_spl_flush_stdin();
 	}
+	spl_a = (spl_a + 1);
+	spl_a = (spl_a + 1);
 	printf("%d", spl_a);
+	printf("\n");
+	spl_b = (87 + spl_a);
+	printf("%c", spl_b);
+	printf("\n");
+	spl_b = 'b';
+	printf("%c", spl_b);
+	printf("\n");
+	spl_c = 4.560000;
+	printf("%lf", spl_c);
 	printf("\n");
 }
 
 int main()
 {
 	fprintf(stderr, "----------------RUNTIME WARNINGS & ERRORS----------------");
-	prg_Test();
+	prg_AssignmentOptimisation();
 	return 0;
 }
