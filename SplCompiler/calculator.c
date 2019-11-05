@@ -984,7 +984,7 @@ void prg_Calculator()
 						}
 					} while ((((spl_choice != 'q')) && ((spl_choice != 0))));
 				}
-			} while ((((spl_choice != 'q')) && ((spl_choice != 0))));
+			} while (((!((spl_choice == 'q'))) && ((spl_choice != 0))));
 		}
 		if ((spl_choice == 'p'))
 		{

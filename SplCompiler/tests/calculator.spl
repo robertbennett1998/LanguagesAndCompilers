@@ -296,7 +296,7 @@ CODE
                         ENDIF
                     WHILE choice <> 'q' AND choice <> 0 ENDDO;
                 ENDIF
-            WHILE choice <> 'q' AND choice <> 0 ENDDO;
+            WHILE NOT choice = 'q' AND choice <> 0 ENDDO;
         ENDIF;
 
         IF choice = 'p' THEN
