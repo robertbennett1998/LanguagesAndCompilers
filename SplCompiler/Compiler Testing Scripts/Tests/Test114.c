@@ -13,7 +13,7 @@ void prg_Test()
 {
 	char spl_a = 1;
 
-	spl_a = (('B' * 2) - 6);
+	spl_a = '~';
 	printf("%c", spl_a);
 	printf("\n");
 }

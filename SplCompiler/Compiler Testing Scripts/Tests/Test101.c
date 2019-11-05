@@ -13,7 +13,7 @@ void prg_Test()
 {
 	double spl_a = 1;
 
-	spl_a = (3.200000 - 1.300000);
+	spl_a = 1.900000;
 	printf("%lf", spl_a);
 	printf("\n");
 }

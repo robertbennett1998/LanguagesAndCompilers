@@ -7,13 +7,20 @@ DECLARATIONS
     char OF TYPE CHARACTER;
 
 CODE
+    FOR int IS 1 + 2 + 3 BY 1 + 1 - 1 TO 10 DO
+        WRITE(int);
+        NEWLINE;
+    ENDFOR;
 
+    WRITE(('a' + 1));
+    NEWLINE;
+    WRITE((1 + 'a'));
     2 + 2 - 4 * 2 / 2 + 2-> int;
     2 * 2 -> int;
     2 + 2 -> int;
     2 - 2 -> int;
     2 / 2 -> int;
-    int + 2 -> int;
+    int + (2 * 2) -> int;
 
     0.5 * 5 -> real;
     2.5 + 2.5 -> real;
@@ -30,7 +37,7 @@ CODE
     2 / 0.5 -> real;
     2 + 2.5 -> real;
 
-    'a' + 'a' -> char;
-    'c' - 'a' -> char;
+    'a' + 1 -> char;
+    'c' - 1 -> char;
 
 ENDP ConstantFolding.

@@ -1799,7 +1799,7 @@ yyreduce:
 		CheckIfVariableIsDeclared((yyvsp[0].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_assignment_statement, (yyvsp[-2].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableAssignedEntry((yyvsp[0].pSymbolTableEntry), pNode);
-		int iExpressionType = GetFinalTypeOfExpression((yyvsp[-2].pNode));
+		int iExpressionType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		if (iExpressionType == TYPE_REAL && (yyvsp[0].pSymbolTableEntry)->symbolDetails.variableDetails.iType == TYPE_CHARACTER)
 		{
 			CreateError(error_type_invalid_type_conversion, NULL);
@@ -3002,7 +3002,12 @@ void Evaluate_StatementList(const Node* const pNode)
 		{
 			char* pIdentifier = pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier;
 			char* pByName = NULL;
-			if (pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
+			if (pNode->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
 			{
 				Indent();
 				if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
@@ -3058,14 +3063,19 @@ void Evaluate_StatementList(const Node* const pNode)
 			Evaluate_StatementList(pNode->pFirstChild->pThirdChild);
 			printf(" : %s <= ", pIdentifier);
 			Evaluate_StatementList(pNode->pFirstChild->pThirdChild);
-			if (pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
+			if (pNode->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
 			{
 				printf("; %s += %s", pIdentifier, pByName);
 				printf(")\n");
 			}
 			else
 			{
-				printf("; %s +=", pIdentifier);
+				printf("; %s += ", pIdentifier);
 				Evaluate_StatementList(pNode->pFirstChild->pSecondChild);
 				printf(")\n");
 			}
@@ -3073,7 +3083,12 @@ void Evaluate_StatementList(const Node* const pNode)
 			printf("{\n");
 			g_iIndentLevel++;
 			Evaluate_StatementList(pNode->pSecondChild);
-			if (pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
+			if (pNode->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild != NULL &&
+				pNode->pFirstChild->pSecondChild->pFirstChild->pFirstChild->pFirstChild->byNodeIdentifier != id_constant)
 			{
 				Indent();
 				printf("%s = ", pByName);
@@ -3306,6 +3321,7 @@ void Evaluate_StatementList(const Node* const pNode)
 
 int OrderTypes(int currType, int newType)
 {
+	/*printf("Curr: %s, New: %s\n", GetTypeName(currType), GetTypeName(newType));*/
 	if (currType == TYPE_CHARACTER)
 	{
 		if (newType == TYPE_REAL)
@@ -3902,19 +3918,19 @@ void AssignReal(void** pValue, const int iType, double dValue)
 	}
 }
 
-void AssignChar(void** pValue, const int iType, char cValue)
+void AssignChar(void** pValue, const int iType, int cValue)
 {
 	if (iType == TYPE_INTEGER)
 	{
-		*(int*)pValue = cValue;
+		*(int*)*pValue = cValue;
 	}
 	else if (iType == TYPE_REAL)
 	{
-		*(double*)pValue = cValue;
+		*(double*)*pValue = cValue;
 	}
 	else if (iType == TYPE_CHARACTER)
 	{
-		*(char*)pValue = cValue;
+		*(char*)*pValue = cValue;
 	}
 }
 
@@ -4018,7 +4034,7 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 					}
 					else if (iTypeOne == TYPE_CHARACTER && iTypeTwo == TYPE_CHARACTER)
 					{
-						AssignChar(&pFinalValue, *iType, *(char*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) - *(char*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
+						AssignChar(&pFinalValue, *iType, *(int*)EvaluateConstantExpression(pNode->pFirstChild, &iTypeOne) - *(int*)EvaluateConstantExpression(pNode->pSecondChild, &iTypeTwo));
 					}
 				}
 			}
@@ -4164,31 +4180,29 @@ void EvaluateTree(Node* pNode)
 	if (pNode->byNodeIdentifier == id_expression || pNode->byNodeIdentifier == id_term)
 	{
 		bool bIsConst = true;
-		int iType = 0;
+		int iType = GetFinalTypeOfExpression(pNode, -1);
 		EvaluateExpresion(pNode, &bIsConst);
 		if (bIsConst)
 		{
-			printf("Expression is const - ");
 			void* pValue = EvaluateConstantExpression(pNode, &iType);
-			if (iType == TYPE_INTEGER)
+			Node* pParentNode = pNode->pParent;
+			if (pParentNode->pFirstChild == pNode)
 			{
-				printf("Value: %d\n", *(int*)pValue);
+				/*DeleteNode(pNode);*/
+				pParentNode->pFirstChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
 			}
-			else if (iType == TYPE_REAL)
+			else if (pParentNode->pSecondChild == pNode)
 			{
-				printf("Value: %lf\n", *(double*)pValue);
+				/*DeleteNode(pNode);*/
+				pParentNode->pSecondChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
 			}
-			else if (iType == TYPE_CHARACTER)
+			else if (pParentNode->pThirdChild == pNode)
 			{
-				printf("Value: %d\n", *(int*)pValue);
+				/*DeleteNode(pNode);*/
+				pParentNode->pThirdChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
 			}
+			return;
 		}
-		else
-		{
-			printf("Expression is not const\n");
-		}
-
-		return;
 	}
 
 	EvaluateTree(pNode->pFirstChild);
