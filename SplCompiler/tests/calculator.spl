@@ -312,11 +312,15 @@ CODE
                     NEWLINE;
                     READ(iB);
                     iA -> iRes;
-                    FOR i IS 1 BY 1 TO iB - 1 DO
-                        iA * iRes -> iRes;
-                    ENDFOR;
-                    WRITE('A', 'n', 's', 'w', 'e', 'r', period, space, iRes);
-                    NEWLINE;
+                    IF iB = 0 THEN
+                        WRITE(1);
+                    ELSE
+                        FOR i IS 1 BY 1 TO iB - 1 DO
+                            iA * iRes -> iRes;
+                        ENDFOR;
+                        WRITE('A', 'n', 's', 'w', 'e', 'r', period, space, iRes);
+                        NEWLINE;
+                    ENDIF;
                     0 -> choice;
                 ENDIF;
                 IF choice = 'r' THEN
@@ -326,9 +330,9 @@ CODE
                     WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', 'n', space, 'i', 'n', 't', 'e', 'g', 'e', 'r', period);
                     NEWLINE;
                     READ(iB);
-                    rA -> rRes;
-                    FOR i IS 1 BY 1 TO iB - 1 DO
-                            rA * rRes -> rRes;
+                    1 -> rRes;
+                    FOR i IS 1 BY 1 TO iB DO
+                        rA * rRes -> rRes;
                     ENDFOR;
                     WRITE('A', 'n', 's', 'w', 'e', 'r', period, space, rRes);
                     NEWLINE;

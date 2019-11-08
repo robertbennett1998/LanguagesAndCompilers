@@ -1,0 +1,158 @@
+DeadCode:
+
+DECLARATIONS
+
+    a OF TYPE INTEGER;
+
+CODE
+
+    7 -> a;
+
+    IF 5 = 7 THEN
+        WRITE('D', 'E', 'A', 'D', 1);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 <> 5 THEN
+        WRITE('D', 'E', 'A', 'D', 2);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 > 7 THEN
+        WRITE('D', 'E', 'A', 'D', 3);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 >= 7 THEN
+        WRITE('D', 'E', 'A', 'D', 4);
+        NEWLINE;
+    ENDIF;
+
+    IF 7 < 7 THEN
+        WRITE('D', 'E', 'A', 'D', 5);
+        NEWLINE;
+    ENDIF;
+
+    IF 8 <= 7 THEN
+        WRITE('D', 'E', 'A', 'D', 6);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 5 = 7 THEN
+        WRITE('L', 'I', 'V', 'E', 1);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 5 <> 5 THEN
+        WRITE('L', 'I', 'V', 'E', 2);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 5 > 7 THEN
+        WRITE('L', 'I', 'V', 'E', 3);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 5 >= 7 THEN
+        WRITE('L', 'I', 'V', 'E', 4);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 7 < 7 THEN
+        WRITE('L', 'I', 'V', 'E', 5);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 8 <= 7 THEN
+        WRITE('L', 'I', 'V', 'E', 6);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 = 7 THEN
+        WRITE('D', 'E', 'A', 'D', 7);
+        NEWLINE;
+    ELSE
+        WRITE('L', 'I', 'V', 'E', 7);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 <> 5 THEN
+        WRITE('D', 'E', 'A', 'D', 8);
+        NEWLINE;
+    ELSE
+        WRITE('L', 'I', 'V', 'E', 8);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 > 7 THEN
+        WRITE('D', 'E', 'A', 'D', 9);
+        NEWLINE;
+    ELSE
+        WRITE('L', 'I', 'V', 'E', 9);
+        NEWLINE;
+    ENDIF;
+
+    IF 5 >= 7 THEN
+        WRITE('D', 'E', 'A', 'D', 11);
+        NEWLINE;
+    ELSE
+        WRITE('L', 'I', 'V', 'E', 11);
+        NEWLINE;
+    ENDIF;
+
+    IF 7 < 7 THEN
+        WRITE('D', 'E', 'A', 'D', 12);
+        NEWLINE;
+    ELSE
+        WRITE('L', 'I', 'V', 'E', 12);
+        NEWLINE;
+    ENDIF;
+
+    IF NOT 7 < 7 THEN
+        WRITE('L', 'I', 'V', 'E', 13);
+        NEWLINE;
+    ELSE
+        WRITE('D', 'E', 'A', 'D', 13);
+        NEWLINE;
+    ENDIF;
+
+    IF a > 8 THEN
+        NEWLINE;
+    ENDIF;
+
+    WHILE 'a' = 'a' DO
+        WRITE('L', 'I', 'V', 'E', 14);
+        NEWLINE;
+    ENDWHILE;
+
+    WHILE 7 = 8 DO
+        WRITE('D', 'E', 'A', 'D', 14);
+        NEWLINE;
+    ENDWHILE;
+
+    WHILE 7 = 7 DO
+        WRITE('L', 'I', 'V', 'E', 15);
+        NEWLINE;
+    ENDWHILE;
+
+    IF 'A' = 65 THEN
+        WRITE('L', 'I', 'V', 'E', 16);
+        NEWLINE;
+    ENDIF;
+
+    IF 'A' <> 65 THEN
+        WRITE('D', 'E', 'A', 'D', 15);
+        NEWLINE;
+    ENDIF;
+
+    IF 'A' > 'a' THEN
+        WRITE('D', 'E', 'A', 'D', 16);
+        NEWLINE;
+    ENDIF;
+
+    IF 65 >= 'B' THEN
+        WRITE('D', 'E', 'A', 'D', 17);
+        NEWLINE;
+    ENDIF;
+
+ENDP DeadCode.

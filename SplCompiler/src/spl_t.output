@@ -84,6 +84,7 @@ Grammar
    57 while_statement: WHILE conditional DO code ENDWHILE
 
    58 do_statement: DO statement_list WHILE conditional ENDDO
+   59             | DO statement_list SEMI_COLON WHILE conditional ENDDO
 
 
 Terminals, with rules where they appear
@@ -105,9 +106,9 @@ THEN (269) 49 50
 ENDIF (270) 49 50
 AND (271) 52
 OR (272) 53
-DO (273) 56 57 58
-WHILE (274) 57 58
-ENDDO (275) 58
+DO (273) 56 57 58 59
+WHILE (274) 57 58 59
+ENDDO (275) 58 59
 ENDWHILE (276) 57
 FOR (277) 56
 IS (278) 56
@@ -128,7 +129,7 @@ OPEN_BRACKET (292) 25 38 48
 CLOSE_BRACKET (293) 25 38 48
 COMMA (294) 8 41
 COLON (295) 1
-SEMI_COLON (296) 6 13 15
+SEMI_COLON (296) 6 13 15 59
 PERIOD (297) 1
 ADD_OPERATOR (298) 29
 SUBTRACT_OPERATOR (299) 28 36
@@ -159,7 +160,7 @@ type (57)
 code (58)
     on left: 12 13, on right: 2 3 49 50 56 57
 statement_list (59)
-    on left: 14 15, on right: 12 13 15 58
+    on left: 14 15, on right: 12 13 15 58 59
 statement (60)
     on left: 16 17 18 19 20 21 22 23, on right: 14 15
 assignment_statement (61)
@@ -185,7 +186,7 @@ if_statement (70)
 if_else_statement (71)
     on left: 50, on right: 20
 conditional (72)
-    on left: 51 52 53, on right: 49 50 52 53 57 58
+    on left: 51 52 53, on right: 49 50 52 53 57 58 59
 comparison (73)
     on left: 54 55, on right: 51 52 53 55
 for_statement (74)
@@ -193,7 +194,7 @@ for_statement (74)
 while_statement (75)
     on left: 57, on right: 22
 do_statement (76)
-    on left: 58, on right: 23
+    on left: 58 59, on right: 23
 
 
 State 0
@@ -348,6 +349,7 @@ State 12
 State 13
 
    58 do_statement: DO . statement_list WHILE conditional ENDDO
+   59             | DO . statement_list SEMI_COLON WHILE conditional ENDDO
 
     IF                  shift, and go to state 12
     DO                  shift, and go to state 13
@@ -720,6 +722,7 @@ State 49
 
    15 statement_list: statement_list . SEMI_COLON statement
    58 do_statement: DO statement_list . WHILE conditional ENDDO
+   59             | DO statement_list . SEMI_COLON WHILE conditional ENDDO
 
     WHILE       shift, and go to state 77
     SEMI_COLON  shift, and go to state 78
@@ -1084,10 +1087,11 @@ State 77
 State 78
 
    15 statement_list: statement_list SEMI_COLON . statement
+   59 do_statement: DO statement_list SEMI_COLON . WHILE conditional ENDDO
 
     IF                  shift, and go to state 12
     DO                  shift, and go to state 13
-    WHILE               shift, and go to state 14
+    WHILE               shift, and go to state 101
     FOR                 shift, and go to state 15
     NEWLINE             shift, and go to state 16
     WRITE               shift, and go to state 17
@@ -1132,7 +1136,7 @@ State 79
     REAL                shift, and go to state 23
     IDENTIFIER          shift, and go to state 24
 
-    code                  go to state 101
+    code                  go to state 102
     statement_list        go to state 26
     statement             go to state 27
     assignment_statement  go to state 28
@@ -1161,7 +1165,7 @@ State 80
     IDENTIFIER          shift, and go to state 24
 
     value       go to state 29
-    expression  go to state 102
+    expression  go to state 103
     term        go to state 31
     constant    go to state 32
 
@@ -1178,15 +1182,15 @@ State 82
    38 write_statement: WRITE OPEN_BRACKET output_list . CLOSE_BRACKET
    41 output_list: output_list . COMMA value
 
-    CLOSE_BRACKET  shift, and go to state 103
-    COMMA          shift, and go to state 104
+    CLOSE_BRACKET  shift, and go to state 104
+    COMMA          shift, and go to state 105
 
 
 State 83
 
    48 read_statement: READ OPEN_BRACKET IDENTIFIER . CLOSE_BRACKET
 
-    CLOSE_BRACKET  shift, and go to state 105
+    CLOSE_BRACKET  shift, and go to state 106
 
 
 State 84
@@ -1280,7 +1284,7 @@ State 95
 
     6 declaration: identifier_list OF TYPE type . SEMI_COLON
 
-    SEMI_COLON  shift, and go to state 106
+    SEMI_COLON  shift, and go to state 107
 
 
 State 96
@@ -1300,8 +1304,8 @@ State 97
    49 if_statement: IF conditional THEN code . ENDIF
    50 if_else_statement: IF conditional THEN code . ELSE code ENDIF
 
-    ELSE   shift, and go to state 107
-    ENDIF  shift, and go to state 108
+    ELSE   shift, and go to state 108
+    ENDIF  shift, and go to state 109
 
 
 State 98
@@ -1326,35 +1330,56 @@ State 100
 
     AND    shift, and go to state 75
     OR     shift, and go to state 76
-    ENDDO  shift, and go to state 109
+    ENDDO  shift, and go to state 110
 
 
 State 101
 
-   57 while_statement: WHILE conditional DO code . ENDWHILE
+   57 while_statement: WHILE . conditional DO code ENDWHILE
+   59 do_statement: DO statement_list SEMI_COLON WHILE . conditional ENDDO
 
-    ENDWHILE  shift, and go to state 110
+    NOT                 shift, and go to state 45
+    OPEN_BRACKET        shift, and go to state 19
+    SUBTRACT_OPERATOR   shift, and go to state 20
+    CHARACTER_CONSTANT  shift, and go to state 21
+    UNSIGNED_INTEGER    shift, and go to state 22
+    REAL                shift, and go to state 23
+    IDENTIFIER          shift, and go to state 24
+
+    value        go to state 29
+    expression   go to state 46
+    term         go to state 31
+    constant     go to state 32
+    conditional  go to state 111
+    comparison   go to state 48
 
 
 State 102
+
+   57 while_statement: WHILE conditional DO code . ENDWHILE
+
+    ENDWHILE  shift, and go to state 112
+
+
+State 103
 
    28 expression: expression . SUBTRACT_OPERATOR term
    29           | expression . ADD_OPERATOR term
    56 for_statement: FOR IDENTIFIER IS expression . BY expression TO expression DO code ENDFOR
 
-    BY                 shift, and go to state 111
+    BY                 shift, and go to state 113
     ADD_OPERATOR       shift, and go to state 58
     SUBTRACT_OPERATOR  shift, and go to state 59
 
 
-State 103
+State 104
 
    38 write_statement: WRITE OPEN_BRACKET output_list CLOSE_BRACKET .
 
     $default  reduce using rule 38 (write_statement)
 
 
-State 104
+State 105
 
    41 output_list: output_list COMMA . value
 
@@ -1365,25 +1390,25 @@ State 104
     REAL                shift, and go to state 23
     IDENTIFIER          shift, and go to state 24
 
-    value     go to state 112
+    value     go to state 114
     constant  go to state 32
 
 
-State 105
+State 106
 
    48 read_statement: READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET .
 
     $default  reduce using rule 48 (read_statement)
 
 
-State 106
+State 107
 
     6 declaration: identifier_list OF TYPE type SEMI_COLON .
 
     $default  reduce using rule 6 (declaration)
 
 
-State 107
+State 108
 
    50 if_else_statement: IF conditional THEN code ELSE . code ENDIF
 
@@ -1401,7 +1426,7 @@ State 107
     REAL                shift, and go to state 23
     IDENTIFIER          shift, and go to state 24
 
-    code                  go to state 113
+    code                  go to state 115
     statement_list        go to state 26
     statement             go to state 27
     assignment_statement  go to state 28
@@ -1418,79 +1443,43 @@ State 107
     do_statement          go to state 39
 
 
-State 108
+State 109
 
    49 if_statement: IF conditional THEN code ENDIF .
 
     $default  reduce using rule 49 (if_statement)
 
 
-State 109
+State 110
 
    58 do_statement: DO statement_list WHILE conditional ENDDO .
 
     $default  reduce using rule 58 (do_statement)
 
 
-State 110
+State 111
+
+   52 conditional: conditional . AND comparison
+   53            | conditional . OR comparison
+   57 while_statement: WHILE conditional . DO code ENDWHILE
+   59 do_statement: DO statement_list SEMI_COLON WHILE conditional . ENDDO
+
+    AND    shift, and go to state 75
+    OR     shift, and go to state 76
+    DO     shift, and go to state 79
+    ENDDO  shift, and go to state 116
+
+
+State 112
 
    57 while_statement: WHILE conditional DO code ENDWHILE .
 
     $default  reduce using rule 57 (while_statement)
 
 
-State 111
-
-   56 for_statement: FOR IDENTIFIER IS expression BY . expression TO expression DO code ENDFOR
-
-    OPEN_BRACKET        shift, and go to state 19
-    SUBTRACT_OPERATOR   shift, and go to state 20
-    CHARACTER_CONSTANT  shift, and go to state 21
-    UNSIGNED_INTEGER    shift, and go to state 22
-    REAL                shift, and go to state 23
-    IDENTIFIER          shift, and go to state 24
-
-    value       go to state 29
-    expression  go to state 114
-    term        go to state 31
-    constant    go to state 32
-
-
-State 112
-
-   41 output_list: output_list COMMA value .
-
-    $default  reduce using rule 41 (output_list)
-
-
 State 113
 
-   50 if_else_statement: IF conditional THEN code ELSE code . ENDIF
-
-    ENDIF  shift, and go to state 115
-
-
-State 114
-
-   28 expression: expression . SUBTRACT_OPERATOR term
-   29           | expression . ADD_OPERATOR term
-   56 for_statement: FOR IDENTIFIER IS expression BY expression . TO expression DO code ENDFOR
-
-    TO                 shift, and go to state 116
-    ADD_OPERATOR       shift, and go to state 58
-    SUBTRACT_OPERATOR  shift, and go to state 59
-
-
-State 115
-
-   50 if_else_statement: IF conditional THEN code ELSE code ENDIF .
-
-    $default  reduce using rule 50 (if_else_statement)
-
-
-State 116
-
-   56 for_statement: FOR IDENTIFIER IS expression BY expression TO . expression DO code ENDFOR
+   56 for_statement: FOR IDENTIFIER IS expression BY . expression TO expression DO code ENDFOR
 
     OPEN_BRACKET        shift, and go to state 19
     SUBTRACT_OPERATOR   shift, and go to state 20
@@ -1505,18 +1494,74 @@ State 116
     constant    go to state 32
 
 
+State 114
+
+   41 output_list: output_list COMMA value .
+
+    $default  reduce using rule 41 (output_list)
+
+
+State 115
+
+   50 if_else_statement: IF conditional THEN code ELSE code . ENDIF
+
+    ENDIF  shift, and go to state 118
+
+
+State 116
+
+   59 do_statement: DO statement_list SEMI_COLON WHILE conditional ENDDO .
+
+    $default  reduce using rule 59 (do_statement)
+
+
 State 117
 
    28 expression: expression . SUBTRACT_OPERATOR term
    29           | expression . ADD_OPERATOR term
-   56 for_statement: FOR IDENTIFIER IS expression BY expression TO expression . DO code ENDFOR
+   56 for_statement: FOR IDENTIFIER IS expression BY expression . TO expression DO code ENDFOR
 
-    DO                 shift, and go to state 118
+    TO                 shift, and go to state 119
     ADD_OPERATOR       shift, and go to state 58
     SUBTRACT_OPERATOR  shift, and go to state 59
 
 
 State 118
+
+   50 if_else_statement: IF conditional THEN code ELSE code ENDIF .
+
+    $default  reduce using rule 50 (if_else_statement)
+
+
+State 119
+
+   56 for_statement: FOR IDENTIFIER IS expression BY expression TO . expression DO code ENDFOR
+
+    OPEN_BRACKET        shift, and go to state 19
+    SUBTRACT_OPERATOR   shift, and go to state 20
+    CHARACTER_CONSTANT  shift, and go to state 21
+    UNSIGNED_INTEGER    shift, and go to state 22
+    REAL                shift, and go to state 23
+    IDENTIFIER          shift, and go to state 24
+
+    value       go to state 29
+    expression  go to state 120
+    term        go to state 31
+    constant    go to state 32
+
+
+State 120
+
+   28 expression: expression . SUBTRACT_OPERATOR term
+   29           | expression . ADD_OPERATOR term
+   56 for_statement: FOR IDENTIFIER IS expression BY expression TO expression . DO code ENDFOR
+
+    DO                 shift, and go to state 121
+    ADD_OPERATOR       shift, and go to state 58
+    SUBTRACT_OPERATOR  shift, and go to state 59
+
+
+State 121
 
    56 for_statement: FOR IDENTIFIER IS expression BY expression TO expression DO . code ENDFOR
 
@@ -1534,7 +1579,7 @@ State 118
     REAL                shift, and go to state 23
     IDENTIFIER          shift, and go to state 24
 
-    code                  go to state 119
+    code                  go to state 122
     statement_list        go to state 26
     statement             go to state 27
     assignment_statement  go to state 28
@@ -1551,14 +1596,14 @@ State 118
     do_statement          go to state 39
 
 
-State 119
+State 122
 
    56 for_statement: FOR IDENTIFIER IS expression BY expression TO expression DO code . ENDFOR
 
-    ENDFOR  shift, and go to state 120
+    ENDFOR  shift, and go to state 123
 
 
-State 120
+State 123
 
    56 for_statement: FOR IDENTIFIER IS expression BY expression TO expression DO code ENDFOR .
 

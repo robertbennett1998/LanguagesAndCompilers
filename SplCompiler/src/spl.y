@@ -220,7 +220,8 @@
 	unsigned int g_uiErrorCount = 0;
 	void CreateError(ErrorTypes errorType, const void* const pValue);
 	void CheckForDivideByZero(const Node* const pNode);
-	void EvaluateTree(Node* pNode);
+	void FoldConstants(Node* pNode);
+	void RemoveDeadCode(Node* pNode);
 %}
 
 %union
@@ -278,8 +279,9 @@ program :
 
 		$$ = pParseTree;
 		EvaluateVariableUsage();
-		EvaluateTree(pParseTree);
+		FoldConstants(pParseTree);
 		CheckForDivideByZero(pParseTree);
+		RemoveDeadCode(pParseTree);
 		if (g_uiErrorCount == 0)
 		{
         	GenerateCode(pParseTree);
@@ -551,6 +553,14 @@ conditional :
 
 comparison :
 	expression comparator expression {
+		int iFirstType = GetFinalTypeOfExpression($1, -1);
+		int iSecondType = GetFinalTypeOfExpression($3, -1);
+
+		if ((iFirstType == TYPE_CHARACTER || iSecondType == TYPE_CHARACTER) && (iFirstType == TYPE_REAL || iSecondType == TYPE_REAL))
+		{
+			CreateError(error_type_invalid_type_conversion_double_char, NULL);
+		}
+
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_comparison, $1, $2, $3);
 	} | NOT comparison {
 		$$ = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_comparison, $2, NO_CHILD_NODE, NO_CHILD_NODE);
@@ -572,6 +582,9 @@ while_statement :
 do_statement :
 	DO statement_list WHILE conditional ENDDO {
 		$$ = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, $2, $4, NO_CHILD_NODE);
+	} |
+	DO statement_list SEMI_COLON WHILE conditional ENDDO {
+		$$ = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, $2, $5, NO_CHILD_NODE);
 	};
 %%
 
@@ -1668,6 +1681,11 @@ int GetFinalTypeOfExpression(const Node* const pNode, const int _currType)
 
 void Evaluate_OutputList_Format(const Node* const pNode)
 {
+	if (pNode == NULL)
+	{
+		return;
+	}
+
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_output_list:
@@ -1754,6 +1772,11 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 
 void Evaluate_OutputList_Parameters(const Node* const pNode)
 {
+	if (pNode == NULL)
+	{
+		return;
+	}
+
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_output_list:
@@ -1818,6 +1841,11 @@ void Evaluate_OutputList_Parameters(const Node* const pNode)
 
 void Evaluate_WriteStatement(const Node* const pNode)
 {
+	if (pNode == NULL)
+	{
+		return;
+	}
+
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_write_statement:
@@ -1849,6 +1877,11 @@ void Evaluate_WriteStatement(const Node* const pNode)
 
 void Evaluate_DeclarationBlock(const Node* const pNode)
 {
+	if (pNode == NULL)
+	{
+		return;
+	}
+
 	switch (pNode->byNodeIdentifier)
 	{
 		case id_declaration_block:
@@ -2419,7 +2452,6 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 			break;
 
 		case id_value:
-
 			if (pNode->pFirstChild->byNodeIdentifier == id_expression)
 			{
 				return EvaluateConstantExpression(pNode->pFirstChild, iType);
@@ -2480,7 +2512,394 @@ void CheckForDivideByZero(const Node* const pNode)
 	CheckForDivideByZero(pNode->pThirdChild);
 }
 
-void EvaluateTree(Node* pNode)
+bool g_bExitDeadCodeRemoval = false;
+bool RemoveDeadCode_Iter(Node* pNode)
+{
+	if (pNode == NULL || g_bExitDeadCodeRemoval)
+	{
+		return false;
+	}
+
+	bool bFinal = true;
+
+	switch (pNode->byNodeIdentifier)
+	{
+		case id_comparison:
+		{
+			if (pNode->pSecondChild == NO_CHILD_NODE)
+			{
+				bFinal = !RemoveDeadCode_Iter(pNode->pFirstChild);
+			}
+			else
+			{
+				bool bFirstConst = true;
+				bool bSecondConst = true;
+				EvaluateExpresion(pNode->pFirstChild, &bFirstConst);
+				EvaluateExpresion(pNode->pThirdChild, &bSecondConst);
+				if (bFirstConst == true && bSecondConst == true)
+				{
+					int iFirstType = -1;
+					int iSecondType = -1;
+					void* pFirstValue = EvaluateConstantExpression(pNode->pFirstChild, &iFirstType);
+					void* pSecondValue = EvaluateConstantExpression(pNode->pThirdChild, &iSecondType);
+					if (iFirstType == TYPE_INTEGER && iSecondType == TYPE_INTEGER)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(int*)pFirstValue == *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(int*)pFirstValue != *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(int*)pFirstValue < *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(int*)pFirstValue > *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(int*)pFirstValue <= *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(int*)pFirstValue >= *(int*)pSecondValue;
+						}
+					}
+					else if (iFirstType == TYPE_INTEGER && iSecondType == TYPE_REAL)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(int*)pFirstValue == *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(int*)pFirstValue != *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(int*)pFirstValue < *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(int*)pFirstValue > *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(int*)pFirstValue <= *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(int*)pFirstValue >= *(double*)pSecondValue;
+						}
+					}
+					else if (iFirstType == TYPE_INTEGER && iSecondType == TYPE_CHARACTER)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(int*)pFirstValue == (int)*(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(int*)pFirstValue != (int)*(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(int*)pFirstValue < (int)*(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(int*)pFirstValue > (int)*(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(int*)pFirstValue <= (int)*(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(int*)pFirstValue >= (int)*(char*)pSecondValue;
+						}
+					}
+					else if (iFirstType == TYPE_REAL && iSecondType == TYPE_INTEGER)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(double*)pFirstValue == *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(double*)pFirstValue != *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(double*)pFirstValue < *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(double*)pFirstValue > *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(double*)pFirstValue <= *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(double*)pFirstValue >= *(int*)pSecondValue;
+						}
+					}
+					else if (iFirstType == TYPE_REAL && iSecondType == TYPE_REAL)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(double*)pFirstValue == *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(double*)pFirstValue != *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(double*)pFirstValue < *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(double*)pFirstValue > *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(double*)pFirstValue <= *(double*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(double*)pFirstValue >= *(double*)pSecondValue;
+						}
+					}
+					else if (iFirstType == TYPE_CHARACTER && iSecondType == TYPE_CHARACTER)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(char*)pFirstValue == *(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(char*)pFirstValue != *(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(char*)pFirstValue < *(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(char*)pFirstValue > *(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(char*)pFirstValue <= *(char*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(char*)pFirstValue >= *(char*)pSecondValue;
+						}
+					}
+					else if (iFirstType == TYPE_CHARACTER && iSecondType == TYPE_INTEGER)
+					{
+						if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_equality)
+						{
+							bFinal = *(char*)pFirstValue == *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_not_equal)
+						{
+							bFinal = *(char*)pFirstValue != *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_than)
+						{
+							bFinal = *(char*)pFirstValue < *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_than)
+						{
+							bFinal = *(char*)pFirstValue > *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_less_equal)
+						{
+							bFinal = *(char*)pFirstValue <= *(int*)pSecondValue;
+						}
+						else if (pNode->pSecondChild->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_more_equal)
+						{
+							bFinal = *(char*)pFirstValue >= *(int*)pSecondValue;
+						}
+					}
+				}
+				else
+				{
+					/*Expression is not constant*/
+					g_bExitDeadCodeRemoval = true;
+					return;
+				}
+			}
+			break;
+		}
+
+		case id_conditional:
+		{
+			bool bFirst = RemoveDeadCode_Iter(pNode->pFirstChild);
+			if (pNode->pSecondChild != NO_CHILD_NODE)
+			{
+				bool bSecond = RemoveDeadCode_Iter(pNode->pSecondChild);
+				if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_and)
+				{
+					bFinal = bFinal && bSecond;
+				}
+				else if (pNode->pSymbolTableEntry->symbolDetails.operatorDetails.operatorType == operator_type_or)
+				{
+					bFinal = bFinal || bSecond;
+				}
+			}
+			else
+			{
+				bFinal = bFirst;
+			}
+			
+			break;	
+		}
+
+		default:
+			break;
+	}
+
+	return bFinal;
+}
+
+void RemoveDeadCode(Node* pNode)
+{
+	if (pNode == NULL)
+	{
+		return;
+	}
+
+	g_bExitDeadCodeRemoval = false;
+	bool bConstRes = RemoveDeadCode_Iter(pNode->pFirstChild);
+	if (pNode->byNodeIdentifier == id_if_statement && !g_bExitDeadCodeRemoval)
+	{
+		Node* pParentNode = pNode->pParent->pParent;
+		
+		if (pParentNode->pFirstChild == pNode->pParent)
+		{
+			/*DeleteNode(pNode);*/
+			if (bConstRes == true)
+			{
+				pParentNode->pFirstChild = pNode->pSecondChild;
+			}
+			else
+			{
+				pParentNode->pFirstChild = NULL;
+			}
+		}
+		else if (pParentNode->pSecondChild == pNode->pParent)
+		{
+			/*DeleteNode(pNode);*/
+			if (bConstRes == true)
+			{
+				pParentNode->pSecondChild = pNode->pSecondChild;
+			}
+			else
+			{
+				pParentNode->pSecondChild = NULL;
+			}
+		}
+		else if (pParentNode->pThirdChild == pNode->pParent)
+		{
+			/*DeleteNode(pNode);*/
+			if (bConstRes == true)
+			{
+				pParentNode->pThirdChild = pNode->pSecondChild;
+			}
+			else
+			{
+				pParentNode->pThirdChild = NULL;
+			}
+		}
+		return;
+	}
+	else if (pNode->byNodeIdentifier == id_if_else_statement && !g_bExitDeadCodeRemoval)
+	{
+		Node* pParentNode = pNode->pParent->pParent;
+		
+		if (pParentNode->pFirstChild == pNode->pParent)
+		{
+			/*DeleteNode(pNode);*/
+			if (bConstRes)
+			{
+				pParentNode->pFirstChild = pNode->pSecondChild;
+			}
+			else
+			{
+				pParentNode->pFirstChild = pNode->pThirdChild;
+			}
+		}
+		else if (pParentNode->pSecondChild == pNode->pParent)
+		{
+			/*DeleteNode(pNode);*/
+			if (bConstRes)
+			{
+				pParentNode->pSecondChild = pNode->pSecondChild;
+			}
+			else
+			{
+				pParentNode->pSecondChild = pNode->pThirdChild;
+			}
+		}
+		else if (pParentNode->pThirdChild == pNode->pParent)
+		{
+			/*DeleteNode(pNode);*/
+			if (bConstRes)
+			{
+				pParentNode->pThirdChild = pNode->pSecondChild;
+			}
+			else
+			{
+				pParentNode->pThirdChild = pNode->pThirdChild;
+			}
+		}
+		return;
+	}
+	else if (pNode->byNodeIdentifier == id_while_statement && !g_bExitDeadCodeRemoval)
+	{
+		Node* pParentNode = pNode->pParent->pParent;
+		
+		if (bConstRes == true)
+		{
+			HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop\n");
+		}
+		else
+		{
+			if (pParentNode->pFirstChild == pNode->pParent)
+			{
+				/*DeleteNode(pNode);*/
+				pParentNode->pFirstChild = NULL;
+			}
+			else if (pParentNode->pSecondChild == pNode->pParent)
+			{
+				/*DeleteNode(pNode);*/
+				pParentNode->pSecondChild = NULL;
+			}
+			else if (pParentNode->pThirdChild == pNode->pParent)
+			{
+				/*DeleteNode(pNode);*/
+				pParentNode->pThirdChild = NULL;
+			}
+		}
+		return;
+	}
+
+	RemoveDeadCode(pNode->pFirstChild);
+	RemoveDeadCode(pNode->pSecondChild);
+	RemoveDeadCode(pNode->pThirdChild);
+}
+
+void FoldConstants(Node* pNode)
 {
 	if (pNode == NULL)
 	{
@@ -2501,17 +2920,29 @@ void EvaluateTree(Node* pNode)
 				if (pParentNode->pFirstChild == pNode)
 				{
 					/*DeleteNode(pNode);*/
-					pParentNode->pFirstChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+					pParentNode->pFirstChild = 	CreateNode(NO_SYMBOLIC_LINK, id_expression, 
+												CreateNode(NO_SYMBOLIC_LINK, id_term, 
+												CreateNode(NO_SYMBOLIC_LINK, id_value, 
+												CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), 
+												NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
 				}
 				else if (pParentNode->pSecondChild == pNode)
 				{
 					/*DeleteNode(pNode);*/
-					pParentNode->pSecondChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+					pParentNode->pSecondChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, 
+												CreateNode(NO_SYMBOLIC_LINK, id_term, 
+												CreateNode(NO_SYMBOLIC_LINK, id_value, 
+												CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), 
+												NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
 				}
 				else if (pParentNode->pThirdChild == pNode)
 				{
 					/*DeleteNode(pNode);*/
-					pParentNode->pThirdChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, CreateNode(NO_SYMBOLIC_LINK, id_term, CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
+					pParentNode->pThirdChild = 	CreateNode(NO_SYMBOLIC_LINK, id_expression, 
+												CreateNode(NO_SYMBOLIC_LINK, id_term, 
+												CreateNode(NO_SYMBOLIC_LINK, id_value, 
+												CreateNode(CreateSymbolTableEntry_Constant(iType, pValue), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE), 
+												NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE), NO_CHILD_NODE, NO_CHILD_NODE);
 				}
 			}
 			return;
@@ -2519,11 +2950,11 @@ void EvaluateTree(Node* pNode)
 	}
 
 	g_bExitEvaluation = false;
-	EvaluateTree(pNode->pFirstChild);
+	FoldConstants(pNode->pFirstChild);
 	g_bExitEvaluation = false;
-	EvaluateTree(pNode->pSecondChild);
+	FoldConstants(pNode->pSecondChild);
 	g_bExitEvaluation = false;
-	EvaluateTree(pNode->pThirdChild);
+	FoldConstants(pNode->pThirdChild);
 }
 
 #include "lex.yy.c"

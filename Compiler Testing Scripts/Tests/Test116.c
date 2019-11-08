@@ -19,10 +19,6 @@ void prg_Test()
 	int spl_a = 1;
 
 	spl_a = 1;
-	if ((1 < 0))
-	{
-		printf("%d", spl_a);
-	}
 	printf("\n");
 }
 
