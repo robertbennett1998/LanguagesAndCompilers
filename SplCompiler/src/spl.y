@@ -2779,119 +2779,154 @@ void RemoveDeadCode(Node* pNode)
 		return;
 	}
 
-	g_bExitDeadCodeRemoval = false;
-	bool bConstRes = RemoveDeadCode_Iter(pNode->pFirstChild);
-	if (pNode->byNodeIdentifier == id_if_statement && !g_bExitDeadCodeRemoval)
+	if (pNode->byNodeIdentifier == id_do_statement)
 	{
-		Node* pParentNode = pNode->pParent->pParent;
-		
-		if (pParentNode->pFirstChild == pNode->pParent)
+		g_bExitDeadCodeRemoval = false;
+		bool bConstRes = RemoveDeadCode_Iter(pNode->pSecondChild);
+		if (!g_bExitDeadCodeRemoval)
 		{
-			/*DeleteNode(pNode);*/
-			if (bConstRes == true)
+			if (bConstRes)
 			{
-				pParentNode->pFirstChild = pNode->pSecondChild;
+				HANDLE_WARNING("The condition for the do while statement is constant and true. This will cause an infinte loop.\n");
 			}
 			else
 			{
-				pParentNode->pFirstChild = NULL;
+				Node* pParentNode = pNode->pParent->pParent;
+			
+				if (pParentNode->pFirstChild == pNode->pParent)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pFirstChild = pNode->pFirstChild;
+				}
+				else if (pParentNode->pSecondChild == pNode->pParent)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pSecondChild = pNode->pFirstChild;
+				}
+				if (pParentNode->pThirdChild == pNode->pParent)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pThirdChild = pNode->pFirstChild;
+				}
 			}
 		}
-		else if (pParentNode->pSecondChild == pNode->pParent)
-		{
-			/*DeleteNode(pNode);*/
-			if (bConstRes == true)
-			{
-				pParentNode->pSecondChild = pNode->pSecondChild;
-			}
-			else
-			{
-				pParentNode->pSecondChild = NULL;
-			}
-		}
-		else if (pParentNode->pThirdChild == pNode->pParent)
-		{
-			/*DeleteNode(pNode);*/
-			if (bConstRes == true)
-			{
-				pParentNode->pThirdChild = pNode->pSecondChild;
-			}
-			else
-			{
-				pParentNode->pThirdChild = NULL;
-			}
-		}
-		return;
 	}
-	else if (pNode->byNodeIdentifier == id_if_else_statement && !g_bExitDeadCodeRemoval)
+	else
 	{
-		Node* pParentNode = pNode->pParent->pParent;
-		
-		if (pParentNode->pFirstChild == pNode->pParent)
+		g_bExitDeadCodeRemoval = false;
+		bool bConstRes = RemoveDeadCode_Iter(pNode->pFirstChild);
+		if (pNode->byNodeIdentifier == id_if_statement && !g_bExitDeadCodeRemoval)
 		{
-			/*DeleteNode(pNode);*/
-			if (bConstRes)
-			{
-				pParentNode->pFirstChild = pNode->pSecondChild;
-			}
-			else
-			{
-				pParentNode->pFirstChild = pNode->pThirdChild;
-			}
-		}
-		else if (pParentNode->pSecondChild == pNode->pParent)
-		{
-			/*DeleteNode(pNode);*/
-			if (bConstRes)
-			{
-				pParentNode->pSecondChild = pNode->pSecondChild;
-			}
-			else
-			{
-				pParentNode->pSecondChild = pNode->pThirdChild;
-			}
-		}
-		else if (pParentNode->pThirdChild == pNode->pParent)
-		{
-			/*DeleteNode(pNode);*/
-			if (bConstRes)
-			{
-				pParentNode->pThirdChild = pNode->pSecondChild;
-			}
-			else
-			{
-				pParentNode->pThirdChild = pNode->pThirdChild;
-			}
-		}
-		return;
-	}
-	else if (pNode->byNodeIdentifier == id_while_statement && !g_bExitDeadCodeRemoval)
-	{
-		Node* pParentNode = pNode->pParent->pParent;
-		
-		if (bConstRes == true)
-		{
-			HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop\n");
-		}
-		else
-		{
+			Node* pParentNode = pNode->pParent->pParent;
+			
 			if (pParentNode->pFirstChild == pNode->pParent)
 			{
 				/*DeleteNode(pNode);*/
-				pParentNode->pFirstChild = NULL;
+				if (bConstRes == true)
+				{
+					pParentNode->pFirstChild = pNode->pSecondChild;
+				}
+				else
+				{
+					pParentNode->pFirstChild = NULL;
+				}
 			}
 			else if (pParentNode->pSecondChild == pNode->pParent)
 			{
 				/*DeleteNode(pNode);*/
-				pParentNode->pSecondChild = NULL;
+				if (bConstRes == true)
+				{
+					pParentNode->pSecondChild = pNode->pSecondChild;
+				}
+				else
+				{
+					pParentNode->pSecondChild = NULL;
+				}
 			}
 			else if (pParentNode->pThirdChild == pNode->pParent)
 			{
 				/*DeleteNode(pNode);*/
-				pParentNode->pThirdChild = NULL;
+				if (bConstRes == true)
+				{
+					pParentNode->pThirdChild = pNode->pSecondChild;
+				}
+				else
+				{
+					pParentNode->pThirdChild = NULL;
+				}
 			}
+			return;
 		}
-		return;
+		else if (pNode->byNodeIdentifier == id_if_else_statement && !g_bExitDeadCodeRemoval)
+		{
+			Node* pParentNode = pNode->pParent->pParent;
+			
+			if (pParentNode->pFirstChild == pNode->pParent)
+			{
+				/*DeleteNode(pNode);*/
+				if (bConstRes)
+				{
+					pParentNode->pFirstChild = pNode->pSecondChild;
+				}
+				else
+				{
+					pParentNode->pFirstChild = pNode->pThirdChild;
+				}
+			}
+			else if (pParentNode->pSecondChild == pNode->pParent)
+			{
+				/*DeleteNode(pNode);*/
+				if (bConstRes)
+				{
+					pParentNode->pSecondChild = pNode->pSecondChild;
+				}
+				else
+				{
+					pParentNode->pSecondChild = pNode->pThirdChild;
+				}
+			}
+			else if (pParentNode->pThirdChild == pNode->pParent)
+			{
+				/*DeleteNode(pNode);*/
+				if (bConstRes)
+				{
+					pParentNode->pThirdChild = pNode->pSecondChild;
+				}
+				else
+				{
+					pParentNode->pThirdChild = pNode->pThirdChild;
+				}
+			}
+			return;
+		}
+		else if (pNode->byNodeIdentifier == id_while_statement && !g_bExitDeadCodeRemoval)
+		{
+			Node* pParentNode = pNode->pParent->pParent;
+			
+			if (bConstRes == true)
+			{
+				HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop\n");
+			}
+			else
+			{
+				if (pParentNode->pFirstChild == pNode->pParent)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pFirstChild = NULL;
+				}
+				else if (pParentNode->pSecondChild == pNode->pParent)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pSecondChild = NULL;
+				}
+				else if (pParentNode->pThirdChild == pNode->pParent)
+				{
+					/*DeleteNode(pNode);*/
+					pParentNode->pThirdChild = NULL;
+				}
+			}
+			return;
+		}
 	}
 
 	RemoveDeadCode(pNode->pFirstChild);
