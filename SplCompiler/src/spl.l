@@ -55,10 +55,10 @@ unsigned_integer            {digit}+
 real_number			        -?[0-9]+\.[0-9]+
 lowercase_letters	        [a-z]
 uppercase_letters	        [A-Z]
-character			        (?:{lowercase_letters}|{uppercase_letters})
-character_constant	        [']{character}[']
-invalid_character_constant	[']{character}{2,}[']
-identifier			        (?:(?:[a-zA-Z])[0-9]*)+
+character			        ({lowercase_letters}|{uppercase_letters})
+character_constant	        '{character}'
+invalid_character_constant	'{character}{2,}'
+identifier			        (({character}){digit}*)+
 
 %%
 
@@ -122,7 +122,7 @@ identifier			        (?:(?:[a-zA-Z])[0-9]*)+
 						}
 {character_constant}	{
 							ASSIGN_YYLVAL(cVal, yytext[1]);
-							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext)
+							PROCESS_GENERIC_TOKEN(CHARACTER_CONSTANT, yytext);
 						}
 {invalid_character_constant}    {
                                     IncrementLinePosition(strlen(yytext));
