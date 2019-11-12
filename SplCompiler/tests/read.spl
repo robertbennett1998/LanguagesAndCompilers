@@ -1,13 +1,28 @@
 read:
     DECLARATIONS
         int OF TYPE INTEGER;
+        real OF TYPE REAL;
         char, char2 OF TYPE CHARACTER;
+        space, period OF TYPE CHARACTER;
     CODE
+        32 -> space;
+        46 -> period;
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', 'n', space, 'i', 'n', 't', 'e', 'g', 'e', 'r', period);
+        NEWLINE;
         READ(int);
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', space, 'r', 'e', 'a', 'l', period);
+        NEWLINE;
+        READ(real);
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', space, 'c', 'h', 'a', 'r', 'a', 'c', 't', 'e', 'r', period);
+        NEWLINE;
         READ(char);
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 'a', space, 'c', 'h', 'a', 'r', 'a', 'c', 't', 'e', 'r', period);
+        NEWLINE;
         READ(char2);
         NEWLINE;
         WRITE(int);
+        NEWLINE;
+        WRITE(real);
         NEWLINE;
         WRITE(char);
         NEWLINE;

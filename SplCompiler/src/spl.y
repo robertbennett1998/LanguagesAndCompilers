@@ -58,7 +58,6 @@
     {
         char acIdentifier[MAX_IDENTIFIER_LENGTH];
         int iType;
-		bool bDeclared;
 		VariableUsageDetails* pFirstUsage;
 		VariableUsageDetails* pLastUsage;
     } VariableDetails;
@@ -144,17 +143,7 @@
 	void CheckIfVariableIsDeclared(SymbolTableEntry* pEntry);
 
     /* PARSE TREE */
-    struct _node
-    {
-        SymbolTableEntry* pSymbolTableEntry;
-        unsigned char byNodeIdentifier;
-        struct _node* pFirstChild;
-        struct _node* pSecondChild;
-        struct _node* pThirdChild;
-		struct _node* pParent;
-    };
-
-    typedef enum _nodeIdentifiers
+	typedef enum _nodeIdentifiers
     {
         id_program = 1,
         id_block,
@@ -170,22 +159,30 @@
         id_write_statement,
         id_output_list,
         id_constant,
-        id_number_constant,
         id_type,
-        id_real,
         id_integer,
         id_comparator,
         id_read_statement,
         id_if_statement,
         id_if_else_statement,
         id_conditional,
-        id_logical,
         id_comparison,
         id_for_statement,
 		id_for_statement_is_by_to,
         id_while_statement,
         id_do_statement
     } NodeIdentifiers;
+
+    struct _node
+    {
+        SymbolTableEntry* pSymbolTableEntry;
+        NodeIdentifiers byNodeIdentifier;
+        struct _node* pFirstChild;
+        struct _node* pSecondChild;
+        struct _node* pThirdChild;
+		struct _node* pParent;
+    };
+
     void PrintNodeIdentifiersValue(const NodeIdentifiers value);
     const char* NodeIdentifiersValueToString(const NodeIdentifiers value);
 
@@ -973,14 +970,8 @@ const char* NodeIdentifiersValueToString(const NodeIdentifiers value)
 			return "id_output_list";
 		case id_constant: 
 			return "id_constant";
-		case id_number_constant: 
-			return "id_number_constant";
 		case id_type: 
 			return "id_type";
-		case id_real: 
-			return "id_real";
-		case id_integer: 
-			return "id_integer";
 		case id_comparator: 
 			return "id_comparator";
 		case id_read_statement: 
@@ -1069,7 +1060,7 @@ void Evaluate(const Node* const pNode)
 		case id_program:
 		{
 			g_iIndentLevel = 0;
-			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tdo\n\t{\n\t\tc = getchar();\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tdo\n\t{\n\t\tc = getchar();\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid _spl_read(const char* pFormat, void* pValue)\n{\n\twhile (scanf(pFormat, pValue) != 1)\n\t{\n\t\tgetchar();\n\t};\n\t_spl_flush_stdin();\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			Evaluate(pNode->pFirstChild);
 			printf("}\n\n");
 			printf("int main()\n{\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
@@ -1119,27 +1110,7 @@ void GenerateCode(const Node* const pStartNode)
 void WriteReadStatement(const Node* const pNode, const char* pFormat)
 {
 	Indent();
-	printf("while (scanf(\"%s\", &%s) != 1)\n", pFormat, pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
-	Indent();
-	printf("{\n");
-	g_iIndentLevel++;
-	Indent();
-	printf("char c = getchar();\n");
-	Indent();
-	printf("if (c == '\\n' || c == ' ' || c == EOF)\n");
-	Indent();
-	printf("{\n");
-	g_iIndentLevel++;
-	Indent();
-	printf("break;\n");
-	g_iIndentLevel--;
-	Indent();
-	printf("}\n");
-	Indent();
-	printf("_spl_flush_stdin();\n");
-	g_iIndentLevel--;
-	Indent();
-	printf("}\n");
+	printf("_spl_read(\"%s\", &%s);\n", pFormat, pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
 }
 
 void Evaluate_StatementList(const Node* const pNode)
@@ -1194,11 +1165,11 @@ void Evaluate_StatementList(const Node* const pNode)
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_INTEGER)
 			{
-				WriteReadStatement(pNode, "%d");
+				WriteReadStatement(pNode, " %d");
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
 			{
-				WriteReadStatement(pNode, "%lf");
+				WriteReadStatement(pNode, " %lf");
 			}
 
 			break;

@@ -18,12 +18,6 @@ tree : tree-clean flex bison
 compiler : compiler-clean flex bison
 	gcc -o ./bin/compiler.exe ./src/spl.c ./src/spl_t.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
 
-compiler-pedantic : compiler-clean flex bison
-	gcc -o ./bin/compiler.exe ./src/spl.c ./src/spl_t.c -lfl -Wall -Wextra -Wpedantic -ansi -D__MINGW_FEATURES -Wno-cpp
-
-test : clean
-	./RunCompiler.bat
-
 clean : lexer-clean bison-clean parser-clean tree-clean compiler-clean
 
 lexer-clean :

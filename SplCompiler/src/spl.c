@@ -20,17 +20,13 @@ extern int yyparse();
 #endif
 
 bool g_bOptimisation_DeadStores, g_bOptimisation_FoldConstants, g_bStaticErrorChecking_DivisionByZero, g_bOptimisation_DeadCode;
+const char* const g_pCompilerVersion = "1.0.0";
 
-int main(int argc, char **argv)
+void ProcessArgs(int argc, char **argv)
 {
-	g_bOptimisation_DeadStores = true;
-	g_bOptimisation_FoldConstants = true;
-	g_bStaticErrorChecking_DivisionByZero = true;
-	g_bOptimisation_DeadCode = true;
 	int i = 1;
 	for (; i < argc; i++)
 	{
-		printf("/*Compiler Settings Information!*/\n");
 		if (strcmp(argv[i], "--noOptimisations") == 0)
 		{
 			printf("/*All optimisations are disabled*/\n");
@@ -64,6 +60,11 @@ int main(int argc, char **argv)
 			printf("/*The static error check division by zero is disabled*/\n");
 			g_bStaticErrorChecking_DivisionByZero = false;
 		}
+		else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
+		{
+			printf("Simple Programming Langauge (SPL) Compiler %s built on %s at %s.\n", g_pCompilerVersion, __DATE__, __TIME__);
+			exit(0);
+		}
 		else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
 		{
 			printf("SPL Compiler Help:\n");
@@ -77,24 +78,33 @@ int main(int argc, char **argv)
 			printf("\t\tStatic Error Checking Flags:\n");
 			printf("\t\tAll static error checks are enabled by default, these flags will disable these static error checks.\n");
 			printf("\t\t--noStaticErrors: Will disable all static error checking.\n");
-			printf("\t\t--noDivisionByZeroCheck: Will disable static error checking for constant division by zeros.\n");
-			return;
+			printf("\t\t--noDivisionByZeroCheck: Will disable static error checking for constant division by zeros.\n\n");
+
+			printf("\t\tMisc:\n");
+			printf("\t\t-v, --version: Will print the current version of the compiler and the date and time it was built.\n");
+			exit(0);
 		}
 		else
 		{
 			printf("Argument %s is not recognised.\n", argv[i]);
 			printf("Please use the -h or --help flag to see a list of valid arguments.\n");
-			return;
+			exit(0);
 		}
 	}
+}
+int main(int argc, char **argv)
+{
+	g_bOptimisation_DeadStores = true;
+	g_bOptimisation_FoldConstants = true;
+	g_bStaticErrorChecking_DivisionByZero = true;
+	g_bOptimisation_DeadCode = true;
+	ProcessArgs(argc, argv);
 
     #if YYDEBUG == 1
         yydebug = 1;
     #endif
 
-	int iRes = yyparse();
-	
-	return iRes;
+	return yyparse();
 }
 
 void yyerror(const char *s) 
