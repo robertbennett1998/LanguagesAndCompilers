@@ -197,6 +197,7 @@
 
     extern unsigned int g_uiCurrentLineNumber;
     extern unsigned long g_ulCurrentLinePosition;
+	extern bool g_bOptimisation_DeadStores, g_bOptimisation_FoldConstants, g_bStaticErrorChecking_DivisionByZero, g_bOptimisation_DeadCode;
     extern void PrintLinePositionUpdate();
     extern void IncrementLinePosition(const int iTokenLength);
     extern void ProcessEndOfLine();
@@ -272,19 +273,15 @@ program :
 
 		Node* pParseTree = CreateNode($1, id_program, $3, NO_CHILD_NODE, NO_CHILD_NODE);
 
-		#ifdef PRINT_UNOPTIMISED_TREE
-			PrintTree(pParseTree, 0);
-		#endif
-		
-		EvaluateVariableUsage();
-		FoldConstants(pParseTree);
-		CheckForDivideByZero(pParseTree);
-		RemoveDeadCode(pParseTree);
-
 		#ifdef DEBUG
 			PrintTree(pParseTree, 0);
             return;
 		#endif
+
+		EvaluateVariableUsage();
+		FoldConstants(pParseTree);
+		CheckForDivideByZero(pParseTree);
+		RemoveDeadCode(pParseTree);
 
 		$$ = pParseTree;
 		if (g_uiErrorCount == 0)
@@ -2019,13 +2016,17 @@ void EvaluateVariableUsage()
 							pStatement = pStatement->pParent;
 						};
 
-						if (pStatement == pStatement->pParent->pFirstChild)
+						/*Optimise the redundant assignment*/
+						if (g_bOptimisation_DeadStores)
 						{
-							pStatement->pParent->pFirstChild = NO_CHILD_NODE;
-						}
-						else if (pStatement == pStatement->pParent->pSecondChild)
-						{
-							pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+							if (pStatement == pStatement->pParent->pFirstChild)
+							{
+								pStatement->pParent->pFirstChild = NO_CHILD_NODE;
+							}
+							else if (pStatement == pStatement->pParent->pSecondChild)
+							{
+								pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+							}
 						}
 
 						if (pStatement->pFirstChild->byNodeIdentifier == id_read_statement)
@@ -2468,7 +2469,7 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 
 void CheckForDivideByZero(const Node* const pNode)
 {
-	if (pNode == NULL)
+	if (pNode == NULL || g_bStaticErrorChecking_DivisionByZero == false)
 	{
 		return;
 	}
@@ -2771,10 +2772,11 @@ void RemoveDeadCode(Node* pNode)
 			{
 				HANDLE_WARNING("The condition for the do while statement is constant and true. This will cause an infinte loop.\n");
 			}
-			else
+			else if (g_bOptimisation_DeadCode)
 			{
 				Node* pParentNode = pNode->pParent->pParent;
-			
+				HANDLE_WARNING("The condition for the do while statement is constant and false. This means the loop is redundant and may be optimised out.\n");
+
 				if (pParentNode->pFirstChild == pNode->pParent)
 				{
 					/*DeleteNode(pNode);*/
@@ -2801,7 +2803,16 @@ void RemoveDeadCode(Node* pNode)
 		{
 			Node* pParentNode = pNode->pParent->pParent;
 			
-			if (pParentNode->pFirstChild == pNode->pParent)
+			if (bConstRes)
+			{
+				HANDLE_WARNING("The condition for the if statement is constant and true. The conditional checks are redundant and may be optimised out.\n");
+			}
+			else
+			{
+				HANDLE_WARNING("The condition for the if statement is constant and false. The code will never execute may be optimised out.\n");
+			}
+
+			if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
@@ -2813,7 +2824,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pFirstChild = NULL;
 				}
 			}
-			else if (pParentNode->pSecondChild == pNode->pParent)
+			else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
@@ -2825,7 +2836,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pSecondChild = NULL;
 				}
 			}
-			else if (pParentNode->pThirdChild == pNode->pParent)
+			else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
@@ -2842,8 +2853,16 @@ void RemoveDeadCode(Node* pNode)
 		else if (pNode->byNodeIdentifier == id_if_else_statement && !g_bExitDeadCodeRemoval)
 		{
 			Node* pParentNode = pNode->pParent->pParent;
-			
-			if (pParentNode->pFirstChild == pNode->pParent)
+			if (bConstRes)
+			{
+				HANDLE_WARNING("The condition for the if else statement is constant and true. Therefore the else code path is redundant and may be optimised out.\n");
+			}
+			else
+			{
+				HANDLE_WARNING("The condition for the if else statement is constant and false. Therefore the if code path is redundant and may be optimised out.\n");
+			}
+
+			if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes)
@@ -2855,7 +2874,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pFirstChild = pNode->pThirdChild;
 				}
 			}
-			else if (pParentNode->pSecondChild == pNode->pParent)
+			else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes)
@@ -2867,7 +2886,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pSecondChild = pNode->pThirdChild;
 				}
 			}
-			else if (pParentNode->pThirdChild == pNode->pParent)
+			else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes)
@@ -2887,21 +2906,22 @@ void RemoveDeadCode(Node* pNode)
 			
 			if (bConstRes == true)
 			{
-				HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop\n");
+				HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop.\n");
 			}
 			else
 			{
-				if (pParentNode->pFirstChild == pNode->pParent)
+				HANDLE_WARNING("The condition for the while statement is constant and false. This loop is redundant and may be optimised out.\n");
+				if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
 					/*DeleteNode(pNode);*/
 					pParentNode->pFirstChild = NULL;
 				}
-				else if (pParentNode->pSecondChild == pNode->pParent)
+				else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
 					/*DeleteNode(pNode);*/
 					pParentNode->pSecondChild = NULL;
 				}
-				else if (pParentNode->pThirdChild == pNode->pParent)
+				else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
 					/*DeleteNode(pNode);*/
 					pParentNode->pThirdChild = NULL;
@@ -2918,7 +2938,7 @@ void RemoveDeadCode(Node* pNode)
 
 void FoldConstants(Node* pNode)
 {
-	if (pNode == NULL)
+	if (pNode == NULL || g_bOptimisation_FoldConstants == false)
 	{
 		return;
 	}

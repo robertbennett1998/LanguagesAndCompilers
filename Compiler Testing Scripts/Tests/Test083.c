@@ -13,7 +13,7 @@ void prg_Test()
 {
 	int spl_a = 1;
 
-	spl_a = (-2 * -2);
+	spl_a = 4;
 	printf("%d", spl_a);
 	printf("\n");
 }

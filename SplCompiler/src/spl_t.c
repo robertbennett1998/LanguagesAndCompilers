@@ -262,6 +262,7 @@
 
     extern unsigned int g_uiCurrentLineNumber;
     extern unsigned long g_ulCurrentLinePosition;
+	extern bool g_bOptimisation_DeadStores, g_bOptimisation_FoldConstants, g_bStaticErrorChecking_DivisionByZero, g_bOptimisation_DeadCode;
     extern void PrintLinePositionUpdate();
     extern void IncrementLinePosition(const int iTokenLength);
     extern void ProcessEndOfLine();
@@ -288,7 +289,7 @@
 	void FoldConstants(Node* pNode);
 	void RemoveDeadCode(Node* pNode);
 
-#line 292 "./src/spl_t.c" /* yacc.c:339  */
+#line 293 "./src/spl_t.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -376,7 +377,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 228 "./src/spl.y" /* yacc.c:355  */
+#line 229 "./src/spl.y" /* yacc.c:355  */
 
 	long iVal;
 	double fVal;
@@ -384,7 +385,7 @@ union YYSTYPE
 	Node* pNode;
 	SymbolTableEntry* pSymbolTableEntry;
 
-#line 388 "./src/spl_t.c" /* yacc.c:355  */
+#line 389 "./src/spl_t.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -401,7 +402,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 405 "./src/spl_t.c" /* yacc.c:358  */
+#line 406 "./src/spl_t.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -703,13 +704,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   248,   248,   297,   300,   305,   308,   313,   326,   329,
-     334,   337,   340,   345,   347,   355,   358,   364,   367,   370,
-     373,   376,   379,   382,   385,   390,   410,   413,   418,   423,
-     426,   429,   434,   444,   454,   459,   473,   482,   493,   498,
-     501,   506,   509,   514,   517,   520,   523,   526,   529,   534,
-     541,   546,   551,   553,   555,   560,   570,   575,   583,   588,
-     591
+       0,   249,   249,   294,   297,   302,   305,   310,   323,   326,
+     331,   334,   337,   342,   344,   352,   355,   361,   364,   367,
+     370,   373,   376,   379,   382,   387,   407,   410,   415,   420,
+     423,   426,   431,   441,   451,   456,   470,   479,   490,   495,
+     498,   503,   506,   511,   514,   517,   520,   523,   526,   531,
+     538,   543,   548,   550,   552,   557,   567,   572,   580,   585,
+     588
 };
 #endif
 
@@ -1574,7 +1575,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 248 "./src/spl.y" /* yacc.c:1646  */
+#line 249 "./src/spl.y" /* yacc.c:1646  */
     {
 		if ((yyvsp[-5].pSymbolTableEntry) != (yyvsp[-1].pSymbolTableEntry))
 		{
@@ -1602,19 +1603,15 @@ yyreduce:
 
 		Node* pParseTree = CreateNode((yyvsp[-5].pSymbolTableEntry), id_program, (yyvsp[-3].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 
-		#ifdef PRINT_UNOPTIMISED_TREE
-			PrintTree(pParseTree, 0);
-		#endif
-		
-		EvaluateVariableUsage();
-		FoldConstants(pParseTree);
-		CheckForDivideByZero(pParseTree);
-		RemoveDeadCode(pParseTree);
-
 		#ifdef DEBUG
 			PrintTree(pParseTree, 0);
             return;
 		#endif
+
+		EvaluateVariableUsage();
+		FoldConstants(pParseTree);
+		CheckForDivideByZero(pParseTree);
+		RemoveDeadCode(pParseTree);
 
 		(yyval.pNode) = pParseTree;
 		if (g_uiErrorCount == 0)
@@ -1622,43 +1619,43 @@ yyreduce:
 			GenerateCode(pParseTree);
 		}
 	}
-#line 1626 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1623 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 297 "./src/spl.y" /* yacc.c:1646  */
+#line 294 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_block, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1634 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1631 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 300 "./src/spl.y" /* yacc.c:1646  */
+#line 297 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_block, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1642 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1639 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 305 "./src/spl.y" /* yacc.c:1646  */
+#line 302 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration_block, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1650 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1647 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 308 "./src/spl.y" /* yacc.c:1646  */
+#line 305 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration_block, (yyvsp[-1].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1658 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1655 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 313 "./src/spl.y" /* yacc.c:1646  */
+#line 310 "./src/spl.y" /* yacc.c:1646  */
     {
 		Node* pNode = (yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration, (yyvsp[-4].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 
@@ -1670,150 +1667,150 @@ yyreduce:
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 	}
-#line 1674 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1671 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 326 "./src/spl.y" /* yacc.c:1646  */
+#line 323 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_identifier_list, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1682 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1679 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 329 "./src/spl.y" /* yacc.c:1646  */
+#line 326 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_identifier_list, (yyvsp[-2].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1690 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1687 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 334 "./src/spl.y" /* yacc.c:1646  */
+#line 331 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_CHARACTER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1698 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1695 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 337 "./src/spl.y" /* yacc.c:1646  */
+#line 334 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_INTEGER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1706 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1703 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 340 "./src/spl.y" /* yacc.c:1646  */
+#line 337 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_REAL), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1714 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1711 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 345 "./src/spl.y" /* yacc.c:1646  */
+#line 342 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = (yyvsp[0].pNode);
 	}
-#line 1722 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1719 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 347 "./src/spl.y" /* yacc.c:1646  */
+#line 344 "./src/spl.y" /* yacc.c:1646  */
     {
 		g_uiCurrentLineNumber--;
 		HANDLE_WARNING("Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.");
 		g_uiCurrentLineNumber++;
 		(yyval.pNode) = (yyvsp[-1].pNode);
 	}
-#line 1733 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1730 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 355 "./src/spl.y" /* yacc.c:1646  */
+#line 352 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement_list, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1741 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1738 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 359 "./src/spl.y" /* yacc.c:1646  */
+#line 356 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement_list, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1749 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1746 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 17:
+#line 361 "./src/spl.y" /* yacc.c:1646  */
+    {
+		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
+	}
+#line 1754 "./src/spl_t.c" /* yacc.c:1646  */
+    break;
+
+  case 18:
 #line 364 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1757 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1762 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
-  case 18:
+  case 19:
 #line 367 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1765 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1770 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
-  case 19:
+  case 20:
 #line 370 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1773 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1778 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
-  case 20:
+  case 21:
 #line 373 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1781 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1786 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
-  case 21:
+  case 22:
 #line 376 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1789 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1794 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
-  case 22:
+  case 23:
 #line 379 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1797 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1802 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
-  case 23:
+  case 24:
 #line 382 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1805 "./src/spl_t.c" /* yacc.c:1646  */
-    break;
-
-  case 24:
-#line 385 "./src/spl.y" /* yacc.c:1646  */
-    {
-		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
-	}
-#line 1813 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1810 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 390 "./src/spl.y" /* yacc.c:1646  */
+#line 387 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[0].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_assignment_statement, (yyvsp[-2].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
@@ -1832,61 +1829,61 @@ yyreduce:
 			HANDLE_WARNING("A real has been assigned to a variable of type integer, this may cause a loss of precision.");
 		}
 	}
-#line 1836 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1833 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 410 "./src/spl.y" /* yacc.c:1646  */
+#line 407 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_value, (yyvsp[-1].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1844 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1841 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 413 "./src/spl.y" /* yacc.c:1646  */
+#line 410 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[0].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableUsedEntry((yyvsp[0].pSymbolTableEntry), pNode);
 	}
-#line 1854 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1851 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 418 "./src/spl.y" /* yacc.c:1646  */
+#line 415 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_value, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1862 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1859 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 423 "./src/spl.y" /* yacc.c:1646  */
+#line 420 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1870 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1867 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 426 "./src/spl.y" /* yacc.c:1646  */
+#line 423 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1878 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1875 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 429 "./src/spl.y" /* yacc.c:1646  */
+#line 426 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_expression, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1886 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1883 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 434 "./src/spl.y" /* yacc.c:1646  */
+#line 431 "./src/spl.y" /* yacc.c:1646  */
     {
 		int iTermType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		int iValueType = GetFinalTypeOfExpression((yyvsp[0].pNode), -1);
@@ -1897,11 +1894,11 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_multipulcation), id_term, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1901 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1898 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 444 "./src/spl.y" /* yacc.c:1646  */
+#line 441 "./src/spl.y" /* yacc.c:1646  */
     {
 		int iTermType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		int iValueType = GetFinalTypeOfExpression((yyvsp[0].pNode), -1);
@@ -1912,19 +1909,19 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1916 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1913 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 454 "./src/spl.y" /* yacc.c:1646  */
+#line 451 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_term, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1924 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1921 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 459 "./src/spl.y" /* yacc.c:1646  */
+#line 456 "./src/spl.y" /* yacc.c:1646  */
     {
 		if ((yyvsp[0].fVal) > DBL_MAX)
 		{
@@ -1939,11 +1936,11 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &(yyvsp[0].fVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1943 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1940 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 473 "./src/spl.y" /* yacc.c:1646  */
+#line 470 "./src/spl.y" /* yacc.c:1646  */
     {
 		if ((yyvsp[0].iVal) > (long)INT_MAX)
 		{
@@ -1953,11 +1950,11 @@ yyreduce:
 		
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &(yyvsp[0].iVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1957 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1954 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 482 "./src/spl.y" /* yacc.c:1646  */
+#line 479 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyvsp[0].iVal) = 0L - (yyvsp[0].iVal);
 		
@@ -1969,149 +1966,149 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &(yyvsp[0].iVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1973 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1970 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 493 "./src/spl.y" /* yacc.c:1646  */
+#line 490 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &(yyvsp[0].cVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1981 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1978 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 498 "./src/spl.y" /* yacc.c:1646  */
+#line 495 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, (yyvsp[-1].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1989 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1986 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 501 "./src/spl.y" /* yacc.c:1646  */
+#line 498 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1997 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1994 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 506 "./src/spl.y" /* yacc.c:1646  */
+#line 503 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_output_list, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2005 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2002 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 509 "./src/spl.y" /* yacc.c:1646  */
+#line 506 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_output_list, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2013 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2010 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 514 "./src/spl.y" /* yacc.c:1646  */
+#line 511 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_equality), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2021 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2018 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 517 "./src/spl.y" /* yacc.c:1646  */
+#line 514 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2029 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2026 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 520 "./src/spl.y" /* yacc.c:1646  */
+#line 517 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2037 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2034 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 523 "./src/spl.y" /* yacc.c:1646  */
+#line 520 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2045 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2042 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 526 "./src/spl.y" /* yacc.c:1646  */
+#line 523 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2053 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2050 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 529 "./src/spl.y" /* yacc.c:1646  */
+#line 526 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2061 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2058 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 534 "./src/spl.y" /* yacc.c:1646  */
+#line 531 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[-1].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[-1].pSymbolTableEntry), id_read_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableAssignedEntry((yyvsp[-1].pSymbolTableEntry), pNode);
 	}
-#line 2071 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2068 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 541 "./src/spl.y" /* yacc.c:1646  */
+#line 538 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_if_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2079 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2076 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 546 "./src/spl.y" /* yacc.c:1646  */
+#line 543 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_if_else_statement, (yyvsp[-5].pNode), (yyvsp[-3].pNode), (yyvsp[-1].pNode));
 	}
-#line 2087 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2084 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 551 "./src/spl.y" /* yacc.c:1646  */
+#line 548 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_conditional, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2095 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2092 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 553 "./src/spl.y" /* yacc.c:1646  */
+#line 550 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2103 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2100 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 555 "./src/spl.y" /* yacc.c:1646  */
+#line 552 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2111 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2108 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 560 "./src/spl.y" /* yacc.c:1646  */
+#line 557 "./src/spl.y" /* yacc.c:1646  */
     {
 		int iFirstType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		int iSecondType = GetFinalTypeOfExpression((yyvsp[0].pNode), -1);
@@ -2123,54 +2120,54 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_comparison, (yyvsp[-2].pNode), (yyvsp[-1].pNode), (yyvsp[0].pNode));
 	}
-#line 2127 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2124 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 570 "./src/spl.y" /* yacc.c:1646  */
+#line 567 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_comparison, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2135 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2132 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 575 "./src/spl.y" /* yacc.c:1646  */
+#line 572 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[-9].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[-9].pSymbolTableEntry), id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, (yyvsp[-7].pNode), (yyvsp[-5].pNode), (yyvsp[-3].pNode)), (yyvsp[-1].pNode), NO_CHILD_NODE);
 		CreateVariableAssignedEntry((yyvsp[-9].pSymbolTableEntry), pNode);
 		CreateVariableUsedEntry((yyvsp[-9].pSymbolTableEntry), pNode);
 	}
-#line 2146 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2143 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 583 "./src/spl.y" /* yacc.c:1646  */
+#line 580 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_while_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2154 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2151 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 588 "./src/spl.y" /* yacc.c:1646  */
+#line 585 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2162 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2159 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 591 "./src/spl.y" /* yacc.c:1646  */
+#line 588 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, (yyvsp[-4].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2170 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2167 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
 
-#line 2174 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2171 "./src/spl_t.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2398,7 +2395,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 594 "./src/spl.y" /* yacc.c:1906  */
+#line 591 "./src/spl.y" /* yacc.c:1906  */
 
 
 SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier)
@@ -3827,13 +3824,17 @@ void EvaluateVariableUsage()
 							pStatement = pStatement->pParent;
 						};
 
-						if (pStatement == pStatement->pParent->pFirstChild)
+						/*Optimise the redundant assignment*/
+						if (g_bOptimisation_DeadStores)
 						{
-							pStatement->pParent->pFirstChild = NO_CHILD_NODE;
-						}
-						else if (pStatement == pStatement->pParent->pSecondChild)
-						{
-							pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+							if (pStatement == pStatement->pParent->pFirstChild)
+							{
+								pStatement->pParent->pFirstChild = NO_CHILD_NODE;
+							}
+							else if (pStatement == pStatement->pParent->pSecondChild)
+							{
+								pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+							}
 						}
 
 						if (pStatement->pFirstChild->byNodeIdentifier == id_read_statement)
@@ -4276,7 +4277,7 @@ void* EvaluateConstantExpression(Node* pNode, int* iType)
 
 void CheckForDivideByZero(const Node* const pNode)
 {
-	if (pNode == NULL)
+	if (pNode == NULL || g_bStaticErrorChecking_DivisionByZero == false)
 	{
 		return;
 	}
@@ -4579,10 +4580,11 @@ void RemoveDeadCode(Node* pNode)
 			{
 				HANDLE_WARNING("The condition for the do while statement is constant and true. This will cause an infinte loop.\n");
 			}
-			else
+			else if (g_bOptimisation_DeadCode)
 			{
 				Node* pParentNode = pNode->pParent->pParent;
-			
+				HANDLE_WARNING("The condition for the do while statement is constant and false. This means the loop is redundant and may be optimised out.\n");
+
 				if (pParentNode->pFirstChild == pNode->pParent)
 				{
 					/*DeleteNode(pNode);*/
@@ -4609,7 +4611,16 @@ void RemoveDeadCode(Node* pNode)
 		{
 			Node* pParentNode = pNode->pParent->pParent;
 			
-			if (pParentNode->pFirstChild == pNode->pParent)
+			if (bConstRes)
+			{
+				HANDLE_WARNING("The condition for the if statement is constant and true. The conditional checks are redundant and may be optimised out.\n");
+			}
+			else
+			{
+				HANDLE_WARNING("The condition for the if statement is constant and false. The code will never execute may be optimised out.\n");
+			}
+
+			if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
@@ -4621,7 +4632,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pFirstChild = NULL;
 				}
 			}
-			else if (pParentNode->pSecondChild == pNode->pParent)
+			else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
@@ -4633,7 +4644,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pSecondChild = NULL;
 				}
 			}
-			else if (pParentNode->pThirdChild == pNode->pParent)
+			else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
@@ -4650,8 +4661,16 @@ void RemoveDeadCode(Node* pNode)
 		else if (pNode->byNodeIdentifier == id_if_else_statement && !g_bExitDeadCodeRemoval)
 		{
 			Node* pParentNode = pNode->pParent->pParent;
-			
-			if (pParentNode->pFirstChild == pNode->pParent)
+			if (bConstRes)
+			{
+				HANDLE_WARNING("The condition for the if else statement is constant and true. Therefore the else code path is redundant and may be optimised out.\n");
+			}
+			else
+			{
+				HANDLE_WARNING("The condition for the if else statement is constant and false. Therefore the if code path is redundant and may be optimised out.\n");
+			}
+
+			if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes)
@@ -4663,7 +4682,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pFirstChild = pNode->pThirdChild;
 				}
 			}
-			else if (pParentNode->pSecondChild == pNode->pParent)
+			else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes)
@@ -4675,7 +4694,7 @@ void RemoveDeadCode(Node* pNode)
 					pParentNode->pSecondChild = pNode->pThirdChild;
 				}
 			}
-			else if (pParentNode->pThirdChild == pNode->pParent)
+			else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
 				/*DeleteNode(pNode);*/
 				if (bConstRes)
@@ -4695,21 +4714,22 @@ void RemoveDeadCode(Node* pNode)
 			
 			if (bConstRes == true)
 			{
-				HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop\n");
+				HANDLE_WARNING("The condition for the while statement is constant and true. This will cause an infinte loop.\n");
 			}
 			else
 			{
-				if (pParentNode->pFirstChild == pNode->pParent)
+				HANDLE_WARNING("The condition for the while statement is constant and false. This loop is redundant and may be optimised out.\n");
+				if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
 					/*DeleteNode(pNode);*/
 					pParentNode->pFirstChild = NULL;
 				}
-				else if (pParentNode->pSecondChild == pNode->pParent)
+				else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
 					/*DeleteNode(pNode);*/
 					pParentNode->pSecondChild = NULL;
 				}
-				else if (pParentNode->pThirdChild == pNode->pParent)
+				else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
 					/*DeleteNode(pNode);*/
 					pParentNode->pThirdChild = NULL;
@@ -4726,7 +4746,7 @@ void RemoveDeadCode(Node* pNode)
 
 void FoldConstants(Node* pNode)
 {
-	if (pNode == NULL)
+	if (pNode == NULL || g_bOptimisation_FoldConstants == false)
 	{
 		return;
 	}
