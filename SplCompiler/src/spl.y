@@ -272,20 +272,29 @@ program :
 
 		Node* pParseTree = CreateNode($1, id_program, $3, NO_CHILD_NODE, NO_CHILD_NODE);
 
+		#ifdef PRINT_UNOPTIMISED_TREE
+			PrintTree(pParseTree, 0);
+		#endif
+
+		#ifndef YYDEBUG
+			EvaluateVariableUsage();
+			FoldConstants(pParseTree);
+			CheckForDivideByZero(pParseTree);
+			RemoveDeadCode(pParseTree);
+		#endif
+
 		#ifdef DEBUG
 			PrintTree(pParseTree, 0);
             return;
 		#endif
 
 		$$ = pParseTree;
-		EvaluateVariableUsage();
-		FoldConstants(pParseTree);
-		CheckForDivideByZero(pParseTree);
-		RemoveDeadCode(pParseTree);
-		if (g_uiErrorCount == 0)
-		{
-        	GenerateCode(pParseTree);
-		}
+		#ifndef YYDEBUG
+			if (g_uiErrorCount == 0)
+			{
+				GenerateCode(pParseTree);
+			}
+		#endif
 	};
 
 block :
