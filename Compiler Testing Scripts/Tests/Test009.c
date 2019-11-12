@@ -23,7 +23,6 @@ void prg_Test9()
 
 int main()
 {
-	fprintf(stderr, "----------------RUNTIME WARNINGS & ERRORS----------------");
 	prg_Test9();
 	return 0;
 }

@@ -2875,10 +2875,10 @@ void Evaluate(const Node* const pNode)
 		case id_program:
 		{
 			g_iIndentLevel = 0;
-			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tfprintf(stderr, \"\\nWARNING: Discarding the following invalid input/extra characters from the stdin stream: \");\n\tdo\n\t{\n\t\tc = getchar();\n\t\tif (c != EOF)\n\t\t{\n\t\t\tfprintf(stderr,\"%%c\", c);\n\t\t}\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("#include <stdio.h>\n\nvoid _spl_flush_stdin()\n{\n\tchar c = -1;\n\tdo\n\t{\n\t\tc = getchar();\n\t} while (c != '\\n' && c != ' ' && c != EOF);\n}\n\nvoid %s()\n{\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			Evaluate(pNode->pFirstChild);
 			printf("}\n\n");
-			printf("int main()\n{\n\tfprintf(stderr, \"----------------RUNTIME WARNINGS & ERRORS----------------\");\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
+			printf("int main()\n{\n\t%s();\n\treturn 0;\n}\n", pNode->pSymbolTableEntry->symbolDetails.programDetails.acIdentifier);
 			break;
 		}
 
@@ -2925,11 +2925,6 @@ void GenerateCode(const Node* const pStartNode)
 void WriteReadStatement(const Node* const pNode, const char* pFormat)
 {
 	Indent();
-	printf("{\n");
-	g_iIndentLevel++;
-	Indent();
-	printf("char _spl_bDiscardedCharsFlag = 0;\n");
-	Indent();
 	printf("while (scanf(\"%s\", &%s) != 1)\n", pFormat, pNode->pSymbolTableEntry->symbolDetails.variableDetails.acIdentifier);
 	Indent();
 	printf("{\n");
@@ -2946,24 +2941,6 @@ void WriteReadStatement(const Node* const pNode, const char* pFormat)
 	g_iIndentLevel--;
 	Indent();
 	printf("}\n");
-	Indent();
-	printf("if (_spl_bDiscardedCharsFlag == 0)\n");
-	Indent();
-	printf("{\n");
-	g_iIndentLevel++;
-	Indent();
-	printf("fprintf(stderr, \"\\nWARNING: Discarding the following invalid input/extra characters from the stdin stream: \");\n");
-	Indent();
-	printf("_spl_bDiscardedCharsFlag = 1;\n");
-	g_iIndentLevel--;
-	Indent();
-	printf("}\n");
-	Indent();
-	printf("fprintf(stderr,\"%%c\", c);\n");
-	g_iIndentLevel--;
-	Indent();
-	printf("};\n");
-
 	Indent();
 	printf("_spl_flush_stdin();\n");
 	g_iIndentLevel--;

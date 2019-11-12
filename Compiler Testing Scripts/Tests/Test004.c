@@ -21,7 +21,6 @@ void prg_Test4()
 
 int main()
 {
-	fprintf(stderr, "----------------RUNTIME WARNINGS & ERRORS----------------");
 	prg_Test4();
 	return 0;
 }
