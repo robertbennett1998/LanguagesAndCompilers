@@ -13,13 +13,13 @@ extern int yyparse();
 
 #define HANDLE_ERROR(message, ...) { fprintf(stderr, "[ERROR] - Line %d | Position %d - ", g_uiCurrentLineNumber, g_ulCurrentLinePosition); fprintf(stderr, message, ##__VA_ARGS__); fprintf(stderr, "\n"); }
 
-#ifdef YYDEBUG
+#if YYDEBUG == 1
 	extern int yydebug;
 #endif
 
 int main(void)
 {
-    #ifdef YYDEBUG
+    #if YYDEBUG == 1
         yydebug = 1;
     #endif
 

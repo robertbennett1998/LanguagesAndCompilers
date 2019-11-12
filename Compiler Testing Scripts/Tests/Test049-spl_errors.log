@@ -1,9 +1,0 @@
-
----- Evaluating Variable Usage ----
-[WARNING] - Line 17 | Position 10 - The variable a is never used.
-[WARNING] - Line 17 | Position 10 - The variable b is never used.
-[WARNING] - Line 17 | Position 10 - The variable c is never used.
-[WARNING] - Line 17 | Position 10 - The variable d is never used.
-[WARNING] - Line 17 | Position 10 - The variable e is never used.
-[WARNING] - Line 17 | Position 10 - Variable f is used at line: 7 | pos: 37 before it has been assigned to. It will have a default value of 1.
-[WARNING] - Line 17 | Position 10 - The variable g is never used.

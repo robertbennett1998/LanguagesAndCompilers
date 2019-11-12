@@ -309,7 +309,7 @@
 
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -1619,7 +1619,7 @@ yyreduce:
 		#endif
 
 		(yyval.pNode) = pParseTree;
-		#ifndef YYDEBUG
+		#if YYDEBUG != 1
 			if (g_uiErrorCount == 0)
 			{
 				GenerateCode(pParseTree);

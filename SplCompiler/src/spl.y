@@ -289,7 +289,7 @@ program :
 		#endif
 
 		$$ = pParseTree;
-		#ifndef YYDEBUG
+		#if YYDEBUG != 1
 			if (g_uiErrorCount == 0)
 			{
 				GenerateCode(pParseTree);

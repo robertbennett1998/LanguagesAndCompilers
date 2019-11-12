@@ -7,7 +7,7 @@ lexer : lexer-clean flex
 	gcc -o ./bin/lexer.exe -DPRINT -UYY_MAIN ./src/lex.yy.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
 
 bison : bison-clean flex
-	bison -t -v ./src/spl.y -o ./src/spl_t.c
+	bison -v ./src/spl.y -o ./src/spl_t.c
 
 parser : parser-clean bison flex
 	gcc -o ./bin/parser.exe -DYYDEBUG -UYY_MAIN ./src/spl.c ./src/spl_t.c -lfl -ansi -D__MINGW_FEATURES -Wno-cpp
