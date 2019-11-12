@@ -12,4 +12,10 @@ for c in to_stringify:
     if (c == ')'):
         print("ket", ", ", end='', sep='')
         continue
+    if (c == '+'):
+        print("plus", ", ", end='', sep='')
+        continue
+    if (c == "^"):
+        print("carot", ", ", end='', sep='')
+        continue
     print("'", c, "', ", end='', sep='')

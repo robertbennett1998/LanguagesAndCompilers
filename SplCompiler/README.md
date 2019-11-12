@@ -44,22 +44,38 @@ This readme will outline the steps taken to create the SPL compiler, it will cov
 ```
 
 ##Highlights
+This compiler implements the following optimisations:
+- Dead store removal.
+- Dead code removal.
+- Constant folding.
 
-##Design Decisions
+It also provides warnings for the following:
+- Program names not matching.
+- Unexpected semi-colons at the end of the last statement in a statement list.
+- Type conversion where an overflow or loss of precision may occur.
+- Constants which are greater then the upper and lower values of integers and reals.
+- When assignments are redundant.
+- The use of uninitialised variables.
+- Variables that are never used; either in the entire program or after the last assignment.
+- Infinite loops.
 
 ##Parse Tree
 
 ##Symbol Table
+For the symbol table I chose to use a double linked list rather then an array. This removed the limit on the number of symbols and it also allowed me to break the table down in to multiple sections i.e. a seperate sub-table for variables, operators, constants and types. This will allow the compiler to be optimised as the language develops and the need to compiler larger programs arises. While the current implementation adds little performance benifit especially considering that the programs been compiled are so small. The other benifit to this is there is no real limit to the details that can be stored and it is very maintainable to add extra features.
+
 ###Program
 ###Variables
 ###Constants
 ###Operators
 ###Types
 
+##Variable Usage Tree
+As the parse tree is being generated a double linked list is being created that tracks the usage of each variable. Each variable is then evaluated and checked to ensure they are not undeclared or redeclared and then redundant assignments are removed.
+
 ##Tests
 
-##Variable Usage Tree
-
 ##Evaluation
+
 
 ##Future Plans

@@ -1,0 +1,65 @@
+QuadraticSolver:
+    DECLARATIONS
+        space, period, bra, ket, carot, plus OF TYPE CHARACTER;
+        rA, rB, rC, rDiscriminent, rSqrtDiscriminent, rAlpha, rBeta, rValue, rStep, rPrescision, rAlphaImaginary, rBetaImaginary OF TYPE REAL;
+
+    CODE
+        32 -> space;
+        46 -> period;
+        40 -> bra;
+        41 -> ket;
+        94 -> carot;
+        43 -> plus;
+        0.0000001 -> rPrescision;
+
+        WRITE('W', 'e', 'l', 'c', 'o', 'm', 'e', space, 't', 'o', space, 't', 'h', 'e', space, 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', space, 's', 'o', 'l', 'v', 'e', 'r', space, 'i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't', 'e', 'd', space, 'i', 'n', space, 's', 'p', 'l', period, space, 'N', 'o', 't', 'e', space, 't', 'h', 'i', 's', space, 'w', 'i', 'l', 'l', space, 'n', 'o', 't', space, 'h', 'a', 'n', 'd', 'l', 'e', space, 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', 's', space, 'w', 'i', 't', 'h', space, 'i', 'm', 'a', 'g', 'i', 'n', 'a', 'r', 'y', space, 'r', 'o', 'o', 't', 's', period);
+        NEWLINE;
+        WRITE('Q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', 's', space, 'a', 'r', 'e', space, 'i', 'n', space, 't', 'h', 'e', space, 'f', 'o', 'r', 'm', space, 'a', carot, 2, 'x', space, plus, space, 'b', 'x', space, plus, space, 'c', period);
+        NEWLINE;
+        NEWLINE;
+
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 't', 'h', 'e', space, 'f', 'i', 'r', 's', 't', space, 'c', 'o', 'e', 'f', 'f', 'i', 'c', 'i', 'e', 'n', 't', space, bra, 'a', ket, period);
+        NEWLINE;
+        READ(rA);
+
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 't', 'h', 'e', space, 's', 'e', 'c', 'o', 'n', 'd', space, 'c', 'o', 'e', 'f', 'f', 'i', 'c', 'i', 'e', 'n', 't', space, bra, 'b', ket, period);
+        NEWLINE;
+        READ(rB);
+        
+        WRITE('P', 'l', 'e', 'a', 's', 'e', space, 'e', 'n', 't', 'e', 'r', space, 't', 'h', 'e', space, 't', 'h', 'i', 'r', 'd', space, 'c', 'o', 'e', 'f', 'f', 'i', 'c', 'i', 'e', 'n', 't', space, bra, 'c', ket, period);
+        NEWLINE;
+        READ(rC);
+
+        (rB * rB) - (4 * rA * rC) -> rDiscriminent;
+        IF rDiscriminent = 0 THEN
+            (0 - rB) / (2 * rA) -> rAlpha;
+            WRITE('A', 'l', 'p', 'h', 'a', space, 'i', 's', space, rAlpha);
+            NEWLINE;
+            WRITE('B', 'e', 't', 'a', space, 'i', 's', space, rAlpha)
+        ELSE
+            IF rDiscriminent < 0 THEN
+                0 - rDiscriminent -> rSqrtDiscriminent;
+                WHILE (rSqrtDiscriminent - rStep) > rPrescision DO
+                    (rSqrtDiscriminent + rStep) / 2 -> rSqrtDiscriminent;
+                    rDiscriminent / rSqrtDiscriminent -> rStep;
+                ENDWHILE;
+                (0 - rB) / (2 * rA) -> rAlpha;
+                rSqrtDiscriminent / (2 * rA) -> rAlphaImaginary;
+                rSqrtDiscriminent / (2 * rA) -> rBetaImaginary;
+                WRITE('A', 'l', 'p', 'h', 'a', space, 'i', 's', space, rAlpha, space, plus, space, rAlphaImaginary, 'i');
+                NEWLINE;
+                WRITE('B', 'e', 't', 'a', space, 'i', 's', space, rAlpha, space, plus, space, rBetaImaginary, 'i');
+            ELSE
+                rDiscriminent -> rSqrtDiscriminent;
+                WHILE (rSqrtDiscriminent - rStep) > rPrescision DO
+                    (rSqrtDiscriminent + rStep) / 2 -> rSqrtDiscriminent;
+                    rDiscriminent / rSqrtDiscriminent -> rStep;
+                ENDWHILE;
+                ((0 - rB) + rSqrtDiscriminent) / (2 * rA) -> rAlpha;
+                ((0 - rB) - rSqrtDiscriminent) / (2 * rA) -> rBeta;
+                WRITE('A', 'l', 'p', 'h', 'a', space, 'i', 's', space, rAlpha);
+                NEWLINE;
+                WRITE('B', 'e', 't', 'a', space, 'i', 's', space, rBeta);
+            ENDIF;
+        ENDIF;
+ENDP QuadraticSolver.
