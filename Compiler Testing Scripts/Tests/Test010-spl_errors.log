@@ -1,0 +1,3 @@
+
+---- Evaluating Variable Usage ----
+[WARNING] - Line 13 | Position 12 - The variable a is never used.

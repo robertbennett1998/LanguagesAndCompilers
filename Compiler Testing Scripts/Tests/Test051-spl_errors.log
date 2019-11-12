@@ -1,0 +1,10 @@
+
+---- Evaluating Variable Usage ----
+[WARNING] - Line 18 | Position 10 - The variable a is never used.
+[WARNING] - Line 18 | Position 10 - The variable b is never used.
+[WARNING] - Line 18 | Position 10 - The variable c is never used.
+[WARNING] - Line 18 | Position 10 - The variable d is never used.
+[WARNING] - Line 18 | Position 10 - The variable e is never used.
+[WARNING] - Line 18 | Position 10 - The variable f is never used.
+[WARNING] - Line 18 | Position 10 - The variable g is never used.
+[WARNING] - Line 18 | Position 10 - The variable int is never used.

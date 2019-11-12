@@ -703,13 +703,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   248,   248,   301,   304,   309,   312,   317,   330,   333,
-     338,   341,   344,   349,   351,   359,   362,   368,   371,   374,
-     377,   380,   383,   386,   389,   394,   414,   417,   422,   427,
-     430,   433,   438,   448,   458,   463,   477,   486,   497,   502,
-     505,   510,   513,   518,   521,   524,   527,   530,   533,   538,
-     545,   550,   555,   557,   559,   564,   574,   579,   587,   592,
-     595
+       0,   248,   248,   297,   300,   305,   308,   313,   326,   329,
+     334,   337,   340,   345,   347,   355,   358,   364,   367,   370,
+     373,   376,   379,   382,   385,   390,   410,   413,   418,   423,
+     426,   429,   434,   444,   454,   459,   473,   482,   493,   498,
+     501,   506,   509,   514,   517,   520,   523,   526,   529,   534,
+     541,   546,   551,   553,   555,   560,   570,   575,   583,   588,
+     591
 };
 #endif
 
@@ -1605,13 +1605,11 @@ yyreduce:
 		#ifdef PRINT_UNOPTIMISED_TREE
 			PrintTree(pParseTree, 0);
 		#endif
-
-		#ifndef YYDEBUG
-			EvaluateVariableUsage();
-			FoldConstants(pParseTree);
-			CheckForDivideByZero(pParseTree);
-			RemoveDeadCode(pParseTree);
-		#endif
+		
+		EvaluateVariableUsage();
+		FoldConstants(pParseTree);
+		CheckForDivideByZero(pParseTree);
+		RemoveDeadCode(pParseTree);
 
 		#ifdef DEBUG
 			PrintTree(pParseTree, 0);
@@ -1619,50 +1617,48 @@ yyreduce:
 		#endif
 
 		(yyval.pNode) = pParseTree;
-		#if YYDEBUG != 1
-			if (g_uiErrorCount == 0)
-			{
-				GenerateCode(pParseTree);
-			}
-		#endif
+		if (g_uiErrorCount == 0)
+		{
+			GenerateCode(pParseTree);
+		}
 	}
-#line 1630 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1626 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 301 "./src/spl.y" /* yacc.c:1646  */
+#line 297 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_block, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1638 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1634 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 304 "./src/spl.y" /* yacc.c:1646  */
+#line 300 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_block, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1646 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1642 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 309 "./src/spl.y" /* yacc.c:1646  */
+#line 305 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration_block, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1654 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1650 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 312 "./src/spl.y" /* yacc.c:1646  */
+#line 308 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration_block, (yyvsp[-1].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1662 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1658 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 317 "./src/spl.y" /* yacc.c:1646  */
+#line 313 "./src/spl.y" /* yacc.c:1646  */
     {
 		Node* pNode = (yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_declaration, (yyvsp[-4].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 
@@ -1674,150 +1670,150 @@ yyreduce:
 			pIdentifierListNode = pIdentifierListNode->pFirstChild;
 		};
 	}
-#line 1678 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1674 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 330 "./src/spl.y" /* yacc.c:1646  */
+#line 326 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_identifier_list, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1686 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1682 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 333 "./src/spl.y" /* yacc.c:1646  */
+#line 329 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_identifier_list, (yyvsp[-2].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1694 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1690 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 338 "./src/spl.y" /* yacc.c:1646  */
+#line 334 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_CHARACTER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1702 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1698 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 341 "./src/spl.y" /* yacc.c:1646  */
+#line 337 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_INTEGER), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1710 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1706 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 344 "./src/spl.y" /* yacc.c:1646  */
+#line 340 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Type((int)TYPE_REAL), id_type, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1718 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1714 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 349 "./src/spl.y" /* yacc.c:1646  */
+#line 345 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = (yyvsp[0].pNode);
 	}
-#line 1726 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1722 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 351 "./src/spl.y" /* yacc.c:1646  */
+#line 347 "./src/spl.y" /* yacc.c:1646  */
     {
 		g_uiCurrentLineNumber--;
 		HANDLE_WARNING("Unexpected semi-colon at the end of the last statement within the code block. This will be ignored.");
 		g_uiCurrentLineNumber++;
 		(yyval.pNode) = (yyvsp[-1].pNode);
 	}
-#line 1737 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1733 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 359 "./src/spl.y" /* yacc.c:1646  */
+#line 355 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement_list, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1745 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1741 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 363 "./src/spl.y" /* yacc.c:1646  */
+#line 359 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement_list, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1753 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1749 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 368 "./src/spl.y" /* yacc.c:1646  */
+#line 364 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1761 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1757 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 371 "./src/spl.y" /* yacc.c:1646  */
+#line 367 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1769 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1765 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 374 "./src/spl.y" /* yacc.c:1646  */
+#line 370 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1777 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1773 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 377 "./src/spl.y" /* yacc.c:1646  */
+#line 373 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1785 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1781 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 380 "./src/spl.y" /* yacc.c:1646  */
+#line 376 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1793 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1789 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 383 "./src/spl.y" /* yacc.c:1646  */
+#line 379 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1801 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1797 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 386 "./src/spl.y" /* yacc.c:1646  */
+#line 382 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1809 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1805 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 389 "./src/spl.y" /* yacc.c:1646  */
+#line 385 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_statement, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1817 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1813 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 394 "./src/spl.y" /* yacc.c:1646  */
+#line 390 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[0].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_assignment_statement, (yyvsp[-2].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
@@ -1836,61 +1832,61 @@ yyreduce:
 			HANDLE_WARNING("A real has been assigned to a variable of type integer, this may cause a loss of precision.");
 		}
 	}
-#line 1840 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1836 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 414 "./src/spl.y" /* yacc.c:1646  */
+#line 410 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_value, (yyvsp[-1].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1848 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1844 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 417 "./src/spl.y" /* yacc.c:1646  */
+#line 413 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[0].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[0].pSymbolTableEntry), id_value, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableUsedEntry((yyvsp[0].pSymbolTableEntry), pNode);
 	}
-#line 1858 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1854 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 422 "./src/spl.y" /* yacc.c:1646  */
+#line 418 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_value, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1866 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1862 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 427 "./src/spl.y" /* yacc.c:1646  */
+#line 423 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_subtract), id_expression, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1874 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1870 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 430 "./src/spl.y" /* yacc.c:1646  */
+#line 426 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_add), id_expression, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1882 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1878 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 433 "./src/spl.y" /* yacc.c:1646  */
+#line 429 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_expression, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1890 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1886 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 438 "./src/spl.y" /* yacc.c:1646  */
+#line 434 "./src/spl.y" /* yacc.c:1646  */
     {
 		int iTermType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		int iValueType = GetFinalTypeOfExpression((yyvsp[0].pNode), -1);
@@ -1901,11 +1897,11 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_multipulcation), id_term, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1905 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1901 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 448 "./src/spl.y" /* yacc.c:1646  */
+#line 444 "./src/spl.y" /* yacc.c:1646  */
     {
 		int iTermType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		int iValueType = GetFinalTypeOfExpression((yyvsp[0].pNode), -1);
@@ -1916,19 +1912,19 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_division), id_term, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 1920 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1916 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 458 "./src/spl.y" /* yacc.c:1646  */
+#line 454 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_term, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1928 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1924 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 463 "./src/spl.y" /* yacc.c:1646  */
+#line 459 "./src/spl.y" /* yacc.c:1646  */
     {
 		if ((yyvsp[0].fVal) > DBL_MAX)
 		{
@@ -1943,11 +1939,11 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_REAL, &(yyvsp[0].fVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1947 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1943 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 477 "./src/spl.y" /* yacc.c:1646  */
+#line 473 "./src/spl.y" /* yacc.c:1646  */
     {
 		if ((yyvsp[0].iVal) > (long)INT_MAX)
 		{
@@ -1957,11 +1953,11 @@ yyreduce:
 		
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &(yyvsp[0].iVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1961 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1957 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 486 "./src/spl.y" /* yacc.c:1646  */
+#line 482 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyvsp[0].iVal) = 0L - (yyvsp[0].iVal);
 		
@@ -1973,149 +1969,149 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_INTEGER, &(yyvsp[0].iVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1977 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1973 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 497 "./src/spl.y" /* yacc.c:1646  */
+#line 493 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Constant(TYPE_CHARACTER, &(yyvsp[0].cVal)), id_constant, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1985 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1981 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 502 "./src/spl.y" /* yacc.c:1646  */
+#line 498 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, (yyvsp[-1].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 1993 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1989 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 505 "./src/spl.y" /* yacc.c:1646  */
+#line 501 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_write_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2001 "./src/spl_t.c" /* yacc.c:1646  */
+#line 1997 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 510 "./src/spl.y" /* yacc.c:1646  */
+#line 506 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_output_list, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2009 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2005 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 513 "./src/spl.y" /* yacc.c:1646  */
+#line 509 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_output_list, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2017 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2013 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 518 "./src/spl.y" /* yacc.c:1646  */
+#line 514 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_equality), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2025 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2021 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 521 "./src/spl.y" /* yacc.c:1646  */
+#line 517 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2033 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2029 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 524 "./src/spl.y" /* yacc.c:1646  */
+#line 520 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2041 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2037 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 527 "./src/spl.y" /* yacc.c:1646  */
+#line 523 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_than), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2049 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2045 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 530 "./src/spl.y" /* yacc.c:1646  */
+#line 526 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_less_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2057 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2053 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 533 "./src/spl.y" /* yacc.c:1646  */
+#line 529 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_more_equal), id_comparator, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);		
 	}
-#line 2065 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2061 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 538 "./src/spl.y" /* yacc.c:1646  */
+#line 534 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[-1].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[-1].pSymbolTableEntry), id_read_statement, NO_CHILD_NODE, NO_CHILD_NODE, NO_CHILD_NODE);
 		CreateVariableAssignedEntry((yyvsp[-1].pSymbolTableEntry), pNode);
 	}
-#line 2075 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2071 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 545 "./src/spl.y" /* yacc.c:1646  */
+#line 541 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_if_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2083 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2079 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 550 "./src/spl.y" /* yacc.c:1646  */
+#line 546 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_if_else_statement, (yyvsp[-5].pNode), (yyvsp[-3].pNode), (yyvsp[-1].pNode));
 	}
-#line 2091 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2087 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 555 "./src/spl.y" /* yacc.c:1646  */
+#line 551 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_conditional, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2099 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2095 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 557 "./src/spl.y" /* yacc.c:1646  */
+#line 553 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_and), id_conditional, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2107 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2103 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 559 "./src/spl.y" /* yacc.c:1646  */
+#line 555 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_or), id_conditional, (yyvsp[-2].pNode), (yyvsp[0].pNode), NO_CHILD_NODE);
 	}
-#line 2115 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2111 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 564 "./src/spl.y" /* yacc.c:1646  */
+#line 560 "./src/spl.y" /* yacc.c:1646  */
     {
 		int iFirstType = GetFinalTypeOfExpression((yyvsp[-2].pNode), -1);
 		int iSecondType = GetFinalTypeOfExpression((yyvsp[0].pNode), -1);
@@ -2127,54 +2123,54 @@ yyreduce:
 
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_comparison, (yyvsp[-2].pNode), (yyvsp[-1].pNode), (yyvsp[0].pNode));
 	}
-#line 2131 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2127 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 574 "./src/spl.y" /* yacc.c:1646  */
+#line 570 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(CreateSymbolTableEntry_Operator(operator_type_not), id_comparison, (yyvsp[0].pNode), NO_CHILD_NODE, NO_CHILD_NODE);
 	}
-#line 2139 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2135 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 579 "./src/spl.y" /* yacc.c:1646  */
+#line 575 "./src/spl.y" /* yacc.c:1646  */
     {
 		CheckIfVariableIsDeclared((yyvsp[-9].pSymbolTableEntry));
 		Node* pNode = (yyval.pNode) = CreateNode((yyvsp[-9].pSymbolTableEntry), id_for_statement, CreateNode(NO_SYMBOLIC_LINK, id_for_statement_is_by_to, (yyvsp[-7].pNode), (yyvsp[-5].pNode), (yyvsp[-3].pNode)), (yyvsp[-1].pNode), NO_CHILD_NODE);
 		CreateVariableAssignedEntry((yyvsp[-9].pSymbolTableEntry), pNode);
 		CreateVariableUsedEntry((yyvsp[-9].pSymbolTableEntry), pNode);
 	}
-#line 2150 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2146 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 587 "./src/spl.y" /* yacc.c:1646  */
+#line 583 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_while_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2158 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2154 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 592 "./src/spl.y" /* yacc.c:1646  */
+#line 588 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, (yyvsp[-3].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2166 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2162 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 595 "./src/spl.y" /* yacc.c:1646  */
+#line 591 "./src/spl.y" /* yacc.c:1646  */
     {
 		(yyval.pNode) = CreateNode(NO_SYMBOLIC_LINK, id_do_statement, (yyvsp[-4].pNode), (yyvsp[-1].pNode), NO_CHILD_NODE);
 	}
-#line 2174 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2170 "./src/spl_t.c" /* yacc.c:1646  */
     break;
 
 
-#line 2178 "./src/spl_t.c" /* yacc.c:1646  */
+#line 2174 "./src/spl_t.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2402,7 +2398,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 598 "./src/spl.y" /* yacc.c:1906  */
+#line 594 "./src/spl.y" /* yacc.c:1906  */
 
 
 SymbolTableEntry* CreateSymbolTableEntry_Variable(const char* pIdentifier)

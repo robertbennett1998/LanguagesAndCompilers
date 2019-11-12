@@ -1,1 +1,10 @@
 [WARNING] - Line 11 | Position 13 - Constant (2147483648) is greater then the maximum value an INTEGER can store (2147483647). This value will be set to the maximum value (2147483647).
+
+---- Evaluating Variable Usage ----
+[WARNING] - Line 17 | Position 10 - The variable a is never used.
+[WARNING] - Line 17 | Position 10 - The variable b is never used.
+[WARNING] - Line 17 | Position 10 - The variable c is never used.
+[WARNING] - Line 17 | Position 10 - The variable d is never used.
+[WARNING] - Line 17 | Position 10 - The variable e is never used.
+[WARNING] - Line 17 | Position 10 - The variable f is never used.
+[WARNING] - Line 17 | Position 10 - The variable g is never used.

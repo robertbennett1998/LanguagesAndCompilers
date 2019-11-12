@@ -275,13 +275,11 @@ program :
 		#ifdef PRINT_UNOPTIMISED_TREE
 			PrintTree(pParseTree, 0);
 		#endif
-
-		#ifndef YYDEBUG
-			EvaluateVariableUsage();
-			FoldConstants(pParseTree);
-			CheckForDivideByZero(pParseTree);
-			RemoveDeadCode(pParseTree);
-		#endif
+		
+		EvaluateVariableUsage();
+		FoldConstants(pParseTree);
+		CheckForDivideByZero(pParseTree);
+		RemoveDeadCode(pParseTree);
 
 		#ifdef DEBUG
 			PrintTree(pParseTree, 0);
@@ -289,12 +287,10 @@ program :
 		#endif
 
 		$$ = pParseTree;
-		#if YYDEBUG != 1
-			if (g_uiErrorCount == 0)
-			{
-				GenerateCode(pParseTree);
-			}
-		#endif
+		if (g_uiErrorCount == 0)
+		{
+			GenerateCode(pParseTree);
+		}
 	};
 
 block :
