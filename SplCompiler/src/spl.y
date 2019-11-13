@@ -63,6 +63,7 @@
     } VariableDetails;
 
 	void EvaluateVariableUsage();
+	void DeleteVariableUsageList(VariableUsageDetails** ppVariableUsage);
 	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
 	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
 	void CreateVariableUsedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
@@ -137,6 +138,7 @@
     SymbolTableEntry* GetSymbolTableEntry_Type(const int iType);
     SymbolTableEntry* GetSymbolTableEntry_Constant(const int iType, const void* pValue);
     SymbolTableEntry* GetSymbolTableEntry_Operator(const OperatorTypes operatorType);
+	void DeleteSymbolTable();
 
     const char* GetTypeName(const int iType);
 
@@ -187,7 +189,9 @@
     const char* NodeIdentifiersValueToString(const NodeIdentifiers value);
 
     Node* CreateNode(SymbolTableEntry* pSymbolTreePointer, unsigned char byNodeIdentifier, Node* pFirstChild, Node* pSecondChild, Node* pThirdChild);
-    void PrintTree(const Node* pStartNode, int iLevel);
+	void DeleteNode(Node** pNode);
+	void DeleteTree(Node** pNode);
+	void PrintTree(const Node* pStartNode, int iLevel);
 
     /* CODE GENERATION */
     void GenerateCode(const Node* const pStartNode);
@@ -272,6 +276,8 @@ program :
 
 		#ifdef DEBUG
 			PrintTree(pParseTree, 0);
+			DeleteTree(&pParseTree);
+			DeleteSymbolTable();
             return;
 		#endif
 
@@ -285,6 +291,9 @@ program :
 		{
 			GenerateCode(pParseTree);
 		}
+
+		DeleteTree(&pParseTree);
+		DeleteSymbolTable();
 	};
 
 block :
@@ -2749,18 +2758,18 @@ void RemoveDeadCode(Node* pNode)
 
 				if (pParentNode->pFirstChild == pNode->pParent)
 				{
-					/*DeleteNode(pNode);*/
 					pParentNode->pFirstChild = pNode->pFirstChild;
+					DeleteNode(&pNode);
 				}
 				else if (pParentNode->pSecondChild == pNode->pParent)
 				{
-					/*DeleteNode(pNode);*/
 					pParentNode->pSecondChild = pNode->pFirstChild;
+					DeleteNode(&pNode);
 				}
 				if (pParentNode->pThirdChild == pNode->pParent)
 				{
-					/*DeleteNode(pNode);*/
 					pParentNode->pThirdChild = pNode->pFirstChild;
+					DeleteNode(&pNode);
 				}
 			}
 		}
@@ -2784,7 +2793,6 @@ void RemoveDeadCode(Node* pNode)
 
 			if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
-				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
 				{
 					pParentNode->pFirstChild = pNode->pSecondChild;
@@ -2793,10 +2801,10 @@ void RemoveDeadCode(Node* pNode)
 				{
 					pParentNode->pFirstChild = NULL;
 				}
+				DeleteNode(&pNode);
 			}
 			else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
-				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
 				{
 					pParentNode->pSecondChild = pNode->pSecondChild;
@@ -2805,10 +2813,10 @@ void RemoveDeadCode(Node* pNode)
 				{
 					pParentNode->pSecondChild = NULL;
 				}
+				DeleteNode(&pNode);
 			}
 			else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
-				/*DeleteNode(pNode);*/
 				if (bConstRes == true)
 				{
 					pParentNode->pThirdChild = pNode->pSecondChild;
@@ -2817,6 +2825,7 @@ void RemoveDeadCode(Node* pNode)
 				{
 					pParentNode->pThirdChild = NULL;
 				}
+				DeleteNode(&pNode);
 			}
 			return;
 		}
@@ -2834,7 +2843,6 @@ void RemoveDeadCode(Node* pNode)
 
 			if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
-				/*DeleteNode(pNode);*/
 				if (bConstRes)
 				{
 					pParentNode->pFirstChild = pNode->pSecondChild;
@@ -2843,10 +2851,10 @@ void RemoveDeadCode(Node* pNode)
 				{
 					pParentNode->pFirstChild = pNode->pThirdChild;
 				}
+				DeleteNode(&pNode);
 			}
 			else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
-				/*DeleteNode(pNode);*/
 				if (bConstRes)
 				{
 					pParentNode->pSecondChild = pNode->pSecondChild;
@@ -2855,10 +2863,10 @@ void RemoveDeadCode(Node* pNode)
 				{
 					pParentNode->pSecondChild = pNode->pThirdChild;
 				}
+				DeleteNode(&pNode);
 			}
 			else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 			{
-				/*DeleteNode(pNode);*/
 				if (bConstRes)
 				{
 					pParentNode->pThirdChild = pNode->pSecondChild;
@@ -2867,6 +2875,7 @@ void RemoveDeadCode(Node* pNode)
 				{
 					pParentNode->pThirdChild = pNode->pThirdChild;
 				}
+				DeleteNode(&pNode);
 			}
 			return;
 		}
@@ -2883,17 +2892,17 @@ void RemoveDeadCode(Node* pNode)
 				HANDLE_WARNING("The condition for the while statement is constant and false. This loop is redundant and may be optimised out.\n");
 				if (pParentNode->pFirstChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
-					/*DeleteNode(pNode);*/
+					DeleteNode(&pNode);
 					pParentNode->pFirstChild = NULL;
 				}
 				else if (pParentNode->pSecondChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
-					/*DeleteNode(pNode);*/
+					DeleteNode(&pNode);
 					pParentNode->pSecondChild = NULL;
 				}
 				else if (pParentNode->pThirdChild == pNode->pParent && g_bOptimisation_DeadCode)
 				{
-					/*DeleteNode(pNode);*/
+					DeleteNode(&pNode);
 					pParentNode->pThirdChild = NULL;
 				}
 			}
@@ -2926,7 +2935,7 @@ void FoldConstants(Node* pNode)
 				Node* pParentNode = pNode->pParent;
 				if (pParentNode->pFirstChild == pNode)
 				{
-					/*DeleteNode(pNode);*/
+					DeleteNode(&pNode);
 					pParentNode->pFirstChild = 	CreateNode(NO_SYMBOLIC_LINK, id_expression, 
 												CreateNode(NO_SYMBOLIC_LINK, id_term, 
 												CreateNode(NO_SYMBOLIC_LINK, id_value, 
@@ -2935,7 +2944,7 @@ void FoldConstants(Node* pNode)
 				}
 				else if (pParentNode->pSecondChild == pNode)
 				{
-					/*DeleteNode(pNode);*/
+					DeleteNode(&pNode);
 					pParentNode->pSecondChild = CreateNode(NO_SYMBOLIC_LINK, id_expression, 
 												CreateNode(NO_SYMBOLIC_LINK, id_term, 
 												CreateNode(NO_SYMBOLIC_LINK, id_value, 
@@ -2944,7 +2953,7 @@ void FoldConstants(Node* pNode)
 				}
 				else if (pParentNode->pThirdChild == pNode)
 				{
-					/*DeleteNode(pNode);*/
+					DeleteNode(&pNode);
 					pParentNode->pThirdChild = 	CreateNode(NO_SYMBOLIC_LINK, id_expression, 
 												CreateNode(NO_SYMBOLIC_LINK, id_term, 
 												CreateNode(NO_SYMBOLIC_LINK, id_value, 
@@ -2962,6 +2971,85 @@ void FoldConstants(Node* pNode)
 	FoldConstants(pNode->pSecondChild);
 	g_bExitEvaluation = false;
 	FoldConstants(pNode->pThirdChild);
+}
+
+void DeleteNode(Node** pNode)
+{
+	if (*pNode == NULL)
+	{
+		return;
+	}
+
+	free(*pNode);
+	*pNode = NULL;
+}
+
+void DeleteTree(Node** pNode)
+{
+	if (*pNode == NULL)
+	{
+		return;
+	}
+
+	DeleteTree(&(*pNode)->pFirstChild);
+	DeleteTree(&(*pNode)->pSecondChild);
+	DeleteTree(&(*pNode)->pThirdChild);
+
+	DeleteNode(&(*pNode)->pFirstChild);
+	DeleteNode(&(*pNode)->pSecondChild);
+	DeleteNode(&(*pNode)->pThirdChild);
+}
+
+void DeleteSymbolTableEntry(SymbolTableEntry** ppSymbolTableEntry)
+{
+	if (*ppSymbolTableEntry == NULL)
+	{
+		return;
+	}
+
+	free(*ppSymbolTableEntry);
+	*ppSymbolTableEntry = NULL;
+}
+
+void DeleteSymbolTable()
+{
+	SymbolTableEntry* pCurrentEntry = g_pSymbolTableStart;
+	while (pCurrentEntry != NO_SYMBOL_FOUND)
+	{
+		if (pCurrentEntry->bySymbolType == symbol_id_variable)
+		{
+			DeleteVariableUsageList(&pCurrentEntry->symbolDetails.variableDetails.pFirstUsage);
+			pCurrentEntry->symbolDetails.variableDetails.pLastUsage = NULL;
+		}
+
+		pCurrentEntry = pCurrentEntry->pNextTableEntry;
+		if (pCurrentEntry != NULL)
+			DeleteSymbolTableEntry(&pCurrentEntry->pPrevTableEntry);
+	}
+}
+
+void DeleteVariableUsage(VariableUsageDetails** ppVariableUsage)
+{
+	if (*ppVariableUsage == NULL)
+	{
+		return;
+	}
+
+	free(*ppVariableUsage);
+	*ppVariableUsage = NULL;
+}
+
+void DeleteVariableUsageList(VariableUsageDetails** ppVariableUsage)
+{
+	VariableUsageDetails* pCurrentUsage = *ppVariableUsage;
+	while (pCurrentUsage != NULL)
+	{
+		pCurrentUsage = pCurrentUsage->pNextUsage;
+		if (pCurrentUsage != NULL)
+			DeleteVariableUsage(&pCurrentUsage->pPrevUsage);
+	};
+
+	*ppVariableUsage = NULL;
 }
 
 #include "lex.yy.c"

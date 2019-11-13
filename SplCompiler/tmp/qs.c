@@ -38,13 +38,13 @@ void prg_QuadraticSolver()
 	printf("\n");
 	printf("Please%center%cthe%cfirst%ccoefficient%c%ca%c%c", spl_space, spl_space, spl_space, spl_space, spl_space, spl_bra, spl_ket, spl_period);
 	printf("\n");
-	_spl_read(" %f", &spl_rA);
+	_spl_read(" %lf", &spl_rA);
 	printf("Please%center%cthe%csecond%ccoefficient%c%cb%c%c", spl_space, spl_space, spl_space, spl_space, spl_space, spl_bra, spl_ket, spl_period);
 	printf("\n");
-	_spl_read(" %f", &spl_rB);
+	_spl_read(" %lf", &spl_rB);
 	printf("Please%center%cthe%cthird%ccoefficient%c%cc%c%c", spl_space, spl_space, spl_space, spl_space, spl_space, spl_bra, spl_ket, spl_period);
 	printf("\n");
-	_spl_read(" %f", &spl_rC);
+	_spl_read(" %lf", &spl_rC);
 	spl_rDiscriminent = ((spl_rB * spl_rB) - ((4 * spl_rA) * spl_rC));
 	if ((spl_rDiscriminent == 0))
 	{
