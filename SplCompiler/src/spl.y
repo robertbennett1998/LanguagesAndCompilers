@@ -63,6 +63,7 @@
     } VariableDetails;
 
 	void EvaluateVariableUsage();
+	void DeleteVariableUsage(VariableUsageDetails** ppVariableUsage);
 	void DeleteVariableUsageList(VariableUsageDetails** ppVariableUsage);
 	void CreateVariableDeclaredEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
 	void CreateVariableAssignedEntry(SymbolTableEntry* pSymbol, Node* pParentNode);
@@ -224,6 +225,8 @@
 	void CheckForDivideByZero(const Node* const pNode);
 	void FoldConstants(Node* pNode);
 	void RemoveDeadCode(Node* pNode);
+
+	bool g_bEvaluateVariableUsageAgain;
 %}
 
 %union
@@ -281,7 +284,14 @@ program :
             return;
 		#endif
 
-		EvaluateVariableUsage();
+		int i = 1;
+		do
+		{
+			i++;
+			g_bEvaluateVariableUsageAgain = false;
+			EvaluateVariableUsage();
+		} while (g_bEvaluateVariableUsageAgain);
+
 		FoldConstants(pParseTree);
 		CheckForDivideByZero(pParseTree);
 		RemoveDeadCode(pParseTree);
@@ -2000,12 +2010,18 @@ void EvaluateVariableUsage()
 						{
 							if (pStatement == pStatement->pParent->pFirstChild)
 							{
-								pStatement->pParent->pFirstChild = NO_CHILD_NODE;
+								DeleteNode(&pStatement->pParent->pFirstChild);
 							}
 							else if (pStatement == pStatement->pParent->pSecondChild)
 							{
-								pStatement->pParent->pSecondChild = NO_CHILD_NODE;
+								DeleteNode(&pStatement->pParent->pSecondChild);
 							}
+
+							VariableUsageDetails* pUsageToDelete = pUsage->pPrevUsage;
+							pUsage->pPrevUsage = pUsage->pPrevUsage->pPrevUsage;
+							pUsage->pPrevUsage->pNextUsage = pUsage;
+							DeleteVariableUsage(&pUsageToDelete);
+							g_bEvaluateVariableUsageAgain = true;
 						}
 
 						if (pStatement->pFirstChild->byNodeIdentifier == id_read_statement)

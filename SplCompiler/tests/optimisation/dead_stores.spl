@@ -26,6 +26,13 @@ DeadStores:
         READ(real);
         READ(real);
         2.789023 -> real;
+        2.789023 -> real;
+        2.789023 -> real;
+        2.789023 -> real;
+        WRITE(real);
+        NEWLINE;
+        WRITE(real);
+        NEWLINE;
         WRITE(real);
         NEWLINE
 ENDP DeadStores.

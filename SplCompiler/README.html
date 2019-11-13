@@ -421,11 +421,10 @@ void 0!==arguments[0]&&(br.sequenceConfig=arguments[0]),e=arguments[1]):e=argume
           : 'default'
     });
   </script>
-<p>#SPL Compiler
-##Introduction
-This readme will outline the steps taken to create the SPL compiler, it will cover why certain decisions were made. It will also highlight the main features of the compiler. Furthermore, it will outline the folder structure, files contained and extra tests that are included.</p>
-<p>##Assumptions</p>
-<p>##Files and Folder Structure</p>
+<h1 id="spl-compiler">SPL Compiler</h1>
+<h2 id="introduction">Introduction</h2>
+<p>This readme will outline the steps taken to create the SPL compiler, it will cover why certain decisions were made. It will also highlight the main features of the compiler. Furthermore, it will outline the folder structure, files contained and extra tests that are included.</p>
+<h2 id="files-and-folder-structure">Files and Folder Structure</h2>
 <pre class="hljs"><code><div>| -- /bin                               | Folder containing the compiled binaries.
     | -- compiler.exe                   | The spl compiler.
     | -- lexer.exe                      | This executable will read and print the tokens within an SPL file.
@@ -438,30 +437,45 @@ This readme will outline the steps taken to create the SPL compiler, it will cov
     | -- spl.y                          | This is the bison file, it also contains all the logic for optimisations and error and warning generation.
     | -- spl.l                          | This is the lex file that parses raw text into lexemes which are fed into bison.
 | -- /tests                             | This directory contains all the tests that were both created and part of the course work files. The details of the tests are in the tests section of this document.
+    | -- /errors
+        | -- not_declared.spl           |
+        | -- prg_identifier_too_long.spl|
+        | -- redeclaration.spl          |
+        | -- var_identifier_too_long.spl|
+        | -- zero_division.spl          |
+    | -- /optimisation                  |
+        | -- constant_folding.spl       |
+        | -- dead_code.spl              |
+        | -- dead_stores.spl            |
     | -- /programs                      |
         | -- calculator.spl             |
         | -- quadratic_solver.spl       |
-    | -- /provided                      |
+    | -- /provided                      | These tests were provided as part of the course work.
         | -- a.spl                      |
         | -- b.spl                      |
         | -- c.spl                      |
         | -- d.spl                      |
         | -- e.spl                      |
         | -- HelloWorld.spl             |
-    | -- zero_division.spl              |
+    | -- /warnings
+        | -- limits.spl                 |
+    | -- read.spl                       |
+    | -- write_expressions.spl          |
 | -- 600087ACW2019.pdf                  | This is the assesed course work description and contains the basic specification for the language.
 | -- spl_bnf.txt                        | This is the bnf that was derrived from the railroad diagrams within 600087ACW2019.pdf.
 | -- makefile                           | This is the make file that will build the executables found in the bin directory.
 | -- README.md                          | This is this file.
+| -- README.html                        | This is this file exported as a html webpage.
+| -- README.pdf                         | This is this file exported as a PDF.
 </div></code></pre>
-<p>##Building The Compiler
-###Prerequisites
-The compiler was developed with the following tools and versions; however, it may be compatible with other versions:
-####flex:</p>
+<h2 id="building-the-compiler">Building The Compiler</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>The compiler was developed with the following tools and versions; however, it may be compatible with other versions:</p>
+<h4 id="flex">flex:</h4>
 <pre class="hljs"><code><div>$ flex --version
 flex 2.6.4
 </div></code></pre>
-<p>####bision:</p>
+<h4 id="bision">bision:</h4>
 <pre class="hljs"><code><div>$ bison --version
 bison (GNU Bison) 3.0.4
 Written by Robert Corbett and Richard Stallman.
@@ -470,14 +484,14 @@ Copyright (C) 2015 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 </div></code></pre>
-<p>####gcc:</p>
+<h4 id="gcc">gcc:</h4>
 <pre class="hljs"><code><div>gcc --version
 gcc (GCC) 7.4.0
 Copyright (C) 2017 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 </div></code></pre>
-<p>####make:</p>
+<h4 id="make">make:</h4>
 <pre class="hljs"><code><div>$ make --version
 GNU Make 4.2.1
 Built for x86_64-unknown-cygwin
@@ -486,42 +500,42 @@ License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 </div></code></pre>
-<p>###Build Process
-To build the compiler a makefile is provided. All C code is compiled with gcc and the -ansi flag. It has several rules that are listed below:</p>
-<p>#####all:
-This will build all the exectuables (compiler.exe, tree.exe, parser.exe and lexer.exe).</p>
-<p>#####flex:
-This will generate the lex.yy.c file from spl.l; this provides the lexical analyser which passes tokens to the parser. The products are output to the /src directory.</p>
-<p>#####bision:
-This will generate the spl_t.c file from spl.y; this provides a parser that matches the tokens fed by the lexical analyser to the defined rules. The products are output to the /src directory.</p>
-<p>#####lexer:
-This will build a program that outputs matched tokens from the input file. The products are output to the /bin directory.</p>
-<p>#####parser:
-This will build a program that prints the debug information provided by the bison file as the input file. This debug information shows how tokens are matched and rules are shifted and reduced. The products are output to the /bin directory.</p>
-<p>#####tree:
-This will build a program that outputs a parse tree generated from the input file. The products are output to the /bin directory.</p>
-<p>#####compiler:
-This will build the actual compiler that outputs C code generated from the compiled input file. The products are output to the /bin directory.</p>
-<p>#####clean:
-This will remove all files generated by all rules.</p>
-<p>#####lexer-clean:
-This will remove all files generated by the lexer rule.</p>
-<p>#####parser-clean:
-This will remove all files generated by the parser rule.</p>
-<p>#####tree-clean:
-This will remove all files generated by the tree rule.</p>
-<p>#####compiler-clean:
-This will remove all files generated by the clean rule.</p>
-<p>####Running a Rule
-To actually execute a rule the following syntax applies:</p>
+<h3 id="build-process">Build Process</h3>
+<p>To build the compiler a makefile is provided. All C code is compiled with gcc and the -ansi flag. It has several rules that are listed below:</p>
+<h5 id="all">all:</h5>
+<p>This will build all the exectuables (compiler.exe, tree.exe, parser.exe and lexer.exe).</p>
+<h5 id="flex">flex:</h5>
+<p>This will generate the lex.yy.c file from spl.l; this provides the lexical analyser which passes tokens to the parser. The products are output to the /src directory.</p>
+<h5 id="bision">bision:</h5>
+<p>This will generate the spl_t.c file from spl.y; this provides a parser that matches the tokens fed by the lexical analyser to the defined rules. The products are output to the /src directory.</p>
+<h5 id="lexer">lexer:</h5>
+<p>This will build a program that outputs matched tokens from the input file. The products are output to the /bin directory.</p>
+<h5 id="parser">parser:</h5>
+<p>This will build a program that prints the debug information provided by the bison file as the input file. This debug information shows how tokens are matched and rules are shifted and reduced. The products are output to the /bin directory.</p>
+<h5 id="tree">tree:</h5>
+<p>This will build a program that outputs a parse tree generated from the input file. The products are output to the /bin directory.</p>
+<h5 id="compiler">compiler:</h5>
+<p>This will build the actual compiler that outputs C code generated from the compiled input file. The products are output to the /bin directory.</p>
+<h5 id="clean">clean:</h5>
+<p>This will remove all files generated by all rules.</p>
+<h5 id="lexer-clean">lexer-clean:</h5>
+<p>This will remove all files generated by the lexer rule.</p>
+<h5 id="parser-clean">parser-clean:</h5>
+<p>This will remove all files generated by the parser rule.</p>
+<h5 id="tree-clean">tree-clean:</h5>
+<p>This will remove all files generated by the tree rule.</p>
+<h5 id="compiler-clean">compiler-clean:</h5>
+<p>This will remove all files generated by the clean rule.</p>
+<h4 id="running-a-rule">Running a Rule</h4>
+<p>To actually execute a rule the following syntax applies:</p>
 <pre class="hljs"><code><div>make [rule]
 </div></code></pre>
 <p>for example</p>
 <pre class="hljs"><code><div>make lexer
 </div></code></pre>
 <p>If no rule is provided, the default rule is exectuted. For this make file this is the all rule.</p>
-<p>##Highlights
-This compiler implements the following optimisations:</p>
+<h2 id="highlights">Highlights</h2>
+<p>This compiler implements the following optimisations:</p>
 <ul>
 <li>Dead store removal.</li>
 <li>Dead code removal.</li>
@@ -545,8 +559,8 @@ This compiler implements the following optimisations:</p>
 <li>Variables that are never used; either in the entire program or after the last assignment.</li>
 <li>Infinite loops.</li>
 </ul>
-<p>##Parse Tree
-The parse tree is a ternery tree that is made up of a struct called Node. Each node may have upto three children; it also has a type which is defined in the enumeration (NodeIdentifiers). Furthermore, a node may have a symbolic link to a symbol table entry which provides more information about that node. The details of the SymbolTableEntry type can be found in the Symbol Table section.</p>
+<h2 id="parse-tree">Parse Tree</h2>
+<p>The parse tree is a ternery tree that is made up of a struct called Node. Each node may have upto three children; it also has a type which is defined in the enumeration (NodeIdentifiers). Furthermore, a node may have a symbolic link to a symbol table entry which provides more information about that node. The details of the SymbolTableEntry type can be found in the Symbol Table section.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">enum</span> _nodeIdentifiers
 {
     id_program = <span class="hljs-number">1</span>,
@@ -588,8 +602,8 @@ The parse tree is a ternery tree that is made up of a struct called Node. Each n
     Node* pParent;
 };
 </div></code></pre>
-<p>##Symbol Table
-A double linked list was chosen over an array. This removed the limit on the number of symbols and it also allows the tab table to be broken down in to multiple sections i.e. a seperate sub-table for variables, operators, constants and types. This will allow the compiler to be optimised as the language develops and the need to compile larger programs arises. While the current implementation adds little performance benifit especially considering that the programs been compiled are so small implementing this early would make implementing future improvements easier. The other benifit to this is there is no real limit to the details that can be stored and it is very maintainable to add extra symbols. The below sections outline the differnt symbol types.</p>
+<h2 id="symbol-table">Symbol Table</h2>
+<p>A double linked list was chosen over an array. This removed the limit on the number of symbols and it also allows the tab table to be broken down in to multiple sections i.e. a seperate sub-table for variables, operators, constants and types. This will allow the compiler to be optimised as the language develops and the need to compile larger programs arises. While the current implementation adds little performance benifit especially considering that the programs been compiled are so small implementing this early would make implementing future improvements easier. The other benifit to this is there is no real limit to the details that can be stored and it is very maintainable to add extra symbols. The below sections outline the differnt symbol types.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">enum</span> _symbolTypes
 {
     symbol_id_unknown = <span class="hljs-number">0</span>,
@@ -617,8 +631,8 @@ A double linked list was chosen over an array. This removed the limit on the num
     
 };
 </div></code></pre>
-<p>###Program
-This symbol stores some metadata about the program.</p>
+<h3 id="program">Program</h3>
+<p>This symbol stores some metadata about the program.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">programDetails</span>
 {</span>
     <span class="hljs-keyword">char</span> acIdentifier[MAX_IDENTIFIER_LENGTH];
@@ -626,8 +640,8 @@ This symbol stores some metadata about the program.</p>
     <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> uiStatementCount;
 } ProgramDetails;
 </div></code></pre>
-<p>###Variables
-This symbol stores information about a variable such as its type, the identifer of the variable and information about its usage.</p>
+<h3 id="variables">Variables</h3>
+<p>This symbol stores information about a variable such as its type, the identifer of the variable and information about its usage.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">variableDetails</span>
 {</span>
     <span class="hljs-keyword">char</span> acIdentifier[MAX_IDENTIFIER_LENGTH];
@@ -636,8 +650,8 @@ This symbol stores information about a variable such as its type, the identifer 
     VariableUsageDetails* pLastUsage;
 } VariableDetails;
 </div></code></pre>
-<p>###Constants
-This symbol stores information about a constant.</p>
+<h3 id="constants">Constants</h3>
+<p>This symbol stores information about a constant.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">constantDetails</span>
 {</span>
     <span class="hljs-keyword">int</span> iType;
@@ -649,8 +663,8 @@ This symbol stores information about a constant.</p>
     } value;
 } ConstantDetails;
 </div></code></pre>
-<p>###Operators
-This symbol stores information about an operator.</p>
+<h3 id="operators">Operators</h3>
+<p>This symbol stores information about an operator.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">enum</span> _operatorTypes
 {
     operator_type_unknown = <span class="hljs-number">0</span>,
@@ -674,15 +688,15 @@ This symbol stores information about an operator.</p>
     OperatorTypes operatorType;
 } OperatorDetails;
 </div></code></pre>
-<p>###Types
-This symbol stores information about an type.</p>
+<h3 id="types">Types</h3>
+<p>This symbol stores information about an type.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">typeDetails</span>
 {</span>
     <span class="hljs-keyword">int</span> iType;
 } TypeDetails;
 </div></code></pre>
-<p>##Variable Usage Tree
-As the parse tree is being generated a double linked list is being created that tracks the usage of each variable. Each variable is then evaluated and checked to ensure they are not undeclared or redeclared and then redundant assignments are removed.</p>
+<h2 id="variable-usage-tree">Variable Usage Tree</h2>
+<p>As the parse tree is being generated a double linked list is being created that tracks the usage of each variable. Each variable is then evaluated and checked to ensure they are not undeclared or redeclared and then redundant assignments are removed.</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">enum</span> _variableUsageType
 {
     variable_usage_declaration,
@@ -700,60 +714,96 @@ As the parse tree is being generated a double linked list is being created that 
     <span class="hljs-class"><span class="hljs-keyword">struct</span> _<span class="hljs-title">variableUsageDetails</span> * <span class="hljs-title">pPrevUsage</span>;</span>
 } VariableUsageDetails;
 </div></code></pre>
-<p>##Tests
-The following table describes the tests that are within the tests directory. The Expected Output column gives the output assuming the input from the Input column is given.</p>
+<h2 id="tests">Tests</h2>
+<p>The following table describes the tests that are within the tests directory. The Expected Output column gives the output assuming the input from the Input column is given.</p>
 <table>
 <thead>
 <tr>
-<th style="text-align:center">Test File</th>
-<th style="text-align:center">Description</th>
+<th style="text-align:left">Test File</th>
+<th style="text-align:left">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">programs/calculator.spl</td>
-<td style="text-align:center">A simple calculator that has a simple menu system allowing the choice of an operator (+, -, /, *, ^) and takes two numbers either integer or real or a mix.</td>
+<td style="text-align:left">errors/not_declared.spl</td>
+<td style="text-align:left">A basic spl file that tests that errors are generated when a variable is used without being declared.</td>
 </tr>
 <tr>
-<td style="text-align:center">programs/quadratic_solver.spl</td>
-<td style="text-align:center">A simple solver that solves a quadratic equation where the coefficients are input one at a time. The expected quadratic format is ax^2 + bx + c = 0.</td>
+<td style="text-align:left">errors/prg_identifier_too_long.spl</td>
+<td style="text-align:left">A basic spl file that tests that errors are generated when the program identifier exceedes 50 characters.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/a.spl</td>
-<td style="text-align:center">A basic spl file that prints hello.</td>
+<td style="text-align:left">errors/redeclaration.spl</td>
+<td style="text-align:left">A basic spl file that checks that redeclaration errors are generated when a variable is redeclared.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/b.spl</td>
-<td style="text-align:center">A test that takes two inputs (integers) comparing the first to the second and printing the A or B where A is printed if the first was the larges and B if the second was the larges. It then takes a real and multiplies it by 2.3 outputing the result. It finally reads a character and writes it back to the console.</td>
+<td style="text-align:left">errors/var_identifier_too_long.spl</td>
+<td style="text-align:left">A basic spl file that tests that errors are generated when a variable identifier exceedes 50 characters.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/c.spl</td>
-<td style="text-align:center">A test that iterates a for loop from 1 to 13 and prints the number if it isn't 7. A do while loop that prints from 1 to 14 but not 6 or 8. A while loop that prints from 0 to 11</td>
+<td style="text-align:left">errors/zero_division.spl</td>
+<td style="text-align:left">A basic spl file that tests that errors are generated for constant division by zeros.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/d.spl</td>
-<td style="text-align:center">A test that performs some floating point arithmatic.</td>
+<td style="text-align:left">optimisation/constant_folding.spl</td>
+<td style="text-align:left">A simple optimisation test that should optimise all constant expressions. The generated c should obey BIDMAS. The generated code should be compared witht the SPL.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/e.spl</td>
-<td style="text-align:center">A test that reads an integer and prints any value x that satisfies x &lt;= 5 or x &gt;= 12. Prints a constant expression (36-1). Performs two loops that iterate and print -1 to -5.</td>
+<td style="text-align:left">optimisation/dead_code.spl</td>
+<td style="text-align:left">A simple optimisation test that should remove dead code. The generated c should have no printfs involving DEAD# and but should have ALIVE# 1-4.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/HelloWorld.spl</td>
-<td style="text-align:center">A basic spl file that prints Hello World. This test uses weak typing to calculate the ascii code for the space character and store it in a char.</td>
+<td style="text-align:left">optimisation/dead_stores.spl</td>
+<td style="text-align:left">A simple optimisation test that should remove dead stores. The generated C should have no redundant assignments. This will require a manual inspection of the generated C agains the SPL.</td>
 </tr>
 <tr>
-<td style="text-align:center">zero_division.spl</td>
-<td style="text-align:center">A basic spl file that tests that errors are generated for constant division by zeros.</td>
+<td style="text-align:left">programs/calculator.spl</td>
+<td style="text-align:left">A simple calculator that has a simple menu system allowing the choice of an operator (+, -, /, *, ^) and takes two numbers either integer or real or a mix.</td>
 </tr>
 <tr>
-<td style="text-align:center">provided/a.spl</td>
-<td style="text-align:center">A basic spl file that prints hello.</td>
+<td style="text-align:left">programs/quadratic_solver.spl</td>
+<td style="text-align:left">A simple solver that solves a quadratic equation where the coefficients are input one at a time. The expected quadratic format is ax^2 + bx + c = 0.</td>
+</tr>
+<tr>
+<td style="text-align:left">provided/a.spl</td>
+<td style="text-align:left">A basic spl file that prints hello.</td>
+</tr>
+<tr>
+<td style="text-align:left">provided/b.spl</td>
+<td style="text-align:left">A test that takes two inputs (integers) comparing the first to the second and printing the A or B where A is printed if the first was the larges and B if the second was the larges. It then takes a real and multiplies it by 2.3 outputing the result. It finally reads a character and writes it back to the console.</td>
+</tr>
+<tr>
+<td style="text-align:left">provided/c.spl</td>
+<td style="text-align:left">A test that iterates a for loop from 1 to 13 and prints the number if it isn't 7. A do while loop that prints from 1 to 14 but not 6 or 8. A while loop that prints from 0 to 11</td>
+</tr>
+<tr>
+<td style="text-align:left">provided/d.spl</td>
+<td style="text-align:left">A test that performs some floating point arithmatic.</td>
+</tr>
+<tr>
+<td style="text-align:left">provided/e.spl</td>
+<td style="text-align:left">A test that reads an integer and prints any value x that satisfies x &lt;= 5 or x &gt;= 12. Prints a constant expression (36-1). Performs two loops that iterate and print -1 to -5.</td>
+</tr>
+<tr>
+<td style="text-align:left">provided/HelloWorld.spl</td>
+<td style="text-align:left">A basic spl file that prints Hello World. This test uses weak typing to calculate the ascii code for the space character and store it in a char.</td>
+</tr>
+<tr>
+<td style="text-align:left">warnings/limits.spl</td>
+<td style="text-align:left">A basic spl file that tests if the correct warnings and caps are placed on values that are to big to be stored in their respective types (CHARACTER is ignored and allowed to overflow with a warning).</td>
+</tr>
+<tr>
+<td style="text-align:left">read.spl</td>
+<td style="text-align:left">A basic spl file that has multiple read statements and write statements to allow the testing of the read function that the compiler implements. This should be tested with errornous data to see if it is correctly parsed.</td>
+</tr>
+<tr>
+<td style="text-align:left">write_expressions.spl</td>
+<td style="text-align:left">A basic spl file that writes various expressions that contain different combinations of types to test the final types (the hiarachy is real &gt; char &gt; int). This test requires a comparison of the SPL and generated C as well as running the compiled program.</td>
 </tr>
 </tbody>
 </table>
-<p>##Using the Compiler
-The compiler can be run by using a terminal or command prompt instance and changing to the /bin directory. The compiler takes the spl code through the stdin stream. It then outputs the generated C code to the stdout stream and all information, warnings and errors are written to the stderr stream.
+<h2 id="using-the-compiler">Using the Compiler</h2>
+<p>The compiler can be run by using a terminal or command prompt instance and changing to the /bin directory. The compiler takes the spl code through the stdin stream. It then outputs the generated C code to the stdout stream and all information, warnings and errors are written to the stderr stream.
 An example of running a simple hello world program using command line on Windows; the first line shows the compiler being run, the second line shows the actual program written directly into the command line window and the rest shows the output from stdin and stderr:</p>
 <pre class="hljs"><code><div>C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;compiler.exe
 HelloWorld: CODE WRITE('H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd'); NEWLINE ENDP HelloWorld.
@@ -782,8 +832,8 @@ int main()
         return 0;
 }
 </div></code></pre>
-<p>###Piping Input and Output
-As it is not ideal to write entire programs on a single the contents of files can be piped into the compiler. The following example shows a test file from the test directory being compiled. The First line shows the file been piped into the compiler and the rest shows a mix of the stdout and stderr streams.</p>
+<h3 id="piping-input-and-output">Piping Input and Output</h3>
+<p>As it is not ideal to write entire programs on a single the contents of files can be piped into the compiler. The following example shows a test file from the test directory being compiled. The First line shows the file been piped into the compiler and the rest shows a mix of the stdout and stderr streams.</p>
 <pre class="hljs"><code><div>C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;compiler.exe &lt; ../tests/a.spl
 
 ---- Evaluating Variable Usage ----
@@ -942,61 +992,61 @@ C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;cat ../constant_folding.
 [WARNING] - Line 43 | Position 26 - Previous usage of variable char was an assignment, therefore the assignment at line: 40 | pos: 24 was redundant; therefore, this statement has been optimised out.
 [WARNING] - Line 43 | Position 26 - The variable char is never used.
 </div></code></pre>
-<p>###Compiler Flags
-A range of flags can be passed to the compiler to disable certain features; these features are enabled by default. The flags are shown in the table below.</p>
+<h3 id="compiler-flags">Compiler Flags</h3>
+<p>A range of flags can be passed to the compiler to disable certain features; these features are enabled by default. The flags are shown in the table below.</p>
 <table>
 <thead>
 <tr>
 <th style="text-align:center">Flag</th>
 <th style="text-align:center">Type</th>
-<th style="text-align:center">Description</th>
+<th style="text-align:left">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:center">--noOptimisations</td>
 <td style="text-align:center">Optimisation</td>
-<td style="text-align:center">This flag disables all optimisations. Pairing with other optimisation flags will have no effects.</td>
+<td style="text-align:left">This flag disables all optimisations. Pairing with other optimisation flags will have no effects.</td>
 </tr>
 <tr>
 <td style="text-align:center">--noDeadStores</td>
 <td style="text-align:center">Optimisation</td>
-<td style="text-align:center">This flag disables dead store optimisation.</td>
+<td style="text-align:left">This flag disables dead store optimisation.</td>
 </tr>
 <tr>
 <td style="text-align:center">--noConstantFolding</td>
 <td style="text-align:center">Optimisation</td>
-<td style="text-align:center">This flag disables constant folding optimisation.</td>
+<td style="text-align:left">This flag disables constant folding optimisation.</td>
 </tr>
 <tr>
 <td style="text-align:center">--noDeadCode</td>
 <td style="text-align:center">Optimisation</td>
-<td style="text-align:center">This flag disables dead code optimisation.</td>
+<td style="text-align:left">This flag disables dead code optimisation.</td>
 </tr>
 <tr>
 <td style="text-align:center">--noStaticErrors</td>
 <td style="text-align:center">Static Errors</td>
-<td style="text-align:center">This flag disables all static error checking.</td>
+<td style="text-align:left">This flag disables all static error checking.</td>
 </tr>
 <tr>
 <td style="text-align:center">--noDivisionByZeroCheck</td>
 <td style="text-align:center">Static Errors</td>
-<td style="text-align:center">This flag disables static division by a zero constant checking.</td>
+<td style="text-align:left">This flag disables static division by a zero constant checking.</td>
 </tr>
 <tr>
 <td style="text-align:center">-v, --version</td>
 <td style="text-align:center">Misc.</td>
-<td style="text-align:center">This flag shows the current version of the compiler that is being used and the data and time that it was built. It then exits the compiler.</td>
+<td style="text-align:left">This flag shows the current version of the compiler that is being used and the data and time that it was built. It then exits the compiler.</td>
 </tr>
 <tr>
 <td style="text-align:center">-h, --help</td>
 <td style="text-align:center">Misc.</td>
-<td style="text-align:center">This flag displays the flags that can be passed to the compiler and what they do.</td>
+<td style="text-align:left">This flag displays the flags that can be passed to the compiler and what they do.</td>
 </tr>
 </tbody>
 </table>
-<p>The following is an example how to use the compiler flags and the different code generated when compiling with the --noDeadStores and --noConstantFolding verses no flags:
-#####Dead Stores and Constant Folding Optimisation Disabled</p>
+<p>The following is an example how to use the compiler flags and the different code generated when compiling with the --noDeadStores and --noConstantFolding verses no flags:</p>
+<h5 id="dead-stores-and-constant-folding-optimisation-disabled">Dead Stores and Constant Folding Optimisation Disabled</h5>
 <pre class="hljs"><code><div>C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;compiler.exe --noDeadStores --noConstantFolding  &lt; ../tests/constant_folding.spl &gt; ../constant_folding.c 2&gt; ../constant_folding.out
 
 C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;cat ../constant_folding.c
@@ -1057,7 +1107,7 @@ int main()
         return 0;
 }
 </div></code></pre>
-<p>#####Dead Stores and Constant Folding Optimisation Disabled</p>
+<h5 id="dead-stores-and-constant-folding-optimisation-enabled">Dead Stores and Constant Folding Optimisation Enabled</h5>
 <pre class="hljs"><code><div>C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;compiler.exe &lt; ../tests/constant_folding.spl &gt; ../constant_folding.c 2&gt; ../constant_folding.out
 
 C:\Programming\LanguagesAndCompilers\SplCompiler\bin&gt;cat ../constant_folding.c
@@ -1098,9 +1148,9 @@ int main()
         return 0;
 }
 </div></code></pre>
-<p>##Generated Code
-###Read Statment
-The generated code for the read statement generates code that calls the following function:</p>
+<h2 id="generated-code">Generated Code</h2>
+<h3 id="read-statment">Read Statment</h3>
+<p>The generated code for the read statement generates code that calls the following function:</p>
 <pre class="hljs"><code><div><span class="hljs-keyword">void</span> _spl_read(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* pFormat, <span class="hljs-keyword">void</span>* pValue)
 {
     <span class="hljs-keyword">while</span> (<span class="hljs-built_in">scanf</span>(pFormat, pValue) != <span class="hljs-number">1</span>)
@@ -1178,14 +1228,12 @@ Please enter a character.
 a
 a
 </div></code></pre>
-<p>###Name Mangeling
-When the compiler parses an identifier it is given a prefix of &quot;spl_&quot; (this is not included in the maximum length of 50 characters as the array length is actually 55 characters). If this identifier is used for the program the prefix is changed to &quot;prg_&quot;. By performing this name mangeling the SPL developer can use identifier that are actually keywords in C i.e. int or char. By changing the prefix for a program identifier, the SPL developer can use an identifier for both the program and a variable. Any functions or variables that are provided by the compiler are prefixed with &quot;_spl_&quot;. This prevents the developer from being able to name a variable something that would clash with a compiler variable or function while allowing it to be identifier as an SPL generated feature.</p>
-<p>##Evaluation</p>
-<p>##Known Issues</p>
+<h3 id="name-mangeling">Name Mangeling</h3>
+<p>When the compiler parses an identifier it is given a prefix of &quot;spl_&quot; (this is not included in the maximum length of 50 characters as the array length is actually 55 characters). If this identifier is used for the program the prefix is changed to &quot;prg_&quot;. By performing this name mangeling the SPL developer can use identifier that are actually keywords in C i.e. int or char. By changing the prefix for a program identifier, the SPL developer can use an identifier for both the program and a variable. Any functions or variables that are provided by the compiler are prefixed with &quot;_spl_&quot;. This prevents the developer from being able to name a variable something that would clash with a compiler variable or function while allowing it to be identifier as an SPL generated feature.</p>
+<h2 id="known-issues">Known Issues</h2>
 <ul>
 <li>Line numbers for some warnings and errors are incorrect. This is due to global variables being used that are incremented during lexical analysis; therefore, when error checking passes are made the file numbers are not correct as they are already at the end of the file.</li>
 </ul>
-<p>##Future Plans</p>
 
 </body>
 </html>
