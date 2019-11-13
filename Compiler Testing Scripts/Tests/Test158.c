@@ -9,19 +9,20 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
+void _spl_read(const char* pFormat, void* pValue)
+{
+	while (scanf(pFormat, pValue) != 1)
+	{
+		getchar();
+	};
+	_spl_flush_stdin();
+}
+
 void prg_Test()
 {
 	int spl_a = 1;
 
-	while (scanf("%d", &spl_a) != 1)
-	{
-		char c = getchar();
-		if (c == '\n' || c == ' ' || c == EOF)
-		{
-			break;
-		}
-		_spl_flush_stdin();
-	}
+	_spl_read(" %d", &spl_a);
 	printf("%d", spl_a);
 	printf("\n");
 }

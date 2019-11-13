@@ -1,6 +1,6 @@
 QuadraticSolver:
     DECLARATIONS
-        space, period, bra, ket, carot, plus OF TYPE CHARACTER;
+        space, period, bra, ket, carot, plus, minus OF TYPE CHARACTER;
         rA, rB, rC, rDiscriminent, rSqrtDiscriminent, rAlpha, rBeta, rValue, rStep, rPrescision, rAlphaImaginary, rBetaImaginary OF TYPE REAL;
 
     CODE
@@ -10,6 +10,7 @@ QuadraticSolver:
         41 -> ket;
         94 -> carot;
         43 -> plus;
+        45 -> minus;
         0.0000001 -> rPrescision;
 
         WRITE('W', 'e', 'l', 'c', 'o', 'm', 'e', space, 't', 'o', space, 't', 'h', 'e', space, 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', space, 's', 'o', 'l', 'v', 'e', 'r', space, 'i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't', 'e', 'd', space, 'i', 'n', space, 's', 'p', 'l', period, space, 'N', 'o', 't', 'e', space, 't', 'h', 'i', 's', space, 'w', 'i', 'l', 'l', space, 'n', 'o', 't', space, 'h', 'a', 'n', 'd', 'l', 'e', space, 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', 's', space, 'w', 'i', 't', 'h', space, 'i', 'm', 'a', 'g', 'i', 'n', 'a', 'r', 'y', space, 'r', 'o', 'o', 't', 's', period);
@@ -38,7 +39,8 @@ QuadraticSolver:
             WRITE('B', 'e', 't', 'a', space, 'i', 's', space, rAlpha)
         ELSE
             IF rDiscriminent < 0 THEN
-                0 - rDiscriminent -> rSqrtDiscriminent;
+                -1 * rDiscriminent -> rDiscriminent;
+                rDiscriminent -> rSqrtDiscriminent;
                 WHILE (rSqrtDiscriminent - rStep) > rPrescision DO
                     (rSqrtDiscriminent + rStep) / 2 -> rSqrtDiscriminent;
                     rDiscriminent / rSqrtDiscriminent -> rStep;
@@ -48,7 +50,7 @@ QuadraticSolver:
                 rSqrtDiscriminent / (2 * rA) -> rBetaImaginary;
                 WRITE('A', 'l', 'p', 'h', 'a', space, 'i', 's', space, rAlpha, space, plus, space, rAlphaImaginary, 'i');
                 NEWLINE;
-                WRITE('B', 'e', 't', 'a', space, 'i', 's', space, rAlpha, space, plus, space, rBetaImaginary, 'i');
+                WRITE('B', 'e', 't', 'a', space, 'i', 's', space, rAlpha, space, minus, space, rBetaImaginary, 'i');
             ELSE
                 rDiscriminent -> rSqrtDiscriminent;
                 WHILE (rSqrtDiscriminent - rStep) > rPrescision DO

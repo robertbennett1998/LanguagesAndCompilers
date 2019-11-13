@@ -18,27 +18,30 @@ This readme will outline the steps taken to create the SPL compiler, it will cov
     | -- spl.y                          | This is the bison file, it also contains all the logic for optimisations and error and warning generation.
     | -- spl.l                          | This is the lex file that parses raw text into lexemes which are fed into bison.
 | -- /tests                             | This directory contains all the tests that were both created and part of the course work files. The details of the tests are in the tests section of this document.
-    | -- a.spl                          |
-    | -- assigned_used.spl              |
-    | -- assignment_optimisation.spl    |
-    | -- b.spl                          |
-    | -- c.spl                          |
-    | -- calculator.spl                 |
-    | -- constant_folding.spl           |
-    | -- d.spl                          |
-    | -- e.spl                          |
-    | -- final_types.spl                |
-    | -- HelloWorld.spl                 |
-    | -- identifier_too_long.spl        |
-    | -- limits.spl                     |
-    | -- not_declared.spl               |
-    | -- operator.spl                   |
+    | -- /errors
+        | -- not_declared.spl           |
+        | -- prg_identifier_too_long.spl|
+        | -- redeclaration.spl          |
+        | -- var_identifier_too_long.spl|
+        | -- zero_division.spl          |
+    | -- /optimisation                  |
+        | -- constant_folding.spl       |
+        | -- dead_code.spl              |
+        | -- dead_stores.spl            |
+    | -- /programs                      |
+        | -- calculator.spl             |
+        | -- quadratic_solver.spl       |
+    | -- /provided                      | These tests were provided as part of the course work.
+        | -- a.spl                      |
+        | -- b.spl                      |
+        | -- c.spl                      |
+        | -- d.spl                      |
+        | -- e.spl                      |
+        | -- HelloWorld.spl             |
+    | -- /warnings
+        | -- limits.spl                 |
     | -- read.spl                       |
-    | -- redeclaration.spl              |
-    | -- unassigned_used.spl            |
-    | -- var_usage.spl                  |
     | -- write_expressions.spl          |
-    | -- zero_division.spl              |
 | -- 600087ACW2019.pdf                  | This is the assesed course work description and contains the basic specification for the language.
 | -- spl_bnf.txt                        | This is the bnf that was derrived from the railroad diagrams within 600087ACW2019.pdf.
 | -- makefile                           | This is the make file that will build the executables found in the bin directory.
@@ -330,9 +333,28 @@ typedef struct _variableUsageDetails
 ```
 
 ##Tests
-| Test File | Description | Expected Output |
-|:-:|:-:|:-:|
-|a.spl|||
+The following table describes the tests that are within the tests directory. The Expected Output column gives the output assuming the input from the Input column is given.
+| Test File | Description |
+|:-:|:-:|
+|errors/not_declared.spl|A basic spl file that tests that errors are generated when a variable is used without being declared.|
+|errors/prg_identifier_too_long.spl|A basic spl file that tests that errors are generated when the program identifier exceedes 50 characters.|
+|errors/redeclaration.spl|A basic spl file that checks that redeclaration errors are generated when a variable is redeclared.|
+|errors/var_identifier_too_long.spl|A basic spl file that tests that errors are generated when a variable identifier exceedes 50 characters.|
+|errors/zero_division.spl|A basic spl file that tests that errors are generated for constant division by zeros.|
+|optimisation/constant_folding.spl|A simple optimisation test that should optimise all constant expressions. The generated c should obey BIDMAS. The generated code should be compared witht the SPL.|
+|optimisation/dead_code.spl|A simple optimisation test that should remove dead code. The generated c should have no printfs involving DEAD# and but should have ALIVE# 1-4.|
+|optimisation/dead_stores.spl|A simple optimisation test that should remove dead stores. The generated C should have no redundant assignments. This will require a manual inspection of the generated C agains the SPL.|
+|programs/calculator.spl|A simple calculator that has a simple menu system allowing the choice of an operator (+, -, /, *, ^) and takes two numbers either integer or real or a mix.|
+|programs/quadratic_solver.spl|A simple solver that solves a quadratic equation where the coefficients are input one at a time. The expected quadratic format is ax^2 + bx + c = 0.|
+|provided/a.spl|A basic spl file that prints hello.|
+|provided/b.spl|A test that takes two inputs (integers) comparing the first to the second and printing the A or B where A is printed if the first was the larges and B if the second was the larges. It then takes a real and multiplies it by 2.3 outputing the result. It finally reads a character and writes it back to the console.|N/a|aaa sa2as as1as ds1.5ds a|A <br />3.45 <br />a|
+|provided/c.spl|A test that iterates a for loop from 1 to 13 and prints the number if it isn't 7. A do while loop that prints from 1 to 14 but not 6 or 8. A while loop that prints from 0 to 11|
+|provided/d.spl|A test that performs some floating point arithmatic.|
+|provided/e.spl|A test that reads an integer and prints any value x that satisfies x <= 5 or x >= 12. Prints a constant expression (36-1). Performs two loops that iterate and print -1 to -5. |
+|provided/HelloWorld.spl|A basic spl file that prints Hello World. This test uses weak typing to calculate the ascii code for the space character and store it in a char.|
+|warnings/limits.spl|A basic spl file that tests if the correct warnings and caps are placed on values that are to big to be stored in their respective types (CHARACTER is ignored and allowed to overflow with a warning).|
+|read.spl|A basic spl file that has multiple read statements and write statements to allow the testing of the read function that the compiler implements. This should be tested with errornous data to see if it is correctly parsed.|
+|write_expressions.spl|A basic spl file that writes various expressions that contain different combinations of types to test the final types (the hiarachy is real > char > int). This test requires a comparison of the SPL and generated C as well as running the compiled program.|
 
 ##Using the Compiler
 The compiler can be run by using a terminal or command prompt instance and changing to the /bin directory. The compiler takes the spl code through the stdin stream. It then outputs the generated C code to the stdout stream and all information, warnings and errors are written to the stderr stream.
@@ -742,5 +764,8 @@ a
 When the compiler parses an identifier it is given a prefix of "spl_" (this is not included in the maximum length of 50 characters as the array length is actually 55 characters). If this identifier is used for the program the prefix is changed to "prg_". By performing this name mangeling the SPL developer can use identifier that are actually keywords in C i.e. int or char. By changing the prefix for a program identifier, the SPL developer can use an identifier for both the program and a variable. Any functions or variables that are provided by the compiler are prefixed with "_spl\_". This prevents the developer from being able to name a variable something that would clash with a compiler variable or function while allowing it to be identifier as an SPL generated feature.
 
 ##Evaluation
+
+##Known Issues
+- Line numbers for some warnings and errors are incorrect. This is due to global variables being used that are incremented during lexical analysis; therefore, when error checking passes are made the file numbers are not correct as they are already at the end of the file.
 
 ##Future Plans

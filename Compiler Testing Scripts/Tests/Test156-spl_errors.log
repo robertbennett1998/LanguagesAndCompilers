@@ -1,3 +1,1 @@
-
----- Evaluating Variable Usage ----
 [WARNING] - Line 17 | Position 10 - Variable a is used at line: 5 | pos: 27 before it has been assigned to. It will have a default value of 1.

@@ -1,0 +1,15 @@
+ConstantFolding:
+    DECLARATIONS
+        int OF TYPE INTEGER;
+        real OF TYPE REAL;
+    CODE
+        7 + 8 / 2 -> int;
+        int * 2 -> int;
+        WRITE(int);
+        NEWLINE;
+        5 * 10 * 10 + 40 - 201 + 5490 / 10 -> int;
+        2.5 * 0.5 / 0.5 -> real;
+        real * 2.000001 -> real;
+        WRITE(real);
+        NEWLINE
+ENDP ConstantFolding.

@@ -874,7 +874,7 @@ void PrintTree(const Node* pStartNode, int iLevel)
 			}
 			else if (pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
 			{
-				printf("Value = %lf\n", pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+				printf("Value = %f\n", pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
 			}
 			else if (pStartNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
 			{
@@ -1424,7 +1424,7 @@ void Evaluate_StatementList(const Node* const pNode)
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
 			{
-				printf("%lf", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+				printf("%f", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_CHARACTER)
 			{
@@ -1668,7 +1668,7 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 				}
 				else if (pNode->pSymbolTableEntry->symbolDetails.variableDetails.iType == TYPE_REAL)
 				{
-					printf("%%lf");
+					printf("%%f");
 				}
 			}
 
@@ -1687,7 +1687,7 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 			}
 			else if (pNode->pSymbolTableEntry->symbolDetails.constantDetails.iType == TYPE_REAL)
 			{
-				printf("%lf", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
+				printf("%f", pNode->pSymbolTableEntry->symbolDetails.constantDetails.value.f);
 			}
 
 			break;
@@ -1706,7 +1706,7 @@ void Evaluate_OutputList_Format(const Node* const pNode)
 			}
 			else if (iType == TYPE_REAL)
 			{
-				printf("%%lf");
+				printf("%%f");
 			}
 
 			break;
@@ -1951,7 +1951,6 @@ void CreateError(ErrorTypes errorType, const void* const pValue)
 
 void EvaluateVariableUsage()
 {
-	fprintf(stderr, "\n---- Evaluating Variable Usage ----\n");
 	SymbolTableEntry* pSymbol = g_pSymbolTableStart;
 	while (pSymbol != NO_SYMBOL_FOUND)
 	{

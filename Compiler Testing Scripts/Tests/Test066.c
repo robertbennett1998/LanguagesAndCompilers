@@ -9,6 +9,15 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
+void _spl_read(const char* pFormat, void* pValue)
+{
+	while (scanf(pFormat, pValue) != 1)
+	{
+		getchar();
+	};
+	_spl_flush_stdin();
+}
+
 void prg_Test()
 {
 	int spl_a = 1, spl_b = 1, spl_c = 1;
@@ -16,7 +25,7 @@ void prg_Test()
 	char spl_f = 1, spl_g = 1;
 
 	spl_d = 3.141590;
-	printf("%lf", spl_d);
+	printf("%f", spl_d);
 	printf("\n");
 }
 

@@ -1,0 +1,45 @@
+DeadCode:
+    DECLARATIONS
+        int OF TYPE INTEGER;
+    CODE
+        IF 5 = 7 THEN
+            WRITE('D', 'E', 'A', 'D', 1);
+            NEWLINE
+        ENDIF;
+
+        5 -> int;
+        IF int = 7 THEN
+            WRITE('D', 'E', 'A', 'D', 2);
+            NEWLINE
+        ENDIF;
+
+        7 -> int;
+        IF int = 7 THEN
+            WRITE('A', 'L', 'I', 'V', 'E', 1);
+            NEWLINE
+        ENDIF;
+
+        IF 'a' = 'b' THEN
+            WRITE('D', 'E', 'A', 'D', 3);
+            NEWLINE
+        ELSE
+            WRITE('A', 'L', 'I', 'V', 'E', 2);
+            NEWLINE
+        ENDIF;
+
+        WHILE 2.5 <> 2.5 DO
+            WRITE('D', 'E', 'A', 'D', 4);
+            NEWLINE
+        ENDWHILE;
+
+        DO
+            WRITE('A', 'L', 'I', 'V', 'E', 3);
+            NEWLINE
+        WHILE 'a' >= 'b' ENDDO;
+
+        WHILE 2.5 <= 2.5 DO
+            WRITE('A', 'L', 'I', 'V', 'E', 4);
+            NEWLINE
+        ENDWHILE
+
+ENDP DeadCode.

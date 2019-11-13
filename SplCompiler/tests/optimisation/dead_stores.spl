@@ -1,0 +1,31 @@
+DeadStores:
+    DECLARATIONS
+        int OF TYPE INTEGER;
+        real OF TYPE REAL;
+        char OF TYPE CHARACTER;
+    CODE
+        2 -> int;
+        4 -> int;
+        int / 4 -> int;
+        WRITE(int);
+        NEWLINE;
+        4 -> int;
+        READ(int);
+        WRITE(int);
+        NEWLINE;
+
+        2.34 -> real;
+        real + 1.342 -> real;
+        2.4 -> real;
+        WRITE(real);
+        NEWLINE;
+        READ(real);
+        2.5 * real -> real;
+        WRITE(real);
+        NEWLINE;
+        READ(real);
+        READ(real);
+        2.789023 -> real;
+        WRITE(real);
+        NEWLINE
+ENDP DeadStores.

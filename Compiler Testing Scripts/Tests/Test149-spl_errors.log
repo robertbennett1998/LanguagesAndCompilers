@@ -1,3 +1,1 @@
-
----- Evaluating Variable Usage ----
 [WARNING] - Line 18 | Position 10 - The variable a is not used after the assignment statement (line: 12 | pos: 23).

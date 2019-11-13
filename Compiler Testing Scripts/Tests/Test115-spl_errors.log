@@ -1,2 +1,2 @@
+[WARNING] - Line 17 | Position 10 - The condition for the if statement is constant and true. The conditional checks are redundant and may be optimised out.
 
----- Evaluating Variable Usage ----

@@ -1,0 +1,8 @@
+IdentifierTooLongbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb:
+DECLARATIONS
+    a OF TYPE INTEGER;
+    b OF TYPE INTEGER;
+    c OF TYPE INTEGER;
+CODE
+    NEWLINE;
+ENDP IdentifierTooLongbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.

@@ -9,13 +9,22 @@ void _spl_flush_stdin()
 	} while (c != '\n' && c != ' ' && c != EOF);
 }
 
+void _spl_read(const char* pFormat, void* pValue)
+{
+	while (scanf(pFormat, pValue) != 1)
+	{
+		getchar();
+	};
+	_spl_flush_stdin();
+}
+
 void prg_Test()
 {
 	double spl_a = 1;
 
 	for (spl_a = 0.100000; 0.100000 < 0 ? spl_a >= 0.500000 : spl_a <= 0.500000; spl_a += 0.100000)
 	{
-		printf("%lf", spl_a);
+		printf("%f", spl_a);
 		printf("\n");
 	}
 	printf("\n");

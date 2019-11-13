@@ -1,0 +1,8 @@
+VarIdentifierTooLong:
+DECLARATIONS
+    a OF TYPE INTEGER;
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb OF TYPE INTEGER;
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc OF TYPE INTEGER;
+CODE
+    NEWLINE;
+ENDP IdentifierTooLong.
